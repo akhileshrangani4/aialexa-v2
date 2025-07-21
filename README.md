@@ -72,7 +72,7 @@ Other available scripts:
 ## Project Structure
 
 ```bash
-mvp/
+contextual-chat/
 ├── src/
 │ ├── db/ # Database configuration and schemas
 │ ├── mastra/ # Mastra framework implementation
