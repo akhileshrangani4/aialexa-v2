@@ -10,6 +10,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  sources?: Array<{ fileName: string; excerpt: string }>;
 }
 
 interface ChatWidgetProps {
@@ -112,24 +113,37 @@ export function ChatWidget({ chatbotId, shareToken, config, embedded = false }: 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+          <div key={index}>
             <div
-              className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                message.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-900 shadow'
-              }`}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {message.role === 'assistant' ? (
-                <ReactMarkdown className="prose prose-sm max-w-none">
-                  {message.content}
-                </ReactMarkdown>
-              ) : (
-                <p className="text-sm">{message.content}</p>
-              )}
+              <div
+                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  message.role === 'user'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-900 shadow'
+                }`}
+              >
+                {message.role === 'assistant' ? (
+                  <>
+                    <ReactMarkdown className="prose prose-sm max-w-none">
+                      {message.content}
+                    </ReactMarkdown>
+                    {message.sources && message.sources.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 mb-1">Sources:</p>
+                        {message.sources.map((source, idx) => (
+                          <div key={idx} className="text-xs text-gray-600">
+                            📄 {source.fileName}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm">{message.content}</p>
+                )}
+              </div>
             </div>
           </div>
         ))}

@@ -50,6 +50,19 @@ export const chatbotFiles = pgTable('chatbot_files', {
   created_at: timestamp('created_at').defaultNow()
 });
 
+// table for file chunks
+export const fileChunks = pgTable('file_chunks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  file_id: uuid('file_id').references(() => chatbotFiles.id, { onDelete: 'cascade' }).notNull(),
+  chatbot_id: uuid('chatbot_id').references(() => chatbots.id, { onDelete: 'cascade' }).notNull(),
+  chunk_index: integer('chunk_index').notNull(), // Order of chunk in original document
+  content: text('content').notNull(), // Chunk text content
+  embedding: vector('embedding', { dimensions: 1536 }), // Embedding for this chunk
+  metadata: jsonb('metadata').default({}), // Additional metadata (page number, section, etc.)
+  token_count: integer('token_count'), // Number of tokens in this chunk
+  created_at: timestamp('created_at').defaultNow()
+});
+
 // Conversations
 export const conversations = pgTable('conversations', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -98,9 +111,21 @@ export const chatbotsRelations = relations(chatbots, ({ one, many }) => ({
   analytics: many(analytics)
 }));
 
-export const chatbotFilesRelations = relations(chatbotFiles, ({ one }) => ({
+export const chatbotFilesRelations = relations(chatbotFiles, ({ one, many }) => ({
   chatbot: one(chatbots, {
     fields: [chatbotFiles.chatbot_id],
+    references: [chatbots.id]
+  }),
+  chunks: many(fileChunks)
+}));
+
+export const fileChunksRelations = relations(fileChunks, ({ one }) => ({
+  file: one(chatbotFiles, {
+    fields: [fileChunks.file_id],
+    references: [chatbotFiles.id]
+  }),
+  chatbot: one(chatbots, {
+    fields: [fileChunks.chatbot_id],
     references: [chatbots.id]
   })
 }));

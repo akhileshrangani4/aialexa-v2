@@ -2,9 +2,16 @@ import { db, chatbots, conversations, messages, chatbotFiles, analytics } from '
 import { eq, and, desc } from 'drizzle-orm';
 import { createAIClient } from '../../ai-client';
 import { AIProvider } from '../../ai-client/types';
+import { RAGService } from './rag.service';
 import { nanoid } from 'nanoid';
 
 export class ChatService {
+  private ragService: RAGService;
+
+  constructor() {
+    this.ragService = new RAGService();
+  }
+
   async processMessage(
     chatbotId: string,
     message: string,
@@ -36,12 +43,39 @@ export class ChatService {
       metadata: context.metadata || {}
     });
 
+    // Perform RAG search to find relevant content
+    let ragContext = '';
+    let relevantChunks = [];
+    
+    try {
+      // Search for relevant chunks from uploaded files
+      relevantChunks = await this.ragService.searchRelevantChunks(
+        chatbotId,
+        message,
+        5 // Get top 5 most relevant chunks
+      );
+
+      if (relevantChunks.length > 0) {
+        ragContext = this.ragService.buildContext(relevantChunks);
+        console.log(`Found ${relevantChunks.length} relevant chunks for query`);
+      }
+    } catch (error) {
+      console.error('RAG search error:', error);
+      // Continue without RAG context if search fails
+    }
+
     // Get conversation history
     const history = await db.select()
       .from(messages)
       .where(eq(messages.conversation_id, conversation.id))
       .orderBy(messages.created_at)
-      .limit(20); // Keep last 20 messages for context
+      .limit(10); // Keep last 10 messages for context
+
+    // Build enhanced system prompt with RAG context
+    const enhancedSystemPrompt = this.buildEnhancedSystemPrompt(
+      chatbot.system_prompt,
+      ragContext
+    );
 
     // Create AI client
     const aiClient = createAIClient({
@@ -49,26 +83,20 @@ export class ChatService {
       apiKey: process.env[this.getApiKeyEnvVar(chatbot.model)]!,
       chatbot: {
         id: chatbot.id,
-        systemPrompt: chatbot.system_prompt,
+        systemPrompt: enhancedSystemPrompt,
         model: chatbot.model,
         temperature: chatbot.temperature || 0.7,
         maxTokens: chatbot.max_tokens || 2000,
         welcomeMessage: chatbot.welcome_message || '',
         suggestedQuestions: chatbot.suggested_questions as string[]
       },
-      files: chatbot.files.map((f: any) => ({
-        id: f.id,
-        fileName: f.file_name,
-        content: f.content,
-        fileType: f.file_type,
-        metadata: f.metadata
-      })),
+      files: [], // We're using RAG instead of passing files directly
       sessionId: actualSessionId
     });
 
     // Add history to AI client
     history.forEach(msg => {
-      if (msg.role !== 'user') { // Skip the current message we just added
+      if (msg.role !== 'user' || msg.content !== message) { // Skip the current message
         aiClient.getMessages().push({
           role: msg.role as any,
           content: msg.content,
@@ -80,14 +108,21 @@ export class ChatService {
     // Get AI response
     const response = await aiClient.sendMessage(message);
 
-    // Save assistant message
+    // Save assistant message with RAG metadata
     await db.insert(messages).values({
       conversation_id: conversation.id,
       role: 'assistant',
       content: response.message.content,
       metadata: {
         ...response.metadata,
-        usage: response.usage
+        usage: response.usage,
+        ragUsed: relevantChunks.length > 0,
+        chunksUsed: relevantChunks.length,
+        sources: relevantChunks.map(c => ({
+          fileName: c.file_name,
+          chunkIndex: c.chunk_index,
+          similarity: c.similarity
+        }))
       }
     });
 
@@ -99,7 +134,8 @@ export class ChatService {
         sessionId: actualSessionId,
         messageLength: message.length,
         responseLength: response.message.content.length,
-        usage: response.usage
+        usage: response.usage,
+        ragUsed: relevantChunks.length > 0
       },
       session_id: actualSessionId
     });
@@ -108,7 +144,13 @@ export class ChatService {
       response: response.message.content,
       sessionId: actualSessionId,
       usage: response.usage,
-      metadata: response.metadata
+      metadata: {
+        ...response.metadata,
+        sources: relevantChunks.length > 0 ? relevantChunks.map(c => ({
+          fileName: c.file_name,
+          excerpt: c.content.substring(0, 100) + '...'
+        })) : []
+      }
     };
   }
 
@@ -250,5 +292,17 @@ export class ChatService {
     } else {
       return 'OPENAI_API_KEY';
     }
+  }
+
+  private buildEnhancedSystemPrompt(basePrompt: string, ragContext: string): string {
+    if (!ragContext) {
+      return basePrompt;
+    }
+
+    return `${basePrompt}
+
+${ragContext}
+
+Please use the above context to answer questions. If the answer can be found in the context, use that information. If the context doesn't contain relevant information, you can use your general knowledge but mention that the information is not from the uploaded documents.`;
   }
 }

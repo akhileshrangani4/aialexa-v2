@@ -1,9 +1,15 @@
 import { db, chatbots, chatbotFiles } from '../../db';
 import { eq, and } from 'drizzle-orm';
-import { createAIClient } from '../../ai-client';
-import { AIProvider } from '../../ai-client/types';
+import { RAGService } from './rag.service';
+import { nanoid } from 'nanoid';
 
 export class FileService {
+  private ragService: RAGService;
+
+  constructor() {
+    this.ragService = new RAGService();
+  }
+
   async uploadFile(chatbotId: string, userId: string, fileData: any) {
     // Verify chatbot ownership
     const [chatbot] = await db.select()
@@ -18,40 +24,52 @@ export class FileService {
       throw new Error('Chatbot not found or unauthorized');
     }
 
-    // Convert buffer to text
-    let content: string;
-    if (fileData.fileType === 'application/pdf') {
-      // For PDFs, you'd need a library like pdf-parse
-      // For now, we'll just store a placeholder
-      content = '[PDF content extraction not implemented]';
-    } else {
-      content = fileData.buffer.toString('utf-8');
+    try {
+      // Extract content using RAG service
+      const content = await this.ragService.extractContent(
+        fileData.buffer,
+        fileData.fileType
+      );
+
+      // Store file record first
+      const [file] = await db.insert(chatbotFiles).values({
+        chatbot_id: chatbotId,
+        file_name: fileData.fileName,
+        file_type: fileData.fileType,
+        file_size: fileData.fileSize,
+        content: content.substring(0, 10000), // Store first 10k chars for preview
+        embedding: null, // We'll store embeddings in chunks instead
+        metadata: {
+          uploadedBy: userId,
+          originalName: fileData.fileName,
+          extractedAt: new Date().toISOString()
+        }
+      }).returning();
+
+      // Process and chunk the content for RAG
+      await this.ragService.processFileContent(
+        file.id,
+        chatbotId,
+        content,
+        {
+          fileName: fileData.fileName,
+          fileType: fileData.fileType,
+          uploadedBy: userId
+        }
+      );
+
+      return {
+        id: file.id,
+        fileName: file.file_name,
+        fileType: file.file_type,
+        fileSize: file.file_size,
+        uploadedAt: file.created_at,
+        status: 'processed'
+      };
+    } catch (error: any) {
+      console.error('File upload error:', error);
+      throw new Error(`Failed to process file: ${error.message}`);
     }
-
-    // Generate embedding for the content
-    const embedding = await this.generateEmbedding(content);
-
-    // Store file
-    const [file] = await db.insert(chatbotFiles).values({
-      chatbot_id: chatbotId,
-      file_name: fileData.fileName,
-      file_type: fileData.fileType,
-      file_size: fileData.fileSize,
-      content: content,
-      embedding: embedding,
-      metadata: {
-        uploadedBy: userId,
-        originalName: fileData.fileName
-      }
-    }).returning();
-
-    return {
-      id: file.id,
-      fileName: file.file_name,
-      fileType: file.file_type,
-      fileSize: file.file_size,
-      uploadedAt: file.created_at
-    };
   }
 
   async uploadTextContent(chatbotId: string, userId: string, data: any) {
@@ -68,29 +86,45 @@ export class FileService {
       throw new Error('Chatbot not found or unauthorized');
     }
 
-    // Generate embedding
-    const embedding = await this.generateEmbedding(data.content);
+    try {
+      // Store file record
+      const [file] = await db.insert(chatbotFiles).values({
+        chatbot_id: chatbotId,
+        file_name: data.fileName,
+        file_type: data.fileType,
+        file_size: Buffer.byteLength(data.content, 'utf8'),
+        content: data.content.substring(0, 10000), // Store first 10k chars for preview
+        embedding: null,
+        metadata: {
+          uploadedBy: userId,
+          uploadedAt: new Date().toISOString()
+        }
+      }).returning();
 
-    // Store file
-    const [file] = await db.insert(chatbotFiles).values({
-      chatbot_id: chatbotId,
-      file_name: data.fileName,
-      file_type: data.fileType,
-      file_size: Buffer.byteLength(data.content, 'utf8'),
-      content: data.content,
-      embedding: embedding,
-      metadata: {
-        uploadedBy: userId
-      }
-    }).returning();
+      // Process and chunk the content for RAG
+      await this.ragService.processFileContent(
+        file.id,
+        chatbotId,
+        data.content,
+        {
+          fileName: data.fileName,
+          fileType: data.fileType,
+          uploadedBy: userId
+        }
+      );
 
-    return {
-      id: file.id,
-      fileName: file.file_name,
-      fileType: file.file_type,
-      fileSize: file.file_size,
-      uploadedAt: file.created_at
-    };
+      return {
+        id: file.id,
+        fileName: file.file_name,
+        fileType: file.file_type,
+        fileSize: file.file_size,
+        uploadedAt: file.created_at,
+        status: 'processed'
+      };
+    } catch (error: any) {
+      console.error('Text upload error:', error);
+      throw new Error(`Failed to process text: ${error.message}`);
+    }
   }
 
   async getChatbotFiles(chatbotId: string, userId: string) {
@@ -170,6 +204,10 @@ export class FileService {
       throw new Error('Chatbot not found or unauthorized');
     }
 
+    // Delete chunks first (handled by cascade, but being explicit)
+    await this.ragService.deleteFileChunks(fileId);
+
+    // Delete file
     const deleted = await db.delete(chatbotFiles)
       .where(and(
         eq(chatbotFiles.id, fileId),
@@ -182,28 +220,5 @@ export class FileService {
     }
 
     return deleted[0];
-  }
-
-  private async generateEmbedding(text: string): Promise<number[]> {
-    try {
-      // Use OpenAI for embeddings
-      const client = createAIClient({
-        provider: AIProvider.OPENAI,
-        apiKey: process.env.OPENAI_API_KEY!,
-        chatbot: {
-          id: 'temp',
-          systemPrompt: '',
-          model: 'gpt-3.5-turbo',
-          temperature: 70,
-          maxTokens: 100
-        }
-      });
-
-      return await client.embedText(text.substring(0, 8000)); // Limit text length
-    } catch (error) {
-      console.error('Error generating embedding:', error);
-      // Return empty embedding if fails
-      return new Array(1536).fill(0);
-    }
   }
 }
