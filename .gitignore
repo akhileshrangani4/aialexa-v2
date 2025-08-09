@@ -1,8 +1,10 @@
 output.txt
 node_modules
 dist
-.mastra
 .env.development
 .env
 *.db
 *.db-*
+/frontend/node_modules
+/frontend/dist
+/frontend/.next

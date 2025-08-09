@@ -8,6 +8,20 @@
       "when": 1753104302862,
       "tag": "0000_flat_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754774541696,
+      "tag": "0001_jittery_sue_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754775978807,
+      "tag": "0002_aromatic_zombie",
+      "breakpoints": true
     }
   ]
 }

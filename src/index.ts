@@ -1,64 +1,32 @@
-import { Mastra } from '@mastra/core/mastra';
-import { contextChatWorkflow } from './mastra/workflows/context-chat-workflow';
-import { LibSQLStore } from '@mastra/libsql';
 import dotenv from 'dotenv';
-
-// Load environment variables
 dotenv.config();
 
-// Initialize Mastra instance
-const mastra = new Mastra({
-  workflows: { contextChatWorkflow },
-  storage: new LibSQLStore({
-    url: ":memory:" // For testing; use file:../mastra.db for persistence
-  })
-});
+// This file is now just for testing the AI client directly
+// The main application runs from src/api/server.ts
 
-async function main() {
-  try {
-    // Get the workflow
-    const workflow = mastra.getWorkflow('contextChatWorkflow');
-    
-    // Create a run instance
-    const run = await workflow.createRunAsync();
+import { createAIClient } from './ai-client';
+import { AIProvider } from './ai-client/types';
 
-    // Example: Upload a file
-    const uploadResult = await run.start({
-      inputData: {
-        type: 'upload',
-        content: `# Sample Document
-This is a sample document that contains some information.
-It can be used to test the file upload and chat system.
+async function testAIClient() {
+  console.log('Testing AI Client...');
+  
+  const client = createAIClient({
+    provider: AIProvider.OPENAI,
+    apiKey: process.env.OPENAI_API_KEY!,
+    chatbot: {
+      id: 'test-chatbot',
+      systemPrompt: 'You are a helpful assistant.',
+      model: 'gpt-4o-mini',
+      temperature: 70,
+      maxTokens: 500
+    }
+  });
 
-## Features
-- File upload support
-- Multiple file types
-- Custom instructions
-- Contextual responses`,
-        fileName: 'sample.md',
-        fileType: 'markdown',
-        customInstructions: 'Focus on technical details and be concise'
-      }
-    });
-
-    console.log('Upload result:', uploadResult);
-
-    // Create another run for the chat query
-    const chatRun = await workflow.createRunAsync();
-    
-    // Example: Chat query using the uploaded context
-    const chatResult = await chatRun.start({
-      inputData: {
-        type: 'query',
-        content: 'What are the main features of the system?',
-        customInstructions: 'List the features in bullet points'
-      }
-    });
-
-    console.log('Chat result:', chatResult);
-  } catch (error) {
-    console.error('Error:', error);
-  }
+  const response = await client.sendMessage('Hello! Can you help me test this system?');
+  console.log('Response:', response.message.content);
 }
 
-main(); 
+// Only run if this file is executed directly
+if (require.main === module) {
+  testAIClient().catch(console.error);
+} 
