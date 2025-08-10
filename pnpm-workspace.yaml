@@ -1,0 +1,4 @@
+# If you prefer pnpm (recommended for monorepos)
+packages:
+  - 'backend'
+  - 'frontend'

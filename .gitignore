@@ -1,10 +1,40 @@
-output.txt
-node_modules
-dist
-.env.development
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files
 .env
+.env.local
+.env.production
+**/.env
+
+# Build outputs
+dist/
+build/
+.next/
+**/.next/
+out/
+
+# Database
 *.db
-*.db-*
-/frontend/node_modules
-/frontend/dist
-/frontend/.next
+*.db-journal
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+
+# Misc
+.turbo
+.vercel
