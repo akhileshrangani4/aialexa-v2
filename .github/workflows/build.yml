@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -37,36 +37,5 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Database
-          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
-          DIRECT_URL: postgresql://dummy:dummy@localhost:5432/dummy
-          # Supabase
-          NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy_anon_key_for_build
-          SUPABASE_SERVICE_ROLE_KEY: dummy_service_role_key_for_build
-          # Better Auth
-          BETTER_AUTH_SECRET: dummy_secret_key_min_32_chars_long_12345
-          BETTER_AUTH_URL: http://localhost:3000
-          # OpenRouter
-          OPENROUTER_API_KEY: dummy_openrouter_api_key_for_build
-          # Resend
-          RESEND_API_KEY: dummy_resend_api_key_for_build
-          RESEND_FROM_EMAIL: noreply@example.com
-          # Upstash Redis
-          UPSTASH_REDIS_REST_URL: https://dummy.upstash.io
-          UPSTASH_REDIS_REST_TOKEN: dummy_redis_token_for_build
-          # Upstash QStash
-          QSTASH_URL: https://qstash.upstash.io
-          QSTASH_TOKEN: dummy_qstash_token_for_build
-          QSTASH_CURRENT_SIGNING_KEY: dummy_current_signing_key_for_build
-          QSTASH_NEXT_SIGNING_KEY: dummy_next_signing_key_for_build
-          # App Config
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
-          APPROVED_EMAIL_DOMAINS: .edu,.ac.in,.edu.in
-          ADMIN_EMAILS: admin@example.com
-          MAX_FILE_SIZE_MB: "10"
-          # Node Config
-          NODE_ENV: production
-          PORT: 3000
-          ENABLE_LOGGING: false
+          SKIP_ENV_VALIDATION: "1"
 
