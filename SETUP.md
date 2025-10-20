@@ -13,6 +13,7 @@ Production-ready AI chatbot platform built with Next.js 15, tRPC, Better Auth, a
 Create accounts and obtain API keys from:
 - **Supabase** (https://supabase.com/) - PostgreSQL + Storage
 - **OpenRouter** (https://openrouter.ai/) - AI models
+- **OpenAI** (https://platform.openai.com/) - Embeddings API
 - **Resend** (https://resend.com/) - Email service
 - **Upstash** (https://upstash.com/) - Redis + QStash
 

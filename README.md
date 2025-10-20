@@ -70,6 +70,7 @@ aialexa/
 - npm
 - PostgreSQL database (Supabase recommended)
 - OpenRouter API key
+- OpenAI API key (for embeddings)
 - Resend API key
 - Upstash Redis + QStash
 
@@ -95,8 +96,9 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 BETTER_AUTH_SECRET=generate-with-openssl-rand-base64-32
 BETTER_AUTH_URL=http://localhost:3000
 
-# OpenRouter
+# AI/OpenRouter
 OPENROUTER_API_KEY=sk-or-v1-your-key
+OPENAI_API_KEY=sk-your-key  # For embeddings
 
 # Resend
 RESEND_API_KEY=re_your-key
