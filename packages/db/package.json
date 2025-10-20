@@ -1,0 +1,27 @@
+{
+  "name": "@aialexa/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "drizzle-orm": "^0.36.4",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.29.1",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
+
