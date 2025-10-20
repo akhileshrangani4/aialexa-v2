@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Skip validation for CI builds with dummy values
+const skipValidation = process.env.SKIP_ENV_VALIDATION === '1';
+
 const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().min(1),
@@ -47,6 +50,27 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 function validateEnv(): Env {
+  // Skip validation in CI builds - return a proxy that provides dummy values on-demand
+  if (skipValidation) {
+    console.warn('⚠️  Skipping environment validation (CI mode)');
+    // Return a proxy that provides sensible dummy values for any accessed property
+    return new Proxy({} as Env, {
+      get(_target, prop: string) {
+        // Return dummy values based on property name patterns
+        if (prop === 'PORT') return 3000;
+        if (prop === 'NODE_ENV') return 'production';
+        if (prop === 'APPROVED_EMAIL_DOMAINS') return '.edu,.ac.in,.edu.in';
+        if (prop === 'MAX_FILE_SIZE_MB') return '10';
+        if (prop.includes('URL')) return 'http://localhost:3000';
+        if (prop.includes('EMAIL')) return 'ci@localhost';
+        if (prop.includes('SECRET') || prop.includes('KEY') || prop.includes('TOKEN')) {
+          return 'ci-dummy-secret-key-min-32-chars-long';
+        }
+        return 'ci-dummy-value';
+      }
+    });
+  }
+
   try {
     return envSchema.parse(process.env);
   } catch (error) {
