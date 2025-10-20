@@ -41,7 +41,7 @@ const envSchema = z.object({
   MAX_FILE_SIZE_MB: z.string().default('10'),
 
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.number().default(3000),
+  PORT: z.coerce.number().default(3000),
 });
 
 export type Env = z.infer<typeof envSchema>;
