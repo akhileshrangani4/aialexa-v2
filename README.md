@@ -1,135 +1,241 @@
-# Turborepo starter
+# AIAlexa
 
-This Turborepo starter is maintained by the Turborepo core team.
+**Production-ready AI chatbot platform for education**
 
-## Using this example
+Create intelligent, context-aware chatbots powered by your course materials using advanced RAG (Retrieval-Augmented Generation).
 
-Run the following command:
+## ✨ Features
 
-```sh
-npx create-turbo@latest
-```
+- 🤖 **4 Open-Source AI Models**: Llama 3.3 70B, Mistral Large, Qwen 2.5 72B, GPT-OSS 120B
+- 📚 **RAG-Powered**: Upload PDFs, Word docs, and more for context-aware responses
+- 👥 **Professor Approval Workflow**: Admin-controlled user registration
+- 📊 **Analytics Dashboard**: Track conversations, usage patterns, and popular topics
+- 🔒 **Secure & Rate-Limited**: Upstash Redis rate limiting on public endpoints
+- ⚡ **Async File Processing**: Background processing with Upstash QStash
+- 🎨 **Modern UI**: Shadcn UI components with Tailwind CSS
+- 📧 **Email Notifications**: Resend integration for approvals and notifications
+- 🌐 **Subdomain Support**: Separate admin dashboard at admin.domain.com
 
-## What's inside?
+## 🏗️ Tech Stack
 
-This Turborepo includes the following packages/apps:
+### Core
+- **Next.js 15** - React framework with App Router
+- **Turborepo** - Monorepo build system
+- **TypeScript** - Type safety throughout
+- **tRPC** - End-to-end type-safe APIs
+- **Tailwind CSS** - Utility-first styling
 
-### Apps and Packages
+### Database & Auth
+- **PostgreSQL** (Supabase) - Primary database
+- **Drizzle ORM** - Type-safe database access
+- **pgvector** - Vector similarity search
+- **Better Auth** - Authentication with email/password
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### AI & RAG
+- **OpenRouter** - Unified AI model access
+- **Vercel AI SDK** - Streaming & tool calling
+- **LangChain** - Text splitting and RAG utilities
+- **tiktoken** - Token counting
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Infrastructure
+- **Upstash Redis** - Rate limiting
+- **Upstash QStash** - Async job processing
+- **Supabase Storage** - File storage
+- **Resend** - Email delivery
+- **Pino** - Structured logging
 
-### Utilities
+### UI
+- **Shadcn UI** - Component library
+- **React Hook Form** - Form management
+- **Recharts** - Analytics charts
 
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
+## 📦 Project Structure
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+aialexa/
+├── apps/web/              # Next.js application
+│   ├── src/app/          # Pages & API routes
+│   ├── src/components/   # UI components
+│   ├── src/lib/          # Utilities
+│   └── src/server/       # tRPC routers
+├── packages/
+│   ├── db/               # Database schema
+│   └── ai/               # OpenRouter + RAG
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🚀 Quick Start
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+### Prerequisites
+- Node.js 18+
+- npm
+- PostgreSQL database (Supabase recommended)
+- OpenRouter API key
+- Resend API key
+- Upstash Redis + QStash
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+### 1. Install Dependencies
+```bash
+npm install
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### 2. Environment Setup
+Create `apps/web/.env` with required variables:
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+```env
+# Database
+DATABASE_URL=postgresql://...
+DIRECT_URL=postgresql://...
 
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Better Auth
+BETTER_AUTH_SECRET=generate-with-openssl-rand-base64-32
+BETTER_AUTH_URL=http://localhost:3000
+
+# OpenRouter
+OPENROUTER_API_KEY=sk-or-v1-your-key
+
+# Resend
+RESEND_API_KEY=re_your-key
+RESEND_FROM_EMAIL=onboarding@yourdomain.com
+
+# Upstash Redis
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token
+
+# Upstash QStash
+QSTASH_URL=https://qstash.upstash.io
+QSTASH_TOKEN=your-token
+QSTASH_CURRENT_SIGNING_KEY=your-signing-key
+QSTASH_NEXT_SIGNING_KEY=your-next-signing-key
+
+# App Config
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+APPROVED_EMAIL_DOMAINS=.edu,.ac.in,.edu.in
+ADMIN_EMAILS=admin@example.com
+MAX_FILE_SIZE_MB=10
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+### 3. Database Setup
+
+Enable pgvector extension in Supabase:
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-## Useful Links
+Push database schema:
+```bash
+npm run db:push
+```
 
-Learn more about the power of Turborepo:
+Create first admin user:
+```sql
+INSERT INTO "user" (id, email, name, "emailVerified", status, role)
+VALUES (gen_random_uuid(), 'admin@example.com', 'Admin', true, 'approved', 'admin');
+```
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+### 4. Start Development Server
+```bash
+npm run dev
+```
+
+Access:
+- Main app: http://localhost:3000
+- Admin: http://admin.localhost:3000
+
+## 📚 Documentation
+
+**[SETUP.md](./SETUP.md)** - Complete setup guide with all environment variables, database setup, deployment instructions, and troubleshooting
+
+## 🛠️ Development
+
+### Available Scripts
+
+```bash
+npm run dev         # Start dev server
+npm run build       # Build all packages
+npm run lint        # Lint codebase
+npm run db:generate # Generate migrations
+npm run db:push     # Push schema to database
+npm run db:studio   # Open Drizzle Studio
+```
+
+### Key Concepts
+
+#### tRPC Routers
+All API logic is in `apps/web/src/server/routers/`:
+- `auth.ts` - Authentication status
+- `chatbot.ts` - Chatbot CRUD
+- `chat.ts` - Chat messages with RAG
+- `files.ts` - File upload/management
+- `analytics.ts` - Usage statistics
+- `admin.ts` - User approval & domains
+
+#### Middleware
+`src/middleware.ts` handles:
+- Subdomain routing (admin.domain.com)
+- Authentication checks
+- Rate limiting
+- User status validation
+
+#### Async Jobs
+File processing runs asynchronously via QStash:
+- Upload triggers job publication
+- `/api/jobs/process-file` handles processing
+- Extracts text, generates embeddings, stores in DB
+
+## 🔐 Security
+
+- ✅ Rate limiting on public endpoints
+- ✅ Email domain restrictions
+- ✅ Admin approval required for new users
+- ✅ QStash signature verification
+- ✅ Session-based authentication
+- ✅ Row-level security ready (Supabase)
+
+## 📊 Implementation Status
+
+### ✅ Complete
+- Full tRPC API (auth, chatbot, chat, files, admin, analytics)
+- Better Auth with approval workflow
+- RAG system with pgvector semantic search
+- Async file processing (QStash)
+- Rate limiting (Upstash Redis)
+- Email notifications (Resend)
+- Structured logging (Pino)
+- All pages & UI components
+- Chat interface with file upload
+- Admin dashboard
+
+**Ready for production deployment!**
+
+## 🤝 Contributing
+
+This is a production system. Follow these guidelines:
+1. Keep code modular and type-safe
+2. Add logging for all important events
+3. Write tests for new features
+4. Update documentation
+5. Follow existing patterns
+
+## 📝 License
+
+See [LICENSE](./LICENSE)
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Next.js](https://nextjs.org/)
+- [tRPC](https://trpc.io/)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [Better Auth](https://better-auth.com/)
+- [Shadcn UI](https://ui.shadcn.com/)
+- [OpenRouter](https://openrouter.ai/)
+- [Vercel AI SDK](https://sdk.vercel.ai/)
+
+---
+
+**Ready to revolutionize education with AI! 🚀**

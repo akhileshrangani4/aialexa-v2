@@ -1,0 +1,27 @@
+{
+  "name": "@aialexa/ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./openrouter": "./src/openrouter-client.ts",
+    "./rag": "./src/rag-service.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.0.10",
+    "ai": "^4.0.38",
+    "langchain": "^0.3.7",
+    "@langchain/community": "^0.3.16",
+    "mammoth": "^1.8.0",
+    "nanoid": "^5.0.9",
+    "pdf-parse": "^1.1.1",
+    "tiktoken": "^1.0.18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pdf-parse": "^1.1.4",
+    "typescript": "^5.7.2"
+  }
+}
+
