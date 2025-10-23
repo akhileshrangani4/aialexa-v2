@@ -1,12 +1,12 @@
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, embed } from 'ai';
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText, embed, streamText } from "ai";
 
 // Supported models
 export const SUPPORTED_MODELS = [
-  'meta-llama/llama-3.3-70b-instruct',
-  'mistralai/mistral-large',
-  'qwen/qwen-2.5-72b-instruct',
-  'openai/gpt-oss-120b',
+  "meta-llama/llama-3.3-70b-instruct",
+  "mistralai/mistral-large",
+  "qwen/qwen-2.5-72b-instruct",
+  "openai/gpt-oss-120b",
 ] as const;
 
 export type SupportedModel = (typeof SUPPORTED_MODELS)[number];
@@ -18,12 +18,12 @@ export class OpenRouterClient {
 
   constructor(apiKey: string, openaiApiKey?: string) {
     if (!apiKey) {
-      throw new Error('OpenRouter API key is required');
+      throw new Error("OpenRouter API key is required");
     }
 
     this.client = createOpenAI({
       apiKey,
-      baseURL: 'https://openrouter.ai/api/v1',
+      baseURL: "https://openrouter.ai/api/v1",
     });
 
     // OpenRouter doesn't support embeddings, so use OpenAI directly if key is provided
@@ -39,7 +39,7 @@ export class OpenRouterClient {
    */
   async generateText(params: {
     model: SupportedModel;
-    messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+    messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
     temperature?: number;
     maxTokens?: number;
   }): Promise<{
@@ -76,18 +76,39 @@ export class OpenRouterClient {
   }
 
   /**
+   * Stream text response using specified model
+   */
+  async streamText(params: {
+    model: SupportedModel;
+    messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
+    temperature?: number;
+    maxTokens?: number;
+  }) {
+    const result = await streamText({
+      model: this.client(params.model),
+      messages: params.messages,
+      temperature: params.temperature ?? 0.7,
+      maxTokens: params.maxTokens ?? 2000,
+    });
+
+    return result;
+  }
+
+  /**
    * Generate embedding for text using OpenAI's text-embedding-3-small
    * Note: OpenRouter doesn't support embeddings, so this uses OpenAI directly
    */
   async generateEmbedding(text: string): Promise<number[]> {
     if (!this.openaiClient) {
       throw new Error(
-        'OpenAI API key required for embeddings. OpenRouter does not support embeddings. ' +
-        'Please provide OPENAI_API_KEY environment variable.'
+        "OpenAI API key required for embeddings. OpenRouter does not support embeddings. " +
+          "Please provide OPENAI_API_KEY environment variable.",
       );
     }
 
-    const embeddingModel = this.openaiClient.embedding('text-embedding-3-small');
+    const embeddingModel = this.openaiClient.embedding(
+      "text-embedding-3-small",
+    );
 
     const { embedding } = await embed({
       model: embeddingModel,
@@ -101,7 +122,9 @@ export class OpenRouterClient {
    * Generate embeddings for multiple texts
    */
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
-    const embeddings = await Promise.all(texts.map((text) => this.generateEmbedding(text)));
+    const embeddings = await Promise.all(
+      texts.map((text) => this.generateEmbedding(text)),
+    );
     return embeddings;
   }
 }
@@ -109,7 +132,9 @@ export class OpenRouterClient {
 /**
  * Create OpenRouter client instance
  */
-export function createOpenRouterClient(apiKey: string, openaiApiKey?: string): OpenRouterClient {
+export function createOpenRouterClient(
+  apiKey: string,
+  openaiApiKey?: string,
+): OpenRouterClient {
   return new OpenRouterClient(apiKey, openaiApiKey);
 }
-

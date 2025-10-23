@@ -1,25 +1,44 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { trpc } from '@/lib/trpc';
-import { useSession, signOut } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import Link from 'next/link';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { trpc } from "@/lib/trpc";
+import { useSession, signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Link from "next/link";
 
 const MODELS = [
-  { value: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
-  { value: 'mistralai/mistral-large', label: 'Mistral Large' },
-  { value: 'qwen/qwen-2.5-72b-instruct', label: 'Qwen 2.5 72B' },
-  { value: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
+  { value: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B" },
+  { value: "mistralai/mistral-large", label: "Mistral Large" },
+  { value: "qwen/qwen-2.5-72b-instruct", label: "Qwen 2.5 72B" },
+  { value: "openai/gpt-oss-120b", label: "GPT-OSS 120B" },
 ];
 
 export default function DashboardPage() {
@@ -27,16 +46,21 @@ export default function DashboardPage() {
   const { data: session, isPending: sessionLoading } = useSession();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    model: 'meta-llama/llama-3.3-70b-instruct',
-    systemPrompt: 'You are a helpful teaching assistant. Answer questions based on the provided context from course materials.',
+    name: "",
+    description: "",
+    model: "meta-llama/llama-3.3-70b-instruct",
+    systemPrompt:
+      "You are a helpful teaching assistant. Answer questions based on the provided context from course materials.",
     temperature: 70,
     maxTokens: 2000,
   });
 
   // Fetch chatbots
-  const { data: chatbots, isLoading: chatbotsLoading, refetch } = trpc.chatbot.list.useQuery(undefined, {
+  const {
+    data: chatbots,
+    isLoading: chatbotsLoading,
+    refetch,
+  } = trpc.chatbot.list.useQuery(undefined, {
     enabled: !!session,
   });
 
@@ -46,10 +70,11 @@ export default function DashboardPage() {
       setDialogOpen(false);
       refetch();
       setFormData({
-        name: '',
-        description: '',
-        model: 'meta-llama/llama-3.3-70b-instruct',
-        systemPrompt: 'You are a helpful teaching assistant. Answer questions based on the provided context from course materials.',
+        name: "",
+        description: "",
+        model: "meta-llama/llama-3.3-70b-instruct",
+        systemPrompt:
+          "You are a helpful teaching assistant. Answer questions based on the provided context from course materials.",
         temperature: 70,
         maxTokens: 2000,
       });
@@ -60,7 +85,11 @@ export default function DashboardPage() {
     e.preventDefault();
     createChatbot.mutate({
       name: formData.name,
-      model: formData.model as 'meta-llama/llama-3.3-70b-instruct' | 'mistralai/mistral-large' | 'qwen/qwen-2.5-72b-instruct' | 'openai/gpt-oss-120b',
+      model: formData.model as
+        | "meta-llama/llama-3.3-70b-instruct"
+        | "mistralai/mistral-large"
+        | "qwen/qwen-2.5-72b-instruct"
+        | "openai/gpt-oss-120b",
       systemPrompt: formData.systemPrompt,
       description: formData.description,
       temperature: formData.temperature,
@@ -78,12 +107,15 @@ export default function DashboardPage() {
   }
 
   if (!session) {
-    router.push('/login');
+    router.push("/login");
     return null;
   }
 
   // Type assertion for extended user fields
-  const user = session.user as typeof session.user & { role: 'user' | 'admin'; status: 'pending' | 'approved' | 'rejected' };
+  const user = session.user as typeof session.user & {
+    role: "user" | "admin";
+    status: "pending" | "approved" | "rejected";
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,12 +124,18 @@ export default function DashboardPage() {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-2">Welcome back, {session.user.name}!</p>
+            <p className="text-gray-600 mt-2">
+              Welcome back, {session.user.name}!
+            </p>
           </div>
-          <Button onClick={async () => {
-            await signOut();
-            router.push('/login');
-          }}>Sign Out</Button>
+          <Button
+            onClick={async () => {
+              await signOut();
+              router.push("/login");
+            }}
+          >
+            Sign Out
+          </Button>
         </div>
 
         {/* Stats */}
@@ -118,8 +156,8 @@ export default function DashboardPage() {
               <CardDescription>Account status</CardDescription>
             </CardHeader>
             <CardContent>
-              <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                {user.role === 'admin' ? 'Admin' : 'User'}
+              <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                {user.role === "admin" ? "Admin" : "User"}
               </Badge>
             </CardContent>
           </Card>
@@ -130,7 +168,7 @@ export default function DashboardPage() {
               <CardDescription>Navigate</CardDescription>
             </CardHeader>
             <CardContent>
-              {user.role === 'admin' && (
+              {user.role === "admin" && (
                 <Link href="/admin">
                   <Button variant="outline" size="sm" className="w-full">
                     Admin Dashboard
@@ -147,7 +185,9 @@ export default function DashboardPage() {
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle>Your Chatbots</CardTitle>
-                <CardDescription>Create and manage your AI chatbots</CardDescription>
+                <CardDescription>
+                  Create and manage your AI chatbots
+                </CardDescription>
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
@@ -163,7 +203,9 @@ export default function DashboardPage() {
 
                   {createChatbot.error && (
                     <Alert variant="destructive">
-                      <AlertDescription>{createChatbot.error.message}</AlertDescription>
+                      <AlertDescription>
+                        {createChatbot.error.message}
+                      </AlertDescription>
                     </Alert>
                   )}
 
@@ -174,7 +216,9 @@ export default function DashboardPage() {
                         id="name"
                         placeholder="CS101 Assistant"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -185,7 +229,12 @@ export default function DashboardPage() {
                         id="description"
                         placeholder="AI assistant for Introduction to Computer Science"
                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -194,7 +243,9 @@ export default function DashboardPage() {
                       <Label htmlFor="model">AI Model *</Label>
                       <Select
                         value={formData.model}
-                        onValueChange={(value) => setFormData({ ...formData, model: value })}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, model: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -215,7 +266,12 @@ export default function DashboardPage() {
                         id="systemPrompt"
                         placeholder="You are a helpful teaching assistant..."
                         value={formData.systemPrompt}
-                        onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            systemPrompt: e.target.value,
+                          })
+                        }
                         rows={4}
                         required
                       />
@@ -233,7 +289,10 @@ export default function DashboardPage() {
                           max="100"
                           value={formData.temperature}
                           onChange={(e) =>
-                            setFormData({ ...formData, temperature: parseInt(e.target.value) })
+                            setFormData({
+                              ...formData,
+                              temperature: parseInt(e.target.value),
+                            })
                           }
                         />
                         <p className="text-xs text-gray-500">
@@ -250,10 +309,15 @@ export default function DashboardPage() {
                           max="4000"
                           value={formData.maxTokens}
                           onChange={(e) =>
-                            setFormData({ ...formData, maxTokens: parseInt(e.target.value) })
+                            setFormData({
+                              ...formData,
+                              maxTokens: parseInt(e.target.value),
+                            })
                           }
                         />
-                        <p className="text-xs text-gray-500">Maximum response length</p>
+                        <p className="text-xs text-gray-500">
+                          Maximum response length
+                        </p>
                       </div>
                     </div>
 
@@ -267,7 +331,9 @@ export default function DashboardPage() {
                         Cancel
                       </Button>
                       <Button type="submit" disabled={createChatbot.isPending}>
-                        {createChatbot.isPending ? 'Creating...' : 'Create Chatbot'}
+                        {createChatbot.isPending
+                          ? "Creating..."
+                          : "Create Chatbot"}
                       </Button>
                     </div>
                   </form>
@@ -283,12 +349,17 @@ export default function DashboardPage() {
             ) : !chatbots || chatbots.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 mb-4">No chatbots yet</p>
-                <Button onClick={() => setDialogOpen(true)}>Create Your First Chatbot</Button>
+                <Button onClick={() => setDialogOpen(true)}>
+                  Create Your First Chatbot
+                </Button>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {chatbots.map((chatbot) => (
-                  <Card key={chatbot.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={chatbot.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardHeader>
                       <CardTitle className="text-lg">{chatbot.name}</CardTitle>
                       <CardDescription className="line-clamp-2">
@@ -300,12 +371,15 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-500">Model:</span>
                           <Badge variant="outline">
-                            {MODELS.find((m) => m.value === chatbot.model)?.label || chatbot.model}
+                            {MODELS.find((m) => m.value === chatbot.model)
+                              ?.label || chatbot.model}
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-500">Created:</span>
-                          <span>{new Date(chatbot.createdAt).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(chatbot.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                         <Link href={`/chatbot/${chatbot.id}`}>
                           <Button className="w-full mt-4" variant="outline">

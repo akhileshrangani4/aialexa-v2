@@ -1,5 +1,5 @@
-import { router, publicProcedure, protectedProcedure } from '../trpc';
-import type { User } from '@/types/better-auth';
+import { router, publicProcedure, protectedProcedure } from "../trpc";
+import type { User } from "@/types/better-auth";
 
 export const authRouter = router({
   /**
@@ -33,10 +33,9 @@ export const authRouter = router({
     const user = ctx.session.user as User;
     return {
       status: user.status,
-      isApproved: user.status === 'approved',
-      isPending: user.status === 'pending',
-      isRejected: user.status === 'rejected',
+      isApproved: user.status === "approved",
+      isPending: user.status === "pending",
+      isRejected: user.status === "rejected",
     };
   }),
 });
-

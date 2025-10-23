@@ -1,8 +1,13 @@
-import { router, adminProcedure } from '../trpc';
-import { z } from 'zod';
-import { user, approvedDomains, chatbots, conversations } from '@aialexa/db/schema';
-import { eq } from 'drizzle-orm';
-import { approveUser, rejectUser } from '@/lib/auth';
+import { router, adminProcedure } from "../trpc";
+import { z } from "zod";
+import {
+  user,
+  approvedDomains,
+  chatbots,
+  conversations,
+} from "@aialexa/db/schema";
+import { eq } from "drizzle-orm";
+import { approveUser, rejectUser } from "@/lib/auth";
 
 export const adminRouter = router({
   /**
@@ -12,7 +17,7 @@ export const adminRouter = router({
     const pendingUsers = await ctx.db
       .select()
       .from(user)
-      .where(eq(user.status, 'pending'))
+      .where(eq(user.status, "pending"))
       .orderBy(user.createdAt);
 
     return pendingUsers;
@@ -100,7 +105,7 @@ export const adminRouter = router({
       z.object({
         limit: z.number().default(50),
         offset: z.number().default(0),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const allConversations = await ctx.db
@@ -113,4 +118,3 @@ export const adminRouter = router({
       return allConversations;
     }),
 });
-

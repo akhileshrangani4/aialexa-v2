@@ -1,5 +1,5 @@
-import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
-import type { OpenRouterClient } from './openrouter-client';
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import type { OpenRouterClient } from "./openrouter-client";
 
 /**
  * RAG Service for file processing, chunking, and semantic search
@@ -14,7 +14,7 @@ export class RAGService {
     this.textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
-      separators: ['\n\n', '\n', '.', ' ', ''],
+      separators: ["\n\n", "\n", ".", " ", ""],
     });
 
     // Don't initialize encoder here - do it lazily when needed
@@ -30,13 +30,15 @@ export class RAGService {
     }
 
     this.encoderInitialized = true;
-    
+
     try {
       // Dynamic import to avoid module evaluation errors
-      const { encoding_for_model } = await import('tiktoken');
-      this.encoder = encoding_for_model('gpt-4o-mini');
+      const { encoding_for_model } = await import("tiktoken");
+      this.encoder = encoding_for_model("gpt-4o-mini");
     } catch (error) {
-      console.warn('Failed to initialize tiktoken, using fallback token counter');
+      console.warn(
+        "Failed to initialize tiktoken, using fallback token counter",
+      );
       this.encoder = null;
     }
   }
@@ -47,24 +49,24 @@ export class RAGService {
   async extractContent(buffer: Buffer, mimeType: string): Promise<string> {
     try {
       switch (mimeType) {
-        case 'application/pdf':
+        case "application/pdf":
           return await this.extractPDF(buffer);
 
-        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        case 'application/msword':
+        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        case "application/msword":
           return await this.extractWord(buffer);
 
-        case 'text/plain':
-        case 'text/markdown':
-        case 'text/csv':
-        case 'application/json':
-          return buffer.toString('utf-8');
+        case "text/plain":
+        case "text/markdown":
+        case "text/csv":
+        case "application/json":
+          return buffer.toString("utf-8");
 
         default:
           throw new Error(`Unsupported file type: ${mimeType}`);
       }
     } catch (error: any) {
-      console.error('Content extraction error:', error);
+      console.error("Content extraction error:", error);
       throw new Error(`Failed to extract content: ${error.message}`);
     }
   }
@@ -75,12 +77,12 @@ export class RAGService {
   private async extractPDF(buffer: Buffer): Promise<string> {
     try {
       // Dynamic import to avoid build-time execution
-      const pdfParse = (await import('pdf-parse')).default;
+      const pdfParse = (await import("pdf-parse")).default;
       const data = await pdfParse(buffer);
       return data.text;
     } catch (error) {
-      console.error('PDF extraction error:', error);
-      throw new Error('Failed to extract PDF content');
+      console.error("PDF extraction error:", error);
+      throw new Error("Failed to extract PDF content");
     }
   }
 
@@ -90,12 +92,12 @@ export class RAGService {
   private async extractWord(buffer: Buffer): Promise<string> {
     try {
       // Dynamic import to avoid build-time execution
-      const mammoth = await import('mammoth');
+      const mammoth = await import("mammoth");
       const result = await mammoth.extractRawText({ buffer });
       return result.value;
     } catch (error) {
-      console.error('Word extraction error:', error);
-      throw new Error('Failed to extract Word document content');
+      console.error("Word extraction error:", error);
+      throw new Error("Failed to extract Word document content");
     }
   }
 
@@ -104,7 +106,7 @@ export class RAGService {
    */
   async chunkText(content: string): Promise<string[]> {
     if (!content || content.trim().length === 0) {
-      throw new Error('No content to process');
+      throw new Error("No content to process");
     }
 
     const chunks = await this.textSplitter.splitText(content);
@@ -116,7 +118,7 @@ export class RAGService {
    */
   async generateEmbeddingsForChunks(
     chunks: string[],
-    openrouterClient: OpenRouterClient
+    openrouterClient: OpenRouterClient,
   ): Promise<number[][]> {
     return await openrouterClient.generateEmbeddings(chunks);
   }
@@ -150,17 +152,17 @@ export class RAGService {
       fileName: string;
       chunkIndex: number;
       similarity?: number;
-    }>
+    }>,
   ): string {
     if (chunks.length === 0) {
-      return '';
+      return "";
     }
 
     const context = chunks
       .map((chunk) => {
         return `[Source: ${chunk.fileName} - Part ${chunk.chunkIndex + 1}]\n${chunk.content}`;
       })
-      .join('\n\n---\n\n');
+      .join("\n\n---\n\n");
 
     return `Based on the following context from uploaded documents:\n\n${context}\n\n`;
   }
@@ -170,7 +172,7 @@ export class RAGService {
    */
   cosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length) {
-      throw new Error('Vectors must have the same length');
+      throw new Error("Vectors must have the same length");
     }
 
     let dotProduct = 0;
@@ -208,11 +210,9 @@ export class RAGService {
    */
   rerank(
     chunks: Array<{ content: string; similarity: number; [key: string]: any }>,
-    topK: number = 5
+    topK: number = 5,
   ): Array<{ content: string; similarity: number; [key: string]: any }> {
-    return chunks
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, topK);
+    return chunks.sort((a, b) => b.similarity - a.similarity).slice(0, topK);
   }
 
   /**
@@ -231,4 +231,3 @@ export class RAGService {
 export function createRAGService(): RAGService {
   return new RAGService();
 }
-

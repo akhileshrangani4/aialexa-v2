@@ -1,13 +1,25 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
-  "globalEnv": ["OPENROUTER_API_KEY","NODE_ENV","ENABLE_LOGGING","PORT","SKIP_ENV_VALIDATION"],
+  "globalEnv": [
+    "OPENROUTER_API_KEY",
+    "NODE_ENV",
+    "ENABLE_LOGGING",
+    "PORT",
+    "SKIP_ENV_VALIDATION"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["OPENROUTER_API_KEY","NODE_ENV","ENABLE_LOGGING","PORT","SKIP_ENV_VALIDATION"]
+      "env": [
+        "OPENROUTER_API_KEY",
+        "NODE_ENV",
+        "ENABLE_LOGGING",
+        "PORT",
+        "SKIP_ENV_VALIDATION"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
