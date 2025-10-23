@@ -1,6 +1,12 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function HomePage() {
   return (
@@ -45,13 +51,12 @@ export default function HomePage() {
           <Card>
             <CardHeader>
               <CardTitle>Share & Analytics</CardTitle>
-              <CardDescription>
-                Share chatbots and track usage
-              </CardDescription>
+              <CardDescription>Share chatbots and track usage</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Generate shareable links and view anonymous conversation analytics
+                Generate shareable links and view anonymous conversation
+                analytics
               </p>
             </CardContent>
           </Card>

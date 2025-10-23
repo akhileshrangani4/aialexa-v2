@@ -1,27 +1,33 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { authClient } from '@/lib/auth-client';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setSuccess(false);
     setLoading(true);
 
@@ -41,17 +47,21 @@ export default function RegisterPage() {
             setLoading(false);
             // Redirect to pending page after 2 seconds
             setTimeout(() => {
-              router.push('/pending');
+              router.push("/pending");
             }, 2000);
           },
           onError: (ctx) => {
-            setError(ctx.error.message || 'Registration failed. Please try again.');
+            setError(
+              ctx.error.message || "Registration failed. Please try again.",
+            );
             setLoading(false);
           },
-        }
+        },
       );
     } catch (err) {
-      setError((err as Error).message || 'An error occurred during registration');
+      setError(
+        (err as Error).message || "An error occurred during registration",
+      );
       setLoading(false);
     }
   };
@@ -66,15 +76,16 @@ export default function RegisterPage() {
         <CardContent>
           <Alert className="mb-4">
             <AlertDescription>
-              All accounts require admin approval before you can log in. You&apos;ll receive an email once
-              your account is approved.
+              All accounts require admin approval before you can log in.
+              You&apos;ll receive an email once your account is approved.
             </AlertDescription>
           </Alert>
 
           {success && (
             <Alert className="mb-4">
               <AlertDescription>
-                Registration successful! Your account is pending admin approval. Redirecting...
+                Registration successful! Your account is pending admin approval.
+                Redirecting...
               </AlertDescription>
             </Alert>
           )}
@@ -122,13 +133,17 @@ export default function RegisterPage() {
               />
               <p className="text-xs text-gray-500">At least 8 characters</p>
             </div>
-            <Button type="submit" className="w-full" disabled={loading || success}>
-              {loading ? 'Registering...' : success ? 'Success!' : 'Register'}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || success}
+            >
+              {loading ? "Registering..." : success ? "Success!" : "Register"}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link href="/login" className="text-blue-600 hover:underline">
               Login
             </Link>

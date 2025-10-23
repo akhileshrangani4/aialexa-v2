@@ -1,25 +1,31 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { authClient } from '@/lib/auth-client';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
@@ -33,19 +39,22 @@ export default function LoginPage() {
             setLoading(true);
           },
           onSuccess: () => {
-            router.push('/dashboard');
+            router.push("/dashboard");
           },
           onError: (ctx) => {
-            setError(ctx.error.message || 'Login failed. Please check your credentials.');
+            setError(
+              ctx.error.message ||
+                "Login failed. Please check your credentials.",
+            );
             setLoading(false);
           },
-        }
+        },
       );
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An error occurred during login');
+        setError("An error occurred during login");
       }
       setLoading(false);
     }
@@ -90,12 +99,12 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-gray-600">
-            Don&apos;t have an account?{' '}
+            Don&apos;t have an account?{" "}
             <Link href="/register" className="text-blue-600 hover:underline">
               Register
             </Link>

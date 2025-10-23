@@ -1,17 +1,17 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 // Note: Better Auth session check happens in tRPC context
 // Middleware focuses on rate limiting and subdomain routing
-import { publicChatRateLimit, checkRateLimit } from './lib/rate-limit';
-import { logWarn } from './lib/logger';
+import { publicChatRateLimit, checkRateLimit } from "./lib/rate-limit";
+import { logWarn } from "./lib/logger";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const host = request.headers.get('host') || '';
+  const host = request.headers.get("host") || "";
 
   // Handle subdomain routing for admin
-  const isAdminSubdomain = host.startsWith('admin.');
-  if (isAdminSubdomain && !pathname.startsWith('/admin')) {
+  const isAdminSubdomain = host.startsWith("admin.");
+  if (isAdminSubdomain && !pathname.startsWith("/admin")) {
     // Rewrite admin subdomain to /admin routes
     const url = request.nextUrl.clone();
     url.pathname = `/admin${pathname}`;
@@ -19,16 +19,22 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rate limiting for public chat endpoints
-  if (pathname.startsWith('/chat/') || pathname.includes('/api/trpc/chat.sendSharedMessage')) {
-    const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown';
+  if (
+    pathname.startsWith("/chat/") ||
+    pathname.includes("/api/trpc/chat.sendSharedMessage")
+  ) {
+    const ip =
+      request.headers.get("x-forwarded-for") ??
+      request.headers.get("x-real-ip") ??
+      "unknown";
     const { success, limit, remaining, reset } = await checkRateLimit(
       publicChatRateLimit,
       ip,
-      { pathname, ip }
+      { pathname, ip },
     );
 
     if (!success) {
-      logWarn('Rate limit exceeded for public chat', {
+      logWarn("Rate limit exceeded for public chat", {
         ip,
         pathname,
         limit,
@@ -38,18 +44,18 @@ export async function middleware(request: NextRequest) {
 
       return NextResponse.json(
         {
-          error: 'Too many requests',
-          message: 'Please try again later',
+          error: "Too many requests",
+          message: "Please try again later",
           retryAfter: Math.ceil((reset - Date.now()) / 1000),
         },
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': limit.toString(),
-            'X-RateLimit-Remaining': remaining.toString(),
-            'X-RateLimit-Reset': reset.toString(),
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
           },
-        }
+        },
       );
     }
   }
@@ -70,7 +76,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-

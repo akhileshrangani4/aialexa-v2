@@ -1,10 +1,10 @@
-import { db } from '@aialexa/db';
-import { chatbotFiles, fileChunks } from '@aialexa/db/schema';
-import { eq } from 'drizzle-orm';
-import { createSupabaseClient } from './supabase';
-import { createOpenRouterClient, createRAGService } from '@aialexa/ai';
-import { env } from './env';
-import { logInfo, logError } from './logger';
+import { db } from "@aialexa/db";
+import { chatbotFiles, fileChunks } from "@aialexa/db/schema";
+import { eq } from "drizzle-orm";
+import { createSupabaseClient } from "./supabase";
+import { createOpenRouterClient, createRAGService } from "@aialexa/ai";
+import { env } from "./env";
+import { logInfo, logError } from "./logger";
 
 /**
  * Process a file: extract content, chunk, generate embeddings, and store
@@ -17,12 +17,12 @@ export async function processFile(params: {
   const { fileId, chatbotId } = params;
 
   try {
-    logInfo('File processing started', { fileId, chatbotId });
+    logInfo("File processing started", { fileId, chatbotId });
 
     // Update status to processing
     await db
       .update(chatbotFiles)
-      .set({ processingStatus: 'processing' })
+      .set({ processingStatus: "processing" })
       .where(eq(chatbotFiles.id, fileId));
 
     // Get file from database
@@ -33,13 +33,13 @@ export async function processFile(params: {
       .limit(1);
 
     if (!file) {
-      throw new Error('File not found');
+      throw new Error("File not found");
     }
 
     // Download file from Supabase Storage
     const supabase = createSupabaseClient();
     const { data, error } = await supabase.storage
-      .from('chatbot-files')
+      .from("chatbot-files")
       .download(file.storagePath);
 
     if (error || !data) {
@@ -60,11 +60,11 @@ export async function processFile(params: {
     // Generate embeddings
     const openrouterClient = createOpenRouterClient(
       env.OPENROUTER_API_KEY,
-      env.OPENAI_API_KEY
+      env.OPENAI_API_KEY,
     );
     const embeddings = await ragService.generateEmbeddingsForChunks(
       chunks,
-      openrouterClient
+      openrouterClient,
     );
 
     // Store chunks with embeddings in database
@@ -76,7 +76,7 @@ export async function processFile(params: {
         content: chunk,
         embedding: embeddings[index],
         tokenCount: await ragService.countTokens(chunk),
-      }))
+      })),
     );
 
     await db.insert(fileChunks).values(chunkRecords);
@@ -85,7 +85,7 @@ export async function processFile(params: {
     await db
       .update(chatbotFiles)
       .set({
-        processingStatus: 'completed',
+        processingStatus: "completed",
         metadata: {
           chunkCount: chunks.length,
           processedAt: new Date().toISOString(),
@@ -93,7 +93,7 @@ export async function processFile(params: {
       })
       .where(eq(chatbotFiles.id, fileId));
 
-    logInfo('File processing completed', {
+    logInfo("File processing completed", {
       fileId,
       chatbotId,
       chunkCount: chunks.length,
@@ -104,13 +104,13 @@ export async function processFile(params: {
       chunkCount: chunks.length,
     };
   } catch (error) {
-    logError(error, 'File processing failed', { fileId, chatbotId });
+    logError(error, "File processing failed", { fileId, chatbotId });
 
     // Update file status to failed
     await db
       .update(chatbotFiles)
       .set({
-        processingStatus: 'failed',
+        processingStatus: "failed",
         metadata: {
           error: error instanceof Error ? error.message : String(error),
         },
@@ -120,4 +120,3 @@ export async function processFile(params: {
     throw error;
   }
 }
-

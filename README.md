@@ -19,6 +19,7 @@ Create intelligent, context-aware chatbots powered by your course materials usin
 ## 🏗️ Tech Stack
 
 ### Core
+
 - **Next.js 15** - React framework with App Router
 - **Turborepo** - Monorepo build system
 - **TypeScript** - Type safety throughout
@@ -26,18 +27,21 @@ Create intelligent, context-aware chatbots powered by your course materials usin
 - **Tailwind CSS** - Utility-first styling
 
 ### Database & Auth
+
 - **PostgreSQL** (Supabase) - Primary database
 - **Drizzle ORM** - Type-safe database access
 - **pgvector** - Vector similarity search
 - **Better Auth** - Authentication with email/password
 
 ### AI & RAG
+
 - **OpenRouter** - Unified AI model access
 - **Vercel AI SDK** - Streaming & tool calling
 - **LangChain** - Text splitting and RAG utilities
 - **tiktoken** - Token counting
 
 ### Infrastructure
+
 - **Upstash Redis** - Rate limiting
 - **Upstash QStash** - Async job processing
 - **Supabase Storage** - File storage
@@ -45,6 +49,7 @@ Create intelligent, context-aware chatbots powered by your course materials usin
 - **Pino** - Structured logging
 
 ### UI
+
 - **Shadcn UI** - Component library
 - **React Hook Form** - Form management
 - **Recharts** - Analytics charts
@@ -66,6 +71,7 @@ aialexa/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - npm
 - PostgreSQL database (Supabase recommended)
@@ -75,11 +81,13 @@ aialexa/
 - Upstash Redis + QStash
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Environment Setup
+
 Create `apps/web/.env` with required variables:
 
 ```env
@@ -124,27 +132,32 @@ MAX_FILE_SIZE_MB=10
 ### 3. Database Setup
 
 Enable pgvector extension in Supabase:
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
 Push database schema:
+
 ```bash
 npm run db:push
 ```
 
 Create first admin user:
+
 ```sql
 INSERT INTO "user" (id, email, name, "emailVerified", status, role)
 VALUES (gen_random_uuid(), 'admin@example.com', 'Admin', true, 'approved', 'admin');
 ```
 
 ### 4. Start Development Server
+
 ```bash
 npm run dev
 ```
 
 Access:
+
 - Main app: http://localhost:3000
 - Admin: http://admin.localhost:3000
 
@@ -168,7 +181,9 @@ npm run db:studio   # Open Drizzle Studio
 ### Key Concepts
 
 #### tRPC Routers
+
 All API logic is in `apps/web/src/server/routers/`:
+
 - `auth.ts` - Authentication status
 - `chatbot.ts` - Chatbot CRUD
 - `chat.ts` - Chat messages with RAG
@@ -177,14 +192,18 @@ All API logic is in `apps/web/src/server/routers/`:
 - `admin.ts` - User approval & domains
 
 #### Middleware
+
 `src/middleware.ts` handles:
+
 - Subdomain routing (admin.domain.com)
 - Authentication checks
 - Rate limiting
 - User status validation
 
 #### Async Jobs
+
 File processing runs asynchronously via QStash:
+
 - Upload triggers job publication
 - `/api/jobs/process-file` handles processing
 - Extracts text, generates embeddings, stores in DB
@@ -201,6 +220,7 @@ File processing runs asynchronously via QStash:
 ## 📊 Implementation Status
 
 ### ✅ Complete
+
 - Full tRPC API (auth, chatbot, chat, files, admin, analytics)
 - Better Auth with approval workflow
 - RAG system with pgvector semantic search
@@ -217,6 +237,7 @@ File processing runs asynchronously via QStash:
 ## 🤝 Contributing
 
 This is a production system. Follow these guidelines:
+
 1. Keep code modular and type-safe
 2. Add logging for all important events
 3. Write tests for new features
@@ -230,6 +251,7 @@ See [LICENSE](./LICENSE)
 ## 🙏 Acknowledgments
 
 Built with:
+
 - [Next.js](https://nextjs.org/)
 - [tRPC](https://trpc.io/)
 - [Drizzle ORM](https://orm.drizzle.team/)

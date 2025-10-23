@@ -1,8 +1,13 @@
-import { router, protectedProcedure } from '../trpc';
-import { z } from 'zod';
-import { chatbots, conversations, messages, analytics } from '@aialexa/db/schema';
-import { eq, and, sql, gte, desc, count } from 'drizzle-orm';
-import { TRPCError } from '@trpc/server';
+import { router, protectedProcedure } from "../trpc";
+import { z } from "zod";
+import {
+  chatbots,
+  conversations,
+  messages,
+  analytics,
+} from "@aialexa/db/schema";
+import { eq, and, sql, gte, desc, count } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 export const analyticsRouter = router({
   /**
@@ -18,15 +23,15 @@ export const analyticsRouter = router({
         .where(
           and(
             eq(chatbots.id, input.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -50,7 +55,7 @@ export const analyticsRouter = router({
           .select({ count: count() })
           .from(messages)
           .where(
-            sql`${messages.conversationId} IN (${conversationIds.map((c) => c.id).join(',')})`
+            sql`${messages.conversationId} IN (${conversationIds.map((c) => c.id).join(",")})`,
           );
 
         totalMessages = messageCount?.count || 0;
@@ -63,8 +68,8 @@ export const analyticsRouter = router({
         .where(
           and(
             eq(analytics.chatbotId, input.chatbotId),
-            eq(analytics.eventType, 'message_sent')
-          )
+            eq(analytics.eventType, "message_sent"),
+          ),
         );
 
       let avgResponseTime = 0;
@@ -73,8 +78,8 @@ export const analyticsRouter = router({
           .map((a) => {
             // Type guard for eventData with responseTime
             const eventData = a.eventData as Record<string, unknown> | null;
-            return eventData && typeof eventData.responseTime === 'number' 
-              ? eventData.responseTime 
+            return eventData && typeof eventData.responseTime === "number"
+              ? eventData.responseTime
               : null;
           })
           .filter((t): t is number => t !== null);
@@ -101,7 +106,7 @@ export const analyticsRouter = router({
       z.object({
         chatbotId: z.string().uuid(),
         limit: z.number().min(1).max(50).default(10),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       // Verify chatbot ownership
@@ -111,15 +116,15 @@ export const analyticsRouter = router({
         .where(
           and(
             eq(chatbots.id, input.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -143,7 +148,7 @@ export const analyticsRouter = router({
             ...conversation,
             messageCount: msgCount?.count || 0,
           };
-        })
+        }),
       );
 
       return conversationsWithCount;
@@ -156,8 +161,8 @@ export const analyticsRouter = router({
     .input(
       z.object({
         chatbotId: z.string().uuid(),
-        timeRange: z.enum(['day', 'week', 'month']).default('week'),
-      })
+        timeRange: z.enum(["day", "week", "month"]).default("week"),
+      }),
     )
     .query(async ({ ctx, input }) => {
       // Verify chatbot ownership
@@ -167,15 +172,15 @@ export const analyticsRouter = router({
         .where(
           and(
             eq(chatbots.id, input.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -184,13 +189,13 @@ export const analyticsRouter = router({
       let startDate: Date;
 
       switch (input.timeRange) {
-        case 'day':
+        case "day":
           startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
           break;
-        case 'week':
+        case "week":
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           break;
-        case 'month':
+        case "month":
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           break;
       }
@@ -202,8 +207,8 @@ export const analyticsRouter = router({
         .where(
           and(
             eq(conversations.chatbotId, input.chatbotId),
-            gte(conversations.createdAt, startDate)
-          )
+            gte(conversations.createdAt, startDate),
+          ),
         );
 
       if (conversationIds.length === 0) {
@@ -218,7 +223,7 @@ export const analyticsRouter = router({
         })
         .from(messages)
         .where(
-          sql`${messages.conversationId} IN (${conversationIds.map((c) => c.id).join(',')})`
+          sql`${messages.conversationId} IN (${conversationIds.map((c) => c.id).join(",")})`,
         )
         .groupBy(sql`DATE(${messages.createdAt})`)
         .orderBy(sql`DATE(${messages.createdAt})`);

@@ -1,10 +1,10 @@
-import { router, protectedProcedure, publicProcedure } from '../trpc';
-import { z } from 'zod';
-import { chatbots } from '@aialexa/db/schema';
-import { eq, and } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-import { TRPCError } from '@trpc/server';
-import { SUPPORTED_MODELS } from '@aialexa/ai';
+import { router, protectedProcedure, publicProcedure } from "../trpc";
+import { z } from "zod";
+import { chatbots } from "@aialexa/db/schema";
+import { eq, and } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { TRPCError } from "@trpc/server";
+import { SUPPORTED_MODELS } from "@aialexa/ai";
 
 const createChatbotSchema = z.object({
   name: z.string().min(1).max(100),
@@ -41,14 +41,17 @@ export const chatbotRouter = router({
         .select()
         .from(chatbots)
         .where(
-          and(eq(chatbots.id, input.id), eq(chatbots.userId, ctx.session.user.id))
+          and(
+            eq(chatbots.id, input.id),
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -65,14 +68,17 @@ export const chatbotRouter = router({
         .select()
         .from(chatbots)
         .where(
-          and(eq(chatbots.id, input.id), eq(chatbots.userId, ctx.session.user.id))
+          and(
+            eq(chatbots.id, input.id),
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -93,8 +99,8 @@ export const chatbotRouter = router({
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found or not shared',
+          code: "NOT_FOUND",
+          message: "Chatbot not found or not shared",
         });
       }
 
@@ -133,7 +139,7 @@ export const chatbotRouter = router({
       z.object({
         id: z.string().uuid(),
         data: createChatbotSchema.partial(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Check ownership
@@ -141,14 +147,17 @@ export const chatbotRouter = router({
         .select()
         .from(chatbots)
         .where(
-          and(eq(chatbots.id, input.id), eq(chatbots.userId, ctx.session.user.id))
+          and(
+            eq(chatbots.id, input.id),
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!existing) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -175,14 +184,17 @@ export const chatbotRouter = router({
         .select()
         .from(chatbots)
         .where(
-          and(eq(chatbots.id, input.id), eq(chatbots.userId, ctx.session.user.id))
+          and(
+            eq(chatbots.id, input.id),
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!existing) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -202,14 +214,17 @@ export const chatbotRouter = router({
         .select()
         .from(chatbots)
         .where(
-          and(eq(chatbots.id, input.id), eq(chatbots.userId, ctx.session.user.id))
+          and(
+            eq(chatbots.id, input.id),
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!existing) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -223,8 +238,8 @@ export const chatbotRouter = router({
 
       if (!updated) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -234,4 +249,3 @@ export const chatbotRouter = router({
       };
     }),
 });
-

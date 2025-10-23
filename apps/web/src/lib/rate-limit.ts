@@ -1,7 +1,7 @@
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
-import { env } from './env';
-import { logWarn } from './logger';
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { env } from "./env";
+import { logWarn } from "./logger";
 
 // Create Redis client
 const redis = new Redis({
@@ -13,27 +13,27 @@ const redis = new Redis({
 // 10 requests per 10 seconds per IP
 export const publicChatRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(10, '10 s'),
+  limiter: Ratelimit.slidingWindow(10, "10 s"),
   analytics: true,
-  prefix: '@ratelimit/public-chat',
+  prefix: "@ratelimit/public-chat",
 });
 
 // Rate limiter for file uploads
 // 5 uploads per minute per user
 export const fileUploadRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(5, '1 m'),
+  limiter: Ratelimit.slidingWindow(5, "1 m"),
   analytics: true,
-  prefix: '@ratelimit/file-upload',
+  prefix: "@ratelimit/file-upload",
 });
 
 // Rate limiter for chatbot creation
 // 10 chatbots per hour per user
 export const chatbotCreationRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(10, '1 h'),
+  limiter: Ratelimit.slidingWindow(10, "1 h"),
   analytics: true,
-  prefix: '@ratelimit/chatbot-creation',
+  prefix: "@ratelimit/chatbot-creation",
 });
 
 /**
@@ -42,12 +42,18 @@ export const chatbotCreationRateLimit = new Ratelimit({
 export async function checkRateLimit(
   ratelimiter: Ratelimit,
   identifier: string,
-  context?: Record<string, unknown>
-): Promise<{ success: boolean; limit: number; remaining: number; reset: number }> {
-  const { success, limit, remaining, reset } = await ratelimiter.limit(identifier);
+  context?: Record<string, unknown>,
+): Promise<{
+  success: boolean;
+  limit: number;
+  remaining: number;
+  reset: number;
+}> {
+  const { success, limit, remaining, reset } =
+    await ratelimiter.limit(identifier);
 
   if (!success) {
-    logWarn('Rate limit exceeded', {
+    logWarn("Rate limit exceeded", {
       ...context,
       identifier,
       limit,
@@ -58,4 +64,3 @@ export async function checkRateLimit(
 
   return { success, limit, remaining, reset };
 }
-

@@ -1,9 +1,9 @@
-import { initTRPC, TRPCError } from '@trpc/server';
-import { auth } from '@/lib/auth';
-import { db } from '@aialexa/db';
-import { logError, logWarn } from '@/lib/logger';
-import type { User } from '@/types/better-auth';
-import superjson from 'superjson';
+import { initTRPC, TRPCError } from "@trpc/server";
+import { auth } from "@/lib/auth";
+import { db } from "@aialexa/db";
+import { logError, logWarn } from "@/lib/logger";
+import type { User } from "@/types/better-auth";
+import superjson from "superjson";
 
 /**
  * Create tRPC context from request headers
@@ -63,27 +63,27 @@ export const protectedProcedure = t.procedure
   .use(loggingMiddleware)
   .use(async ({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
-      logWarn('[tRPC] Unauthorized access attempt', {
+      logWarn("[tRPC] Unauthorized access attempt", {
         session: ctx.session,
       });
       throw new TRPCError({
-        code: 'UNAUTHORIZED',
-        message: 'You must be logged in to access this resource',
+        code: "UNAUTHORIZED",
+        message: "You must be logged in to access this resource",
       });
     }
 
     // Check if user is approved
     const user = ctx.session.user as User;
-    
+
     // Admins bypass the approval workflow
-    if (user.role !== 'admin' && user.status !== 'approved') {
-      logWarn('[tRPC] Unapproved user access attempt', {
+    if (user.role !== "admin" && user.status !== "approved") {
+      logWarn("[tRPC] Unapproved user access attempt", {
         userId: user.id,
         status: user.status,
       });
       throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'Your account is pending admin approval',
+        code: "FORBIDDEN",
+        message: "Your account is pending admin approval",
       });
     }
 
@@ -98,15 +98,15 @@ export const protectedProcedure = t.procedure
 // Admin procedure (requires admin role)
 export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   const user = ctx.session.user as User;
-  
-  if (user.role !== 'admin') {
-    logWarn('[tRPC] Non-admin access attempt to admin endpoint', {
+
+  if (user.role !== "admin") {
+    logWarn("[tRPC] Non-admin access attempt to admin endpoint", {
       userId: user.id,
       role: user.role,
     });
     throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'You must be an admin to access this resource',
+      code: "FORBIDDEN",
+      message: "You must be an admin to access this resource",
     });
   }
 
@@ -121,4 +121,3 @@ export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 // Export router and procedure builders
 export const router = t.router;
 export const middleware = t.middleware;
-

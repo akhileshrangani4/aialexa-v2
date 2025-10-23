@@ -1,7 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Skip validation for CI builds with dummy values
-const skipValidation = process.env.SKIP_ENV_VALIDATION === '1';
+const skipValidation = process.env.SKIP_ENV_VALIDATION === "1";
 
 const envSchema = z.object({
   // Database
@@ -19,7 +19,7 @@ const envSchema = z.object({
 
   // OpenRouter
   OPENROUTER_API_KEY: z.string().min(1),
-  
+
   // OpenAI (for embeddings - OpenRouter doesn't support embeddings)
   OPENAI_API_KEY: z.string().min(1).optional(),
 
@@ -39,11 +39,13 @@ const envSchema = z.object({
 
   // App Config
   NEXT_PUBLIC_APP_URL: z.string().url(),
-  APPROVED_EMAIL_DOMAINS: z.string().default('.edu,.ac.in,.edu.in'),
+  APPROVED_EMAIL_DOMAINS: z.string().default(".edu,.ac.in,.edu.in"),
   ADMIN_EMAILS: z.string().email(),
-  MAX_FILE_SIZE_MB: z.string().default('10'),
+  MAX_FILE_SIZE_MB: z.string().default("10"),
 
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
   PORT: z.coerce.number().default(3000),
 });
 
@@ -52,22 +54,26 @@ export type Env = z.infer<typeof envSchema>;
 function validateEnv(): Env {
   // Skip validation in CI builds - return a proxy that provides dummy values on-demand
   if (skipValidation) {
-    console.warn('⚠️  Skipping environment validation (CI mode)');
+    console.warn("⚠️  Skipping environment validation (CI mode)");
     // Return a proxy that provides sensible dummy values for any accessed property
     return new Proxy({} as Env, {
       get(_target, prop: string) {
         // Return dummy values based on property name patterns
-        if (prop === 'PORT') return 3000;
-        if (prop === 'NODE_ENV') return 'production';
-        if (prop === 'APPROVED_EMAIL_DOMAINS') return '.edu,.ac.in,.edu.in';
-        if (prop === 'MAX_FILE_SIZE_MB') return '10';
-        if (prop.includes('URL')) return 'http://localhost:3000';
-        if (prop.includes('EMAIL')) return 'ci@localhost';
-        if (prop.includes('SECRET') || prop.includes('KEY') || prop.includes('TOKEN')) {
-          return 'ci-dummy-secret-key-min-32-chars-long';
+        if (prop === "PORT") return 3000;
+        if (prop === "NODE_ENV") return "production";
+        if (prop === "APPROVED_EMAIL_DOMAINS") return ".edu,.ac.in,.edu.in";
+        if (prop === "MAX_FILE_SIZE_MB") return "10";
+        if (prop.includes("URL")) return "http://localhost:3000";
+        if (prop.includes("EMAIL")) return "ci@localhost";
+        if (
+          prop.includes("SECRET") ||
+          prop.includes("KEY") ||
+          prop.includes("TOKEN")
+        ) {
+          return "ci-dummy-secret-key-min-32-chars-long";
         }
-        return 'ci-dummy-value';
-      }
+        return "ci-dummy-value";
+      },
     });
   }
 
@@ -75,28 +81,29 @@ function validateEnv(): Env {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map((e) => e.path.join('.')).join(', ');
-      throw new Error(`Missing or invalid environment variables: ${missingVars}`);
+      const missingVars = error.errors.map((e) => e.path.join(".")).join(", ");
+      throw new Error(
+        `Missing or invalid environment variables: ${missingVars}`,
+      );
     }
     throw error;
   }
 }
 
 // Validate env on module load (server-side only)
-export const env = typeof window === 'undefined' ? validateEnv() : ({} as Env);
+export const env = typeof window === "undefined" ? validateEnv() : ({} as Env);
 
 // Helper to get approved email domains as array
 export function getApprovedDomains(): string[] {
-  return env.APPROVED_EMAIL_DOMAINS.split(',').map((d) => d.trim());
+  return env.APPROVED_EMAIL_DOMAINS.split(",").map((d) => d.trim());
 }
 
 // Helper to get admin emails as array
 export function getAdminEmails(): string[] {
-  return env.ADMIN_EMAILS.split(',').map((e) => e.trim());
+  return env.ADMIN_EMAILS.split(",").map((e) => e.trim());
 }
 
 // Helper to get max file size in bytes
 export function getMaxFileSizeBytes(): number {
   return parseInt(env.MAX_FILE_SIZE_MB) * 1024 * 1024;
 }
-

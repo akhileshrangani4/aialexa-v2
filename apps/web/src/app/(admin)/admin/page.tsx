@@ -1,25 +1,39 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { trpc } from '@/lib/trpc';
-import { useSession, signOut } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { trpc } from "@/lib/trpc";
+import { useSession, signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminPage() {
   const router = useRouter();
   const { data: session, isPending: sessionLoading } = useSession();
 
   // Fetch pending users
-  const { data: pendingUsers, isLoading: usersLoading, refetch } = trpc.admin.getPendingUsers.useQuery(
-    undefined,
-    { enabled: !!session }
-  );
+  const {
+    data: pendingUsers,
+    isLoading: usersLoading,
+    refetch,
+  } = trpc.admin.getPendingUsers.useQuery(undefined, { enabled: !!session });
 
   // Approve user mutation
   const approveUser = trpc.admin.approveUser.useMutation({
@@ -36,13 +50,17 @@ export default function AdminPage() {
   });
 
   const handleApprove = async (userId: string) => {
-    if (confirm('Are you sure you want to approve this user?')) {
+    if (confirm("Are you sure you want to approve this user?")) {
       await approveUser.mutateAsync({ userId });
     }
   };
 
   const handleReject = async (userId: string) => {
-    if (confirm('Are you sure you want to reject this user? They will be notified via email.')) {
+    if (
+      confirm(
+        "Are you sure you want to reject this user? They will be notified via email.",
+      )
+    ) {
       await rejectUser.mutateAsync({ userId });
     }
   };
@@ -58,20 +76,25 @@ export default function AdminPage() {
 
   // Check if user is admin
   if (!session) {
-    router.push('/login');
+    router.push("/login");
     return null;
   }
 
   // Type assertion for extended user fields
-  const user = session.user as typeof session.user & { role: 'user' | 'admin'; status: 'pending' | 'approved' | 'rejected' };
+  const user = session.user as typeof session.user & {
+    role: "user" | "admin";
+    status: "pending" | "approved" | "rejected";
+  };
 
-  if (user.role !== 'admin') {
+  if (user.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
-            <CardDescription>You don&apos;t have permission to access this page.</CardDescription>
+            <CardDescription>
+              You don&apos;t have permission to access this page.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/dashboard">
@@ -89,17 +112,26 @@ export default function AdminPage() {
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-2">Manage users, domains, and system settings</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Manage users, domains, and system settings
+            </p>
           </div>
           <div className="flex gap-2">
             <Link href="/dashboard">
               <Button variant="outline">Back to Dashboard</Button>
             </Link>
-            <Button variant="outline" onClick={async () => {
-              await signOut();
-              router.push('/login');
-            }}>Sign Out</Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                await signOut();
+                router.push("/login");
+              }}
+            >
+              Sign Out
+            </Button>
           </div>
         </div>
 
@@ -114,22 +146,30 @@ export default function AdminPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Pending User Approvals</CardTitle>
-                <CardDescription>Review and approve user registrations</CardDescription>
+                <CardDescription>
+                  Review and approve user registrations
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {approveUser.error && (
                   <Alert variant="destructive" className="mb-4">
-                    <AlertDescription>{approveUser.error.message}</AlertDescription>
+                    <AlertDescription>
+                      {approveUser.error.message}
+                    </AlertDescription>
                   </Alert>
                 )}
                 {rejectUser.error && (
                   <Alert variant="destructive" className="mb-4">
-                    <AlertDescription>{rejectUser.error.message}</AlertDescription>
+                    <AlertDescription>
+                      {rejectUser.error.message}
+                    </AlertDescription>
                   </Alert>
                 )}
 
                 {usersLoading ? (
-                  <p className="text-center py-8 text-gray-500">Loading users...</p>
+                  <p className="text-center py-8 text-gray-500">
+                    Loading users...
+                  </p>
                 ) : !pendingUsers || pendingUsers.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-gray-500">No pending users</p>
@@ -161,7 +201,9 @@ export default function AdminPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleApprove(user.id)}
-                                disabled={approveUser.isPending || rejectUser.isPending}
+                                disabled={
+                                  approveUser.isPending || rejectUser.isPending
+                                }
                               >
                                 Approve
                               </Button>
@@ -169,7 +211,9 @@ export default function AdminPage() {
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => handleReject(user.id)}
-                                disabled={approveUser.isPending || rejectUser.isPending}
+                                disabled={
+                                  approveUser.isPending || rejectUser.isPending
+                                }
                               >
                                 Reject
                               </Button>
@@ -196,13 +240,15 @@ export default function AdminPage() {
               <CardContent>
                 <Alert className="mb-4">
                   <AlertDescription>
-                    Approved domains are configured in your environment variables (APPROVED_DOMAINS).
-                    Users with these email domains can register automatically.
+                    Approved domains are configured in your environment
+                    variables (APPROVED_DOMAINS). Users with these email domains
+                    can register automatically.
                   </AlertDescription>
                 </Alert>
                 <div className="space-y-2">
                   <p className="text-sm text-gray-600">
-                    Configured domains will be shown here. If the list is empty, all domains are allowed.
+                    Configured domains will be shown here. If the list is empty,
+                    all domains are allowed.
                   </p>
                 </div>
               </CardContent>

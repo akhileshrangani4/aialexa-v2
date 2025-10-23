@@ -11,6 +11,7 @@ Production-ready AI chatbot platform built with Next.js 15, tRPC, Better Auth, a
 ### Prerequisites
 
 Create accounts and obtain API keys from:
+
 - **Supabase** (https://supabase.com/) - PostgreSQL + Storage
 - **OpenRouter** (https://openrouter.ai/) - AI models
 - **OpenAI** (https://platform.openai.com/) - Embeddings API
@@ -144,12 +145,14 @@ aialexa/
 ### How It Works
 
 **Registration:**
+
 1. User registers → status set to 'pending'
 2. Database hook validates email domain
 3. Admin receives notification email
 4. User sees "Awaiting approval" message
 
 **Login:**
+
 1. User enters credentials
 2. Better Auth validates
 3. Database hook checks status
@@ -157,6 +160,7 @@ aialexa/
 5. Allows if approved
 
 **Approval:**
+
 1. Admin views pending users at `/admin`
 2. Approves or rejects
 3. User receives email notification
@@ -168,7 +172,7 @@ Restrict registration to specific domains:
 
 ```sql
 INSERT INTO "approved_domains" (domain, created_at)
-VALUES 
+VALUES
   ('yourdomain.com', NOW()),
   ('university.edu', NOW());
 ```
@@ -225,10 +229,12 @@ If no domains configured → all emails allowed.
 ## 📊 API Reference (tRPC)
 
 ### Auth Router
+
 - `getStatus` - Current user status
 - `checkApprovalStatus` - Check approval
 
 ### Chatbot Router
+
 - `list` - Get user's chatbots
 - `create` - Create new chatbot
 - `update` - Update settings
@@ -238,12 +244,14 @@ If no domains configured → all emails allowed.
 - `generateShareToken` - Generate public link
 
 ### Chat Router
+
 - `sendMessage` - Send message (protected)
 - `sendSharedMessage` - Public chat (rate limited)
 - `getHistory` - Conversation history
 - `deleteConversation` - Delete session
 
 ### Files Router
+
 - `upload` - Upload file
 - `list` - List files
 - `delete` - Delete file
@@ -251,6 +259,7 @@ If no domains configured → all emails allowed.
 - `getPreviewUrl` - Get signed URL
 
 ### Admin Router
+
 - `getPendingUsers` - Users awaiting approval
 - `approveUser` - Approve user
 - `rejectUser` - Reject user
@@ -259,6 +268,7 @@ If no domains configured → all emails allowed.
 - `listDomains` - List domains
 
 ### Analytics Router
+
 - `getChatbotStats` - Aggregate stats
 - `getConversations` - Recent sessions
 - `getMessageVolume` - Usage charts
@@ -270,12 +280,14 @@ If no domains configured → all emails allowed.
 ### Test Checklist
 
 **Database:**
+
 - [ ] pgvector enabled
 - [ ] Migrations successful
 - [ ] Admin user created
 - [ ] Storage bucket created
 
 **Authentication:**
+
 - [ ] User registration
 - [ ] Admin notification email
 - [ ] Pending user blocked from login
@@ -283,18 +295,21 @@ If no domains configured → all emails allowed.
 - [ ] Approved user can login
 
 **Chatbot & Files:**
+
 - [ ] Create chatbot
 - [ ] Upload file
 - [ ] File processes successfully
 - [ ] Embeddings created
 
 **Chat:**
+
 - [ ] Send message with RAG
 - [ ] Sources displayed
 - [ ] Public chat works
 - [ ] Rate limiting active
 
 **Admin:**
+
 - [ ] View pending users
 - [ ] Approve/reject users
 - [ ] Manage domains
@@ -321,6 +336,7 @@ git push origin main
 ### 3. Update Environment Variables
 
 **IMPORTANT** - Change these for production:
+
 - `BETTER_AUTH_URL` → `https://yourdomain.com`
 - `NEXT_PUBLIC_APP_URL` → `https://yourdomain.com`
 - `RESEND_FROM_EMAIL` → verified domain
@@ -339,6 +355,7 @@ git push origin main
 **Admin**: `admin.yourdomain.com`
 
 In Vercel:
+
 1. Settings → Domains
 2. Add both domains
 3. Update DNS records
@@ -348,34 +365,43 @@ In Vercel:
 ## 🐛 Troubleshooting
 
 ### Build Fails
+
 **Error**: Missing environment variables  
 **Solution**: Create `apps/web/.env` with all required vars
 
 ### Database Migration Fails
+
 **Error**: Cannot connect  
-**Solution**: 
+**Solution**:
+
 1. Check `DATABASE_URL`
 2. Enable pgvector
 3. Verify database is accessible
 
 ### File Upload Fails
+
 **Error**: Upload/processing fails  
 **Solution**:
+
 1. Verify Storage bucket exists: `chatbot-files`
 2. Check `SUPABASE_SERVICE_ROLE_KEY`
 3. Verify QStash credentials
 
 ### AI Chat Not Working
+
 **Error**: No response  
 **Solution**:
+
 1. Check `OPENROUTER_API_KEY`
 2. Check `OPENAI_API_KEY` for embeddings
 3. Verify model name in config
 4. Check file chunks have embeddings
 
 ### Emails Not Sending
+
 **Error**: No emails received  
 **Solution**:
+
 1. Verify `RESEND_API_KEY`
 2. Check domain is verified in Resend
 3. Check spam folder
@@ -408,6 +434,7 @@ npm run lint
 ## 🎯 Features
 
 ### For Instructors
+
 - Create chatbots for each course
 - Upload course materials (PDF, Word, etc.)
 - Get shareable links for students
@@ -415,6 +442,7 @@ npm run lint
 - Manage multiple chatbots
 
 ### For Students
+
 - Access via shared link (no signup)
 - Ask questions about materials
 - Get AI-powered answers
@@ -422,6 +450,7 @@ npm run lint
 - Completely anonymous
 
 ### For Admins
+
 - Review user registrations
 - Approve/reject users
 - Manage email domains
@@ -459,6 +488,7 @@ npm run lint
 ## ✨ What's Included
 
 ### Backend
+
 - ✅ All 6 tRPC routers implemented
 - ✅ Better Auth with database hooks
 - ✅ RAG system with semantic search
@@ -468,6 +498,7 @@ npm run lint
 - ✅ Structured logging
 
 ### Frontend
+
 - ✅ All pages implemented
 - ✅ Full chat interface
 - ✅ File upload with drag-drop
@@ -484,4 +515,3 @@ The project is production-ready. Follow the setup steps above, and you'll have a
 For support or questions, refer to this guide and the inline code documentation.
 
 **Built with ❤️ using Next.js, tRPC, Better Auth, and OpenRouter**
-
