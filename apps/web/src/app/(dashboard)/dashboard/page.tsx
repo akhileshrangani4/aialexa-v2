@@ -28,12 +28,14 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
 const MODELS = [
   { value: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B" },
@@ -46,6 +48,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { data: session, isPending: sessionLoading } = useSession();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [chatbotToDelete, setChatbotToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -88,6 +92,21 @@ export default function DashboardPage() {
     },
   });
 
+  // Delete chatbot mutation
+  const deleteChatbot = trpc.chatbot.delete.useMutation({
+    onSuccess: () => {
+      setDeleteDialogOpen(false);
+      setChatbotToDelete(null);
+      refetch();
+      toast.success("Chatbot deleted successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete chatbot", {
+        description: error.message,
+      });
+    },
+  });
+
   const handleCreateChatbot = async (e: React.FormEvent) => {
     e.preventDefault();
     createChatbot.mutate({
@@ -102,6 +121,12 @@ export default function DashboardPage() {
       temperature: formData.temperature,
       maxTokens: formData.maxTokens,
     });
+  };
+
+  const handleDeleteChatbot = () => {
+    if (chatbotToDelete) {
+      deleteChatbot.mutate({ id: chatbotToDelete });
+    }
   };
 
   // Redirect if not logged in
@@ -391,11 +416,27 @@ export default function DashboardPage() {
                             {new Date(chatbot.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                        <Link href={`/chatbot/${chatbot.id}`}>
-                          <Button className="w-full mt-4" variant="outline">
-                            Open Chatbot
+                        <div className="flex gap-2 mt-4">
+                          <Link
+                            href={`/chatbot/${chatbot.id}`}
+                            className="flex-1"
+                          >
+                            <Button className="w-full" variant="outline">
+                              Open Chatbot
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              setChatbotToDelete(chatbot.id);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </Link>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -405,6 +446,19 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteChatbot}
+        title="Delete Chatbot"
+        description="Are you sure you want to delete this chatbot? This action cannot be undone and will permanently delete all uploaded files, conversation history, and analytics data."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        loading={deleteChatbot.isPending}
+      />
     </div>
   );
 }
