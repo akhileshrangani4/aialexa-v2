@@ -67,14 +67,39 @@ export function logError(
   context?: Record<string, unknown>,
 ) {
   // Always log errors
-  const errorObj = error instanceof Error ? error : new Error(String(error));
+  let errorInfo: {
+    message: string;
+    stack?: string;
+    name?: string;
+    details?: unknown;
+  };
+
+  if (error instanceof Error) {
+    // Standard Error object
+    errorInfo = {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    };
+  } else if (error && typeof error === "object") {
+    // Object with error information (e.g., from APIs)
+    const errorObj = error as Record<string, unknown>;
+    errorInfo = {
+      message: errorObj.message?.toString() || JSON.stringify(error),
+      name: errorObj.name?.toString() || "Error",
+      details: error,
+    };
+  } else {
+    // Primitive value or null/undefined
+    errorInfo = {
+      message: String(error),
+      name: "Error",
+    };
+  }
+
   console.error(`[ERROR] ${message}`, {
     ...context,
-    error: {
-      message: errorObj.message,
-      stack: errorObj.stack,
-      name: errorObj.name,
-    },
+    error: errorInfo,
   });
 }
 

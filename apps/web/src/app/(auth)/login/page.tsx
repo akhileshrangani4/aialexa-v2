@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const utils = trpc.useUtils();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,15 +47,69 @@ export default function LoginPage() {
             });
             router.push("/dashboard");
           },
-          onError: (ctx) => {
-            const errorMessage =
-              ctx.error.message ||
-              "Login failed. Please check your credentials.";
-            setError(errorMessage);
-            toast.error("Login failed", {
-              description: errorMessage,
-            });
+          onError: async (ctx) => {
             setLoading(false);
+
+            // Check for specific error messages from Better Auth
+            const errorMessage = ctx.error.message || "";
+
+            if (errorMessage === "ACCOUNT_PENDING") {
+              toast.info("Account Pending", {
+                description: "Your account is awaiting admin approval",
+              });
+              router.push("/pending");
+              return;
+            }
+
+            if (errorMessage === "ACCOUNT_REJECTED") {
+              toast.error("Account Rejected", {
+                description: "Your registration was not approved",
+              });
+              router.push("/rejected");
+              return;
+            }
+
+            // For other errors, check user status as fallback
+            if (!errorMessage.includes("credentials") && email) {
+              try {
+                const statusResult =
+                  await utils.client.auth.checkUserStatus.query({
+                    email,
+                  });
+
+                if (statusResult.exists && statusResult.status === "pending") {
+                  toast.info("Account Pending", {
+                    description: "Your account is awaiting admin approval",
+                  });
+                  router.push("/pending");
+                  return;
+                } else if (
+                  statusResult.exists &&
+                  statusResult.status === "rejected"
+                ) {
+                  toast.error("Account Rejected", {
+                    description: "Your registration was not approved",
+                  });
+                  router.push("/rejected");
+                  return;
+                }
+              } catch {
+                // If status check fails, fall through to regular error handling
+              }
+            }
+
+            // Default error handling
+            const displayMessage =
+              errorMessage === "ACCOUNT_PENDING" ||
+              errorMessage === "ACCOUNT_REJECTED"
+                ? "Login failed. Please check your credentials."
+                : errorMessage ||
+                  "Login failed. Please check your credentials.";
+
+            setError(displayMessage);
+            toast.error("Login failed", {
+              description: displayMessage,
+            });
           },
         },
       );

@@ -124,7 +124,7 @@ QSTASH_NEXT_SIGNING_KEY=your-next-signing-key
 
 # App Config
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-APPROVED_EMAIL_DOMAINS=.edu,.ac.in,.edu.in
+ALLOWED_EMAIL_DOMAINS=.edu,.ac.in,.edu.in
 ADMIN_EMAILS=admin@example.com
 MAX_FILE_SIZE_MB=10
 ```

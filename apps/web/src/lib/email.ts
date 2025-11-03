@@ -20,7 +20,7 @@ export async function sendAdminNotificationEmail(params: {
     const adminUrl = `${env.NEXT_PUBLIC_APP_URL}/admin`;
 
     const { data, error } = await resend.emails.send({
-      from: env.RESEND_FROM_EMAIL,
+      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
       to: adminEmails,
       subject: "New User Registration - Approval Required",
       react: UserRegistrationNotification({
@@ -62,7 +62,7 @@ export async function sendApprovalEmail(params: {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/login`;
 
     const { data, error } = await resend.emails.send({
-      from: env.RESEND_FROM_EMAIL,
+      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Your Account Has Been Approved! 🎉",
       react: ApprovalConfirmation({
@@ -101,7 +101,7 @@ export async function sendRejectionEmail(params: {
     const supportEmail = adminEmails[0] || "support@aialexa.com";
 
     const { data, error } = await resend.emails.send({
-      from: env.RESEND_FROM_EMAIL,
+      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Account Registration Update",
       react: RejectionNotification({

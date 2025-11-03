@@ -9,6 +9,7 @@ import {
 } from "@aialexa/db/schema";
 import { eq, sql, desc } from "drizzle-orm";
 import { approveUser, rejectUser } from "@/lib/auth";
+import { getApprovedDomains } from "@/lib/env";
 
 export const adminRouter = router({
   /**
@@ -45,7 +46,7 @@ export const adminRouter = router({
     }),
 
   /**
-   * List all approved domains
+   * List all allowed domains from database
    */
   listDomains: adminProcedure.query(async ({ ctx }) => {
     const domains = await ctx.db
@@ -57,7 +58,15 @@ export const adminRouter = router({
   }),
 
   /**
-   * Add approved domain
+   * Get allowed domains from environment variables
+   */
+  getEnvDomains: adminProcedure.query(async () => {
+    const envDomains = getApprovedDomains();
+    return envDomains;
+  }),
+
+  /**
+   * Add allowed domain
    */
   addDomain: adminProcedure
     .input(z.object({ domain: z.string().min(1) }))
@@ -74,7 +83,7 @@ export const adminRouter = router({
     }),
 
   /**
-   * Remove approved domain
+   * Remove allowed domain
    */
   removeDomain: adminProcedure
     .input(z.object({ domainId: z.string().uuid() }))

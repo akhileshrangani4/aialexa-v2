@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -14,12 +15,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PendingUsersTab } from "@/components/admin/PendingUsersTab";
 import { AllChatbotsTab } from "@/components/admin/AllChatbotsTab";
-import { ApprovedDomainsTab } from "@/components/admin/ApprovedDomainsTab";
+import { AllowedDomainsTab } from "@/components/admin/AllowedDomainsTab";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 
 export default function AdminPage() {
   const router = useRouter();
   const { data: session, isPending: sessionLoading } = useSession();
+
+  // Redirect to login if no session
+  useEffect(() => {
+    if (!sessionLoading && !session) {
+      router.push("/login");
+    }
+  }, [session, sessionLoading, router]);
 
   // Loading state
   if (sessionLoading) {
@@ -32,8 +40,11 @@ export default function AdminPage() {
 
   // Check if user is admin
   if (!session) {
-    router.push("/login");
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Redirecting...</p>
+      </div>
+    );
   }
 
   // Type assertion for extended user fields
@@ -71,7 +82,7 @@ export default function AdminPage() {
           <TabsList>
             <TabsTrigger value="users">Pending Users</TabsTrigger>
             <TabsTrigger value="chatbots">All Chatbots</TabsTrigger>
-            <TabsTrigger value="domains">Approved Domains</TabsTrigger>
+            <TabsTrigger value="domains">Allowed Domains</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -83,7 +94,7 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="domains">
-            <ApprovedDomainsTab />
+            <AllowedDomainsTab />
           </TabsContent>
         </Tabs>
       </div>
