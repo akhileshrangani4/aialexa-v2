@@ -279,14 +279,13 @@ export default function DashboardPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="temperature">
-                          Temperature: {formData.temperature}
-                        </Label>
+                        <Label htmlFor="temperature">Temperature</Label>
                         <Input
                           id="temperature"
-                          type="range"
+                          type="number"
                           min="0"
                           max="100"
+                          step="1"
                           value={formData.temperature}
                           onChange={(e) =>
                             setFormData({
@@ -296,7 +295,7 @@ export default function DashboardPage() {
                           }
                         />
                         <p className="text-xs text-muted-foreground">
-                          Higher = more creative, Lower = more focused
+                          Control randomness (0 = focused, 100 = creative)
                         </p>
                       </div>
 
@@ -307,6 +306,7 @@ export default function DashboardPage() {
                           type="number"
                           min="100"
                           max="4000"
+                          step="100"
                           value={formData.maxTokens}
                           onChange={(e) =>
                             setFormData({
@@ -316,7 +316,7 @@ export default function DashboardPage() {
                           }
                         />
                         <p className="text-xs text-muted-foreground">
-                          Maximum response length
+                          Maximum length of responses (100-4000)
                         </p>
                       </div>
                     </div>

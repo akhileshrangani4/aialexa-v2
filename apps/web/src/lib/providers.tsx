@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { trpc, getTRPCClientConfig } from "./trpc";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSession } from "@/lib/auth-client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -18,6 +19,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   const [trpcClient] = useState(() => trpc.createClient(getTRPCClientConfig()));
+
+  // Track the current user to detect changes
+  const { data: session } = useSession();
+  const previousUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const currentUserId = session?.user?.id || null;
+    const previousUserId = previousUserIdRef.current;
+
+    // If user changed (logged in, logged out, or switched accounts)
+    if (previousUserId !== null && previousUserId !== currentUserId) {
+      // Clear all cached queries
+      queryClient.clear();
+    }
+
+    // Update the ref to track the current user
+    previousUserIdRef.current = currentUserId;
+  }, [session?.user?.id, queryClient]);
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
