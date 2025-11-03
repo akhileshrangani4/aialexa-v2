@@ -67,7 +67,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-secondary">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
@@ -131,7 +131,7 @@ export default function RegisterPage() {
                 disabled={loading || success}
                 minLength={8}
               />
-              <p className="text-xs text-gray-500">At least 8 characters</p>
+              <p className="text-xs text-muted-foreground">At least 8 characters</p>
             </div>
             <Button
               type="submit"
@@ -142,9 +142,9 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-600">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               Login
             </Link>
           </p>

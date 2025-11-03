@@ -112,7 +112,7 @@ export function FileUpload({
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-lg font-semibold">Course Materials</h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Upload files to train your chatbot
           </p>
         </div>
@@ -180,10 +180,10 @@ export function FileUpload({
       </div>
 
       {filesLoading ? (
-        <p className="text-center py-8 text-gray-500">Loading files...</p>
+        <p className="text-center py-8 text-muted-foreground">Loading files...</p>
       ) : !files || files.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">No files uploaded yet</p>
+          <p className="text-muted-foreground mb-4">No files uploaded yet</p>
           <Button onClick={() => setUploadDialogOpen(true)}>
             Upload Your First File
           </Button>

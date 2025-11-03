@@ -93,7 +93,7 @@ export default function ChatbotDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-secondary">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -102,8 +102,8 @@ export default function ChatbotDetailPage() {
               ← Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{chatbot.name}</h1>
-          <p className="text-gray-600 mt-2">{chatbot.description}</p>
+          <h1 className="text-3xl font-bold text-foreground">{chatbot.name}</h1>
+          <p className="text-muted-foreground mt-2">{chatbot.description}</p>
           <div className="flex gap-2 mt-4">
             <Badge>{chatbot.model}</Badge>
             {chatbot.shareToken && (

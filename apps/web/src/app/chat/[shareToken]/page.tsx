@@ -23,7 +23,7 @@ export default function SharedChatPage() {
   // Loading state
   if (chatbotLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-secondary">
         <p>Loading chatbot...</p>
       </div>
     );
@@ -32,10 +32,10 @@ export default function SharedChatPage() {
   // Not found
   if (!chatbot) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-secondary">
         <div className="max-w-md">
           <h1 className="text-2xl font-bold mb-2">Chatbot Not Found</h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             The chatbot you&apos;re looking for doesn&apos;t exist or is not
             shared.
           </p>
@@ -45,7 +45,7 @@ export default function SharedChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-secondary">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <ChatHeader
@@ -67,7 +67,7 @@ export default function SharedChatPage() {
         />
 
         {/* Footer */}
-        <div className="mt-6 text-center text-sm text-gray-500">
+        <div className="mt-6 text-center text-sm text-muted-foreground">
           <p>Powered by AIAlexa • AI Teaching Assistant Platform</p>
         </div>
       </div>

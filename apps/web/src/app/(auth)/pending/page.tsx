@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function PendingPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-secondary">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Account Pending Approval</CardTitle>
@@ -23,14 +23,14 @@ export default function PendingPage() {
                 administrator. You&apos;ll receive an email notification once
                 your account has been reviewed.
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 This typically takes 24-48 hours during business days.
               </p>
             </AlertDescription>
           </Alert>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Questions? Contact your institution&apos;s administrator.
             </p>
           </div>

@@ -18,7 +18,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     <div className="space-y-4">
       <div>
         <Label>Model</Label>
-        <p className="text-sm text-gray-600">{chatbot.model}</p>
+        <p className="text-sm text-muted-foreground">{chatbot.model}</p>
       </div>
       <div>
         <Label>System Prompt</Label>
@@ -27,13 +27,13 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Temperature</Label>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {chatbot.temperature ?? "Not set"}
           </p>
         </div>
         <div>
           <Label>Max Tokens</Label>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {chatbot.maxTokens ?? "Not set"}
           </p>
         </div>
@@ -59,7 +59,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
             </Button>
           </div>
         ) : (
-          <p className="text-sm text-gray-500">Sharing not enabled</p>
+          <p className="text-sm text-muted-foreground">Sharing not enabled</p>
         )}
       </div>
     </div>
