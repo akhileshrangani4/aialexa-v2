@@ -1,28 +1,29 @@
 # AIAlexa
 
-**Production-ready AI chatbot platform for education**
+Production-ready AI chatbot platform for education.
 
 Create intelligent, context-aware chatbots powered by your course materials using advanced RAG (Retrieval-Augmented Generation).
 
-## ✨ Features
+## Features
 
-- 🤖 **4 Open-Source AI Models**: Llama 3.3 70B, Mistral Large, Qwen 2.5 72B, GPT-OSS 120B
-- 📚 **RAG-Powered**: Upload PDFs, Word docs, and more for context-aware responses
-- 👥 **Professor Approval Workflow**: Admin-controlled user registration
-- 📊 **Analytics Dashboard**: Track conversations, usage patterns, and popular topics
-- 🔒 **Secure & Rate-Limited**: Upstash Redis rate limiting on public endpoints
-- ⚡ **Async File Processing**: Background processing with Upstash QStash
-- 🎨 **Modern UI**: Shadcn UI components with Tailwind CSS
-- 📧 **Email Notifications**: Resend integration for approvals and notifications
-- 🌐 **Subdomain Support**: Separate admin dashboard at admin.domain.com
+- **4 Open-Source AI Models**: Llama 3.3 70B, Mistral Large, Qwen 2.5 72B, GPT-OSS 120B
+- **RAG-Powered**: Upload PDFs, Word docs, and more for context-aware responses
+- **Professor Approval Workflow**: Admin-controlled user registration
+- **Analytics Dashboard**: Track conversations, usage patterns, and popular topics
+- **Secure & Rate-Limited**: Upstash Redis rate limiting on public endpoints
+- **Async File Processing**: Background processing with Upstash QStash
+- **Modern UI**: Shadcn UI components with Tailwind CSS
+- **Email Notifications**: Resend integration for approvals and notifications
+- **Subdomain Support**: Separate admin dashboard at admin.domain.com
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 ### Core
 
-- **Next.js 15** - React framework with App Router
+- **Next.js 15.5** - React framework with App Router
+- **React 19** - Latest React with enhanced hooks
 - **Turborepo** - Monorepo build system
-- **TypeScript** - Type safety throughout
+- **TypeScript 5.9** - Type safety throughout
 - **tRPC** - End-to-end type-safe APIs
 - **Tailwind CSS** - Utility-first styling
 
@@ -53,8 +54,11 @@ Create intelligent, context-aware chatbots powered by your course materials usin
 - **Shadcn UI** - Component library
 - **React Hook Form** - Form management
 - **Recharts** - Analytics charts
+- **Framer Motion** - Animation library
+- **Sonner** - Toast notifications
+- **Lucide React** - Icon library
 
-## 📦 Project Structure
+## Project Structure
 
 ```
 aialexa/
@@ -68,12 +72,12 @@ aialexa/
 │   └── ai/               # OpenRouter + RAG
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm
+- Node.js 20+
+- npm 11+
 - PostgreSQL database (Supabase recommended)
 - OpenRouter API key
 - OpenAI API key (for embeddings)
@@ -161,11 +165,11 @@ Access:
 - Main app: http://localhost:3000
 - Admin: http://admin.localhost:3000
 
-## 📚 Documentation
+## Documentation
 
 **[SETUP.md](./SETUP.md)** - Complete setup guide with all environment variables, database setup, deployment instructions, and troubleshooting
 
-## 🛠️ Development
+## Development
 
 ### Available Scripts
 
@@ -173,7 +177,9 @@ Access:
 npm run dev         # Start dev server
 npm run build       # Build all packages
 npm run lint        # Lint codebase
+npm run format      # Format code with Prettier
 npm run db:generate # Generate migrations
+npm run db:migrate  # Run migrations
 npm run db:push     # Push schema to database
 npm run db:studio   # Open Drizzle Studio
 ```
@@ -208,18 +214,18 @@ File processing runs asynchronously via QStash:
 - `/api/jobs/process-file` handles processing
 - Extracts text, generates embeddings, stores in DB
 
-## 🔐 Security
+## Security
 
-- ✅ Rate limiting on public endpoints
-- ✅ Email domain restrictions
-- ✅ Admin approval required for new users
-- ✅ QStash signature verification
-- ✅ Session-based authentication
-- ✅ Row-level security ready (Supabase)
+- Rate limiting on public endpoints
+- Email domain restrictions
+- Admin approval required for new users
+- QStash signature verification
+- Session-based authentication
+- Row-level security ready (Supabase)
 
-## 📊 Implementation Status
+## Implementation Status
 
-### ✅ Complete
+### Complete
 
 - Full tRPC API (auth, chatbot, chat, files, admin, analytics)
 - Better Auth with approval workflow
@@ -234,7 +240,7 @@ File processing runs asynchronously via QStash:
 
 **Ready for production deployment!**
 
-## 🤝 Contributing
+## Contributing
 
 This is a production system. Follow these guidelines:
 
@@ -244,11 +250,11 @@ This is a production system. Follow these guidelines:
 4. Update documentation
 5. Follow existing patterns
 
-## 📝 License
+## License
 
 See [LICENSE](./LICENSE)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built with:
 
@@ -262,4 +268,4 @@ Built with:
 
 ---
 
-**Ready to revolutionize education with AI! 🚀**
+**Ready to revolutionize education with AI.**
