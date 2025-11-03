@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/select";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { SUPPORTED_MODELS, type SupportedModel } from "@aialexa/ai/openrouter";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
 interface ChatbotSettingsProps {
   chatbot: {
@@ -30,10 +31,12 @@ interface ChatbotSettingsProps {
 
 export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   const params = useParams();
+  const router = useRouter();
   const chatbotId = params.id as string;
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [disableShareDialog, setDisableShareDialog] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Editable state
   const [model, setModel] = useState(chatbot.model);
@@ -103,6 +106,18 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     },
   });
 
+  const deleteChatbot = trpc.chatbot.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Chatbot deleted successfully");
+      router.push("/dashboard");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete chatbot", {
+        description: error.message,
+      });
+    },
+  });
+
   const handleCopy = () => {
     if (chatbot.shareToken) {
       navigator.clipboard.writeText(
@@ -125,6 +140,10 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   const confirmDisableShare = async () => {
     disableShare.mutate({ id: chatbotId });
     setDisableShareDialog(false);
+  };
+
+  const handleDeleteChatbot = () => {
+    deleteChatbot.mutate({ id: chatbotId });
   };
 
   const handleSave = () => {
@@ -352,6 +371,28 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
         )}
       </div>
 
+      {/* Danger Zone Card */}
+      <div className="space-y-4 p-6 bg-destructive/5 rounded-lg border border-destructive/20">
+        <div className="space-y-1">
+          <Label className="text-base font-semibold text-destructive">
+            Danger Zone
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            Permanently delete this chatbot and all associated data
+          </p>
+        </div>
+
+        <Button
+          variant="destructive"
+          onClick={() => setDeleteDialogOpen(true)}
+          disabled={deleteChatbot.isPending}
+          className="w-full sm:w-auto"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete Chatbot
+        </Button>
+      </div>
+
       {/* Disable Share Confirmation Dialog */}
       <ConfirmationDialog
         open={disableShareDialog}
@@ -362,6 +403,19 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
         confirmText="Disable Sharing"
         variant="destructive"
         loading={disableShare.isPending}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteChatbot}
+        title="Delete Chatbot"
+        description="Are you sure you want to delete this chatbot? This action cannot be undone and will permanently delete all uploaded files, conversation history, and analytics data."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        loading={deleteChatbot.isPending}
       />
     </div>
   );
