@@ -31,8 +31,17 @@ export function useChat(shareToken: string) {
   } | null>(null);
 
   // Fetch chatbot info by share token
-  const { data: chatbot, isLoading: chatbotLoading } =
-    trpc.chatbot.getByShareToken.useQuery({ shareToken });
+  const {
+    data: chatbot,
+    isLoading: chatbotLoading,
+    error: chatbotError,
+  } = trpc.chatbot.getByShareToken.useQuery(
+    { shareToken },
+    {
+      retry: false, // Don't retry on 404/NOT_FOUND errors
+      refetchOnWindowFocus: false,
+    },
+  );
 
   // tRPC subscription for streaming messages
   trpc.chat.sendSharedMessageStream.useSubscription(
@@ -125,5 +134,6 @@ export function useChat(shareToken: string) {
     chatbot,
     chatbotLoading,
     handleSendMessage,
+    error: chatbotError,
   };
 }

@@ -12,7 +12,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <MessageContent markdown={false} className="bg-foreground/10 max-w-[80%]">
+        <MessageContent
+          markdown={false}
+          className="bg-foreground/10 max-w-[80%]"
+        >
           {message.content}
         </MessageContent>
       </div>
@@ -36,8 +39,8 @@ export function StreamingMessage({ content }: StreamingMessageProps) {
   return (
     <Message className="items-start max-w-[85%]">
       {content ? (
-        <MessageContent 
-          markdown={true} 
+        <MessageContent
+          markdown={true}
           parseIncompleteMarkdown={true}
           className="bg-secondary"
         >

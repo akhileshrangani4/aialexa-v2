@@ -248,4 +248,37 @@ export const chatbotRouter = router({
         shareUrl: `${process.env.NEXT_PUBLIC_APP_URL}/chat/${updated.shareToken}`,
       };
     }),
+
+  /**
+   * Disable sharing for chatbot
+   */
+  disableSharing: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      // Check ownership
+      const [existing] = await ctx.db
+        .select()
+        .from(chatbots)
+        .where(
+          and(
+            eq(chatbots.id, input.id),
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
+        )
+        .limit(1);
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
+        });
+      }
+
+      await ctx.db
+        .update(chatbots)
+        .set({ shareToken: null, updatedAt: new Date() })
+        .where(eq(chatbots.id, input.id));
+
+      return { success: true };
+    }),
 });

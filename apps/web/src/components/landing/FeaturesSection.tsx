@@ -6,16 +6,19 @@ export default function FeaturesSection() {
   const features = [
     {
       title: "Built for Educators",
-      description: "Designed specifically for professors and students in higher education."
+      description:
+        "Designed specifically for professors and students in higher education.",
     },
     {
       title: "Privacy Focused",
-      description: "Your data stays yours. We don't train on your materials or sell information."
+      description:
+        "Your data stays yours. We don't train on your materials or sell information.",
     },
     {
       title: "Open Source",
-      description: "Fully transparent code. Self-host if you want. Community-driven development."
-    }
+      description:
+        "Fully transparent code. Self-host if you want. Community-driven development.",
+    },
   ];
 
   return (
@@ -32,7 +35,8 @@ export default function FeaturesSection() {
               Upload. Chat. Learn.
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Transform your course materials into an intelligent assistant. No setup, no hassle, no cost.
+              Transform your course materials into an intelligent assistant. No
+              setup, no hassle, no cost.
             </p>
           </motion.div>
 
@@ -51,8 +55,12 @@ export default function FeaturesSection() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
               >
-                <h3 className="text-xl font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {item.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -61,4 +69,3 @@ export default function FeaturesSection() {
     </section>
   );
 }
-

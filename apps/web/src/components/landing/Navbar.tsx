@@ -28,7 +28,10 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Left side - empty for balance */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-foreground hover:text-muted-foreground transition-colors">
+            <Link
+              href="/"
+              className="text-2xl font-bold text-foreground hover:text-muted-foreground transition-colors"
+            >
               AI Alexa
             </Link>
           </div>
@@ -63,8 +66,8 @@ export default function Navbar() {
 
           {/* Sign In Button - Upper Right */}
           <div className="flex items-center">
-            <Button 
-              asChild 
+            <Button
+              asChild
               className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 text-sm rounded-full font-medium"
             >
               <Link href="/login">Sign In</Link>
@@ -75,4 +78,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
