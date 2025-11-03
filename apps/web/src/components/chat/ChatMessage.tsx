@@ -1,4 +1,4 @@
-import { Message as MessageType } from "@/hooks/useChat";
+import type { ChatMessage as MessageType } from "@/types/database";
 import { Message, MessageContent } from "@/components/ui/message";
 import { TypingLoader } from "@/components/ui/loader";
 

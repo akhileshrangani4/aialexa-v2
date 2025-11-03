@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,6 +21,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import type { ChatbotFile } from "@/types/database";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_FILE_TYPES = [
@@ -34,11 +37,26 @@ const ALLOWED_FILE_TYPES = [
 
 interface FileUploadProps {
   chatbotId: string;
-  files: any[];
+  files: ChatbotFile[];
   filesLoading: boolean;
   refetchFiles: () => void;
-  uploadFile: any;
-  deleteFile: any;
+  uploadFile: {
+    mutateAsync: (data: {
+      chatbotId: string;
+      fileName: string;
+      fileType: string;
+      fileData: string;
+      fileSize: number;
+    }) => Promise<unknown>;
+    isPending: boolean;
+  };
+  deleteFile: {
+    mutateAsync: (data: {
+      chatbotId: string;
+      fileId: string;
+    }) => Promise<unknown>;
+    isPending: boolean;
+  };
 }
 
 export function FileUpload({
@@ -53,6 +71,15 @@ export function FileUpload({
   const [uploadError, setUploadError] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    fileId: string | null;
+    fileName: string | null;
+  }>({
+    isOpen: false,
+    fileId: null,
+    fileName: null,
+  });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -60,24 +87,38 @@ export function FileUpload({
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setUploadError("File size must be less than 10MB");
+      const errorMsg = "File size must be less than 10MB";
+      setUploadError(errorMsg);
+      toast.error("File too large", {
+        description: errorMsg,
+      });
       return;
     }
 
     // Validate file type
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      setUploadError(
-        "File type not supported. Please upload PDF, Word, TXT, Markdown, JSON, or CSV files.",
-      );
+      const errorMsg =
+        "File type not supported. Please upload PDF, Word, TXT, Markdown, JSON, or CSV files.";
+      setUploadError(errorMsg);
+      toast.error("Invalid file type", {
+        description: errorMsg,
+      });
       return;
     }
 
     setSelectedFile(file);
     setUploadError("");
+    toast.success("File selected", {
+      description: `${file.name} ready to upload`,
+    });
   };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
+
+    const toastId = toast.loading("Uploading file...", {
+      description: "Please wait while we process your file",
+    });
 
     // Convert file to base64
     const reader = new FileReader();
@@ -86,24 +127,81 @@ export function FileUpload({
       const base64Data = base64.split(",")[1]; // Remove data:mime;base64, prefix
 
       if (!base64Data) {
-        setUploadError("Failed to read file");
+        const errorMsg = "Failed to read file";
+        setUploadError(errorMsg);
+        toast.error("Upload failed", {
+          id: toastId,
+          description: errorMsg,
+        });
         return;
       }
 
-      await uploadFile.mutateAsync({
-        chatbotId,
-        fileName: selectedFile.name,
-        fileType: selectedFile.type,
-        fileData: base64Data,
-        fileSize: selectedFile.size,
+      try {
+        await uploadFile.mutateAsync({
+          chatbotId,
+          fileName: selectedFile.name,
+          fileType: selectedFile.type,
+          fileData: base64Data,
+          fileSize: selectedFile.size,
+        });
+        toast.success("File uploaded successfully", {
+          id: toastId,
+          description: `${selectedFile.name} is being processed`,
+        });
+        setUploadDialogOpen(false);
+        setSelectedFile(null);
+        setUploadError("");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        refetchFiles();
+      } catch (error) {
+        toast.error("Upload failed", {
+          id: toastId,
+          description:
+            error instanceof Error ? error.message : "An error occurred",
+        });
+      }
+    };
+    reader.onerror = () => {
+      toast.error("Upload failed", {
+        id: toastId,
+        description: "Failed to read file",
       });
     };
     reader.readAsDataURL(selectedFile);
   };
 
-  const handleDeleteFile = async (fileId: string) => {
-    if (confirm("Are you sure you want to delete this file?")) {
-      await deleteFile.mutateAsync({ chatbotId, fileId });
+  const handleDeleteFile = (fileId: string, fileName: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      fileId,
+      fileName,
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteDialog.fileId) return;
+    try {
+      await deleteFile.mutateAsync({
+        chatbotId,
+        fileId: deleteDialog.fileId,
+      });
+      toast.success("File deleted", {
+        description: `${deleteDialog.fileName} has been removed`,
+      });
+      refetchFiles();
+    } catch (error) {
+      toast.error("Failed to delete file", {
+        description:
+          error instanceof Error ? error.message : "An error occurred",
+      });
+    } finally {
+      setDeleteDialog({
+        isOpen: false,
+        fileId: null,
+        fileName: null,
+      });
     }
   };
 
@@ -226,7 +324,7 @@ export function FileUpload({
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDeleteFile(file.id)}
+                    onClick={() => handleDeleteFile(file.id, file.fileName)}
                     disabled={deleteFile.isPending}
                   >
                     Delete
@@ -237,6 +335,27 @@ export function FileUpload({
           </TableBody>
         </Table>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deleteDialog.isOpen}
+        onOpenChange={(open) =>
+          !open &&
+          setDeleteDialog({ isOpen: false, fileId: null, fileName: null })
+        }
+        onConfirm={confirmDelete}
+        title="Delete File"
+        description={
+          <>
+            Are you sure you want to delete{" "}
+            <strong>{deleteDialog.fileName}</strong>? This action cannot be
+            undone.
+          </>
+        }
+        confirmText="Delete"
+        variant="destructive"
+        loading={deleteFile.isPending}
+      />
     </div>
   );
 }

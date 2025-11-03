@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,23 +40,30 @@ export default function LoginPage() {
             setLoading(true);
           },
           onSuccess: () => {
+            toast.success("Welcome back!", {
+              description: "Login successful",
+            });
             router.push("/dashboard");
           },
           onError: (ctx) => {
-            setError(
+            const errorMessage =
               ctx.error.message ||
-                "Login failed. Please check your credentials.",
-            );
+              "Login failed. Please check your credentials.";
+            setError(errorMessage);
+            toast.error("Login failed", {
+              description: errorMessage,
+            });
             setLoading(false);
           },
         },
       );
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An error occurred during login");
-      }
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred during login";
+      setError(errorMessage);
+      toast.error("Login failed", {
+        description: errorMessage,
+      });
       setLoading(false);
     }
   };

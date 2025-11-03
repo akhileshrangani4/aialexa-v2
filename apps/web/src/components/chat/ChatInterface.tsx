@@ -1,6 +1,6 @@
 import { ChatMessage, StreamingMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { Message } from "@/hooks/useChat";
+import type { ChatMessage as MessageType } from "@/types/database";
 import {
   ChatContainerRoot,
   ChatContainerContent,
@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/chat-container";
 
 interface ChatInterfaceProps {
-  messages: Message[];
+  messages: MessageType[];
   isStreaming: boolean;
   streamingContent: string;
   currentMessage: string;

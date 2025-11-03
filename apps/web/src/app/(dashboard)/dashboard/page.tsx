@@ -33,6 +33,7 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const MODELS = [
   { value: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B" },
@@ -69,6 +70,7 @@ export default function DashboardPage() {
     onSuccess: () => {
       setDialogOpen(false);
       refetch();
+      toast.success("Chatbot created successfully!");
       setFormData({
         name: "",
         description: "",
@@ -77,6 +79,11 @@ export default function DashboardPage() {
           "You are a helpful teaching assistant. Answer questions based on the provided context from course materials.",
         temperature: 70,
         maxTokens: 2000,
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to create chatbot", {
+        description: error.message,
       });
     },
   });
@@ -131,6 +138,7 @@ export default function DashboardPage() {
           <Button
             onClick={async () => {
               await signOut();
+              toast.success("Signed out successfully");
               router.push("/login");
             }}
           >
