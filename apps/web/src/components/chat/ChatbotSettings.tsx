@@ -11,10 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { SUPPORTED_MODELS, type SupportedModel } from "@aialexa/ai/openrouter";
+import { toast } from "sonner";
 
 interface ChatbotSettingsProps {
   chatbot: {
@@ -31,6 +33,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   const chatbotId = params.id as string;
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [disableShareDialog, setDisableShareDialog] = useState(false);
 
   // Editable state
   const [model, setModel] = useState(chatbot.model);
@@ -57,6 +60,14 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
       await utils.chatbot.get.invalidate({ id: chatbotId });
       await utils.chatbot.getById.invalidate({ id: chatbotId });
       setIsEditing(false);
+      toast.success("Settings saved successfully", {
+        description: "Your chatbot configuration has been updated",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to save settings", {
+        description: error.message,
+      });
     },
   });
 
@@ -65,6 +76,14 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
       // Invalidate both query keys
       await utils.chatbot.get.invalidate({ id: chatbotId });
       await utils.chatbot.getById.invalidate({ id: chatbotId });
+      toast.success("Sharing enabled", {
+        description: "Your chatbot is now publicly accessible",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to enable sharing", {
+        description: error.message,
+      });
     },
   });
 
@@ -73,6 +92,14 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
       // Invalidate both query keys
       await utils.chatbot.get.invalidate({ id: chatbotId });
       await utils.chatbot.getById.invalidate({ id: chatbotId });
+      toast.success("Sharing disabled", {
+        description: "Your chatbot is no longer publicly accessible",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to disable sharing", {
+        description: error.message,
+      });
     },
   });
 
@@ -82,6 +109,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
         `${window.location.origin}/chat/${chatbot.shareToken}`,
       );
       setCopied(true);
+      toast.success("Link copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -91,13 +119,12 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   };
 
   const handleDisableSharing = () => {
-    if (
-      confirm(
-        "Are you sure you want to disable sharing? This will invalidate the current share link.",
-      )
-    ) {
-      disableShare.mutate({ id: chatbotId });
-    }
+    setDisableShareDialog(true);
+  };
+
+  const confirmDisableShare = async () => {
+    disableShare.mutate({ id: chatbotId });
+    setDisableShareDialog(false);
   };
 
   const handleSave = () => {
@@ -105,17 +132,23 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     const tokensValue = parseInt(maxTokens);
 
     if (isNaN(tempValue) || tempValue < 0 || tempValue > 100) {
-      alert("Temperature must be between 0 and 100");
+      toast.error("Invalid temperature", {
+        description: "Temperature must be between 0 and 100",
+      });
       return;
     }
 
     if (isNaN(tokensValue) || tokensValue < 100 || tokensValue > 4000) {
-      alert("Max tokens must be between 100 and 4000");
+      toast.error("Invalid max tokens", {
+        description: "Max tokens must be between 100 and 4000",
+      });
       return;
     }
 
     if (!systemPrompt.trim()) {
-      alert("System prompt is required");
+      toast.error("System prompt is required", {
+        description: "Please provide a system prompt for your chatbot",
+      });
       return;
     }
 
@@ -318,6 +351,18 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
           </Button>
         )}
       </div>
+
+      {/* Disable Share Confirmation Dialog */}
+      <ConfirmationDialog
+        open={disableShareDialog}
+        onOpenChange={setDisableShareDialog}
+        onConfirm={confirmDisableShare}
+        title="Disable Sharing"
+        description="Are you sure you want to disable sharing? This will invalidate the current share link and users will no longer be able to access the chatbot through it."
+        confirmText="Disable Sharing"
+        variant="destructive"
+        loading={disableShare.isPending}
+      />
     </div>
   );
 }

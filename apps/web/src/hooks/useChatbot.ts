@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Message } from "./useChat";
+import type { ChatMessage } from "@/types/database";
 
-export function useChatbot(chatbotId: string, session: any) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function useChatbot(
+  chatbotId: string,
+  session: { user: { id: string } } | null,
+) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [sessionId, setSessionId] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState(false);

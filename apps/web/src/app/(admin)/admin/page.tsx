@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,14 +20,37 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function AdminPage() {
   const router = useRouter();
   const { data: session, isPending: sessionLoading } = useSession();
+
+  // State for confirmation dialogs
+  const [approveDialog, setApproveDialog] = useState<{
+    isOpen: boolean;
+    userId: string | null;
+    userName: string | null;
+  }>({
+    isOpen: false,
+    userId: null,
+    userName: null,
+  });
+
+  const [rejectDialog, setRejectDialog] = useState<{
+    isOpen: boolean;
+    userId: string | null;
+    userName: string | null;
+  }>({
+    isOpen: false,
+    userId: null,
+    userName: null,
+  });
 
   // Fetch pending users
   const {
@@ -39,6 +63,14 @@ export default function AdminPage() {
   const approveUser = trpc.admin.approveUser.useMutation({
     onSuccess: () => {
       refetch();
+      toast.success("User approved successfully", {
+        description: "The user has been notified via email",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to approve user", {
+        description: error.message,
+      });
     },
   });
 
@@ -46,23 +78,43 @@ export default function AdminPage() {
   const rejectUser = trpc.admin.rejectUser.useMutation({
     onSuccess: () => {
       refetch();
+      toast.success("User rejected", {
+        description: "The user has been notified via email",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to reject user", {
+        description: error.message,
+      });
     },
   });
 
-  const handleApprove = async (userId: string) => {
-    if (confirm("Are you sure you want to approve this user?")) {
-      await approveUser.mutateAsync({ userId });
-    }
+  const handleApprove = (userId: string, userName: string) => {
+    setApproveDialog({
+      isOpen: true,
+      userId,
+      userName,
+    });
   };
 
-  const handleReject = async (userId: string) => {
-    if (
-      confirm(
-        "Are you sure you want to reject this user? They will be notified via email.",
-      )
-    ) {
-      await rejectUser.mutateAsync({ userId });
-    }
+  const handleReject = (userId: string, userName: string) => {
+    setRejectDialog({
+      isOpen: true,
+      userId,
+      userName,
+    });
+  };
+
+  const confirmApprove = async () => {
+    if (!approveDialog.userId) return;
+    await approveUser.mutateAsync({ userId: approveDialog.userId });
+    setApproveDialog({ isOpen: false, userId: null, userName: null });
+  };
+
+  const confirmReject = async () => {
+    if (!rejectDialog.userId) return;
+    await rejectUser.mutateAsync({ userId: rejectDialog.userId });
+    setRejectDialog({ isOpen: false, userId: null, userName: null });
   };
 
   // Loading state
@@ -127,6 +179,7 @@ export default function AdminPage() {
               variant="outline"
               onClick={async () => {
                 await signOut();
+                toast.success("Signed out successfully");
                 router.push("/login");
               }}
             >
@@ -200,7 +253,9 @@ export default function AdminPage() {
                             <div className="flex gap-2">
                               <Button
                                 size="sm"
-                                onClick={() => handleApprove(user.id)}
+                                onClick={() =>
+                                  handleApprove(user.id, user.name || "User")
+                                }
                                 disabled={
                                   approveUser.isPending || rejectUser.isPending
                                 }
@@ -210,7 +265,9 @@ export default function AdminPage() {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => handleReject(user.id)}
+                                onClick={() =>
+                                  handleReject(user.id, user.name || "User")
+                                }
                                 disabled={
                                   approveUser.isPending || rejectUser.isPending
                                 }
@@ -255,6 +312,48 @@ export default function AdminPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Approval Confirmation Dialog */}
+        <ConfirmationDialog
+          open={approveDialog.isOpen}
+          onOpenChange={(open) =>
+            !open &&
+            setApproveDialog({ isOpen: false, userId: null, userName: null })
+          }
+          onConfirm={confirmApprove}
+          title="Approve User"
+          description={
+            <>
+              Are you sure you want to approve{" "}
+              <strong>{approveDialog.userName}</strong>? They will be notified
+              via email and granted access to the system.
+            </>
+          }
+          confirmText="Approve"
+          variant="default"
+          loading={approveUser.isPending}
+        />
+
+        {/* Rejection Confirmation Dialog */}
+        <ConfirmationDialog
+          open={rejectDialog.isOpen}
+          onOpenChange={(open) =>
+            !open &&
+            setRejectDialog({ isOpen: false, userId: null, userName: null })
+          }
+          onConfirm={confirmReject}
+          title="Reject User"
+          description={
+            <>
+              Are you sure you want to reject{" "}
+              <strong>{rejectDialog.userName}</strong>? They will be notified
+              via email and will not be able to access the system.
+            </>
+          }
+          confirmText="Reject"
+          variant="destructive"
+          loading={rejectUser.isPending}
+        />
       </div>
     </div>
   );

@@ -1,14 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-
-export interface Message {
-  role: "user" | "assistant";
-  content: string;
-  sources?: Array<{ fileName: string; chunkIndex: number; similarity: number }>;
-}
+import type { ChatMessage } from "@/types/database";
 
 export function useChat(shareToken: string) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [sessionId, setSessionId] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState(false);

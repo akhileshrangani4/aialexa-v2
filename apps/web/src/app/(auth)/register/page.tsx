@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -45,23 +46,32 @@ export default function RegisterPage() {
           onSuccess: () => {
             setSuccess(true);
             setLoading(false);
+            toast.success("Registration successful!", {
+              description: "Your account is pending admin approval",
+            });
             // Redirect to pending page after 2 seconds
             setTimeout(() => {
               router.push("/pending");
             }, 2000);
           },
           onError: (ctx) => {
-            setError(
-              ctx.error.message || "Registration failed. Please try again.",
-            );
+            const errorMessage =
+              ctx.error.message || "Registration failed. Please try again.";
+            setError(errorMessage);
+            toast.error("Registration failed", {
+              description: errorMessage,
+            });
             setLoading(false);
           },
         },
       );
     } catch (err) {
-      setError(
-        (err as Error).message || "An error occurred during registration",
-      );
+      const errorMessage =
+        (err as Error).message || "An error occurred during registration";
+      setError(errorMessage);
+      toast.error("Registration failed", {
+        description: errorMessage,
+      });
       setLoading(false);
     }
   };
