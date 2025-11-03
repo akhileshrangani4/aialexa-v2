@@ -123,7 +123,7 @@ function PromptInputTextarea({
       typeof maxHeight === "number"
         ? `${Math.min(textareaRef.current.scrollHeight, maxHeight)}px`
         : `min(${textareaRef.current.scrollHeight}px, ${maxHeight})`;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, maxHeight, disableAutosize]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
