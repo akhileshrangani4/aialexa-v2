@@ -1,27 +1,58 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { authClient } from '@/lib/auth-client';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Helper to check if error is due to pending account (not a real failure)
+  const isAccountPendingError = (error: unknown): boolean => {
+    const err = error as { message?: string; code?: string };
+    const message = err.message || "";
+    const code = err.code || "";
+    return (
+      code === "FAILED_TO_CREATE_SESSION" ||
+      message === "Failed to create session" ||
+      message === "ACCOUNT_PENDING"
+    );
+  };
+
+  // Helper to handle successful registration (redirects to pending page)
+  const handleRegistrationSuccess = () => {
+    setSuccess(true);
+    setLoading(false);
+    toast.success("Registration successful!", {
+      description: "Your account is pending admin approval",
+    });
+    setTimeout(() => {
+      router.push("/pending");
+    }, 1500);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setSuccess(false);
     setLoading(true);
 
@@ -39,25 +70,52 @@ export default function RegisterPage() {
           onSuccess: () => {
             setSuccess(true);
             setLoading(false);
+            toast.success("Registration successful!", {
+              description: "Your account is pending admin approval",
+            });
             // Redirect to pending page after 2 seconds
             setTimeout(() => {
-              router.push('/pending');
+              router.push("/pending");
             }, 2000);
           },
           onError: (ctx) => {
-            setError(ctx.error.message || 'Registration failed. Please try again.');
+            // Account created but session blocked = success for pending users
+            if (isAccountPendingError(ctx.error)) {
+              handleRegistrationSuccess();
+              return;
+            }
+
+            // Real error - show to user
+            const errorMessage =
+              ctx.error.message || "Registration failed. Please try again.";
+            setError(errorMessage);
+            toast.error("Registration failed", {
+              description: errorMessage,
+            });
             setLoading(false);
           },
-        }
+        },
       );
     } catch (err) {
-      setError((err as Error).message || 'An error occurred during registration');
+      // Account created but session blocked = success for pending users
+      if (isAccountPendingError(err)) {
+        handleRegistrationSuccess();
+        return;
+      }
+
+      // Real error - show to user
+      const errorMessage =
+        (err as Error).message || "An error occurred during registration";
+      setError(errorMessage);
+      toast.error("Registration failed", {
+        description: errorMessage,
+      });
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-secondary">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
@@ -66,15 +124,16 @@ export default function RegisterPage() {
         <CardContent>
           <Alert className="mb-4">
             <AlertDescription>
-              All accounts require admin approval before you can log in. You&apos;ll receive an email once
-              your account is approved.
+              All accounts require admin approval before you can log in.
+              You&apos;ll receive an email once your account is approved.
             </AlertDescription>
           </Alert>
 
           {success && (
             <Alert className="mb-4">
               <AlertDescription>
-                Registration successful! Your account is pending admin approval. Redirecting...
+                Registration successful! Your account is pending admin approval.
+                Redirecting...
               </AlertDescription>
             </Alert>
           )}
@@ -120,16 +179,22 @@ export default function RegisterPage() {
                 disabled={loading || success}
                 minLength={8}
               />
-              <p className="text-xs text-gray-500">At least 8 characters</p>
+              <p className="text-xs text-muted-foreground">
+                At least 8 characters
+              </p>
             </div>
-            <Button type="submit" className="w-full" disabled={loading || success}>
-              {loading ? 'Registering...' : success ? 'Success!' : 'Register'}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || success}
+            >
+              {loading ? "Registering..." : success ? "Success!" : "Register"}
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary hover:underline">
               Login
             </Link>
           </p>

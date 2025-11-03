@@ -1,13 +1,13 @@
-import { router, protectedProcedure } from '../trpc';
-import { z } from 'zod';
-import { chatbots, chatbotFiles, fileChunks } from '@aialexa/db/schema';
-import { eq, and } from 'drizzle-orm';
-import { TRPCError } from '@trpc/server';
-import { createSupabaseClient, getSignedUrl } from '@/lib/supabase';
-import { publishQStashJob } from '@/lib/qstash';
-import { env } from '@/lib/env';
-import { logInfo, logError } from '@/lib/logger';
-import { processFile } from '@/lib/file-processor';
+import { router, protectedProcedure } from "../trpc";
+import { z } from "zod";
+import { chatbots, chatbotFiles, fileChunks } from "@aialexa/db/schema";
+import { eq, and } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { createSupabaseClient, getSignedUrl } from "@/lib/supabase";
+import { publishQStashJob } from "@/lib/qstash";
+import { env } from "@/lib/env";
+import { logInfo, logError } from "@/lib/logger";
+import { processFile } from "@/lib/file-processor";
 
 export const filesRouter = router({
   /**
@@ -21,7 +21,7 @@ export const filesRouter = router({
         fileType: z.string(),
         fileSize: z.number(),
         fileData: z.string(), // Base64 encoded
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify chatbot ownership
@@ -31,15 +31,15 @@ export const filesRouter = router({
         .where(
           and(
             eq(chatbots.id, input.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -49,31 +49,31 @@ export const filesRouter = router({
 
       if (input.fileSize > maxSizeBytes) {
         throw new TRPCError({
-          code: 'BAD_REQUEST',
+          code: "BAD_REQUEST",
           message: `File size exceeds ${maxSizeMB}MB limit`,
         });
       }
 
       // Validate file type
       const supportedTypes = [
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain',
-        'text/markdown',
-        'application/json',
-        'text/csv',
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+        "text/markdown",
+        "application/json",
+        "text/csv",
       ];
 
       if (!supportedTypes.includes(input.fileType)) {
         throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Unsupported file type',
+          code: "BAD_REQUEST",
+          message: "Unsupported file type",
         });
       }
 
       try {
         // Decode base64 file data
-        const fileBuffer = Buffer.from(input.fileData, 'base64');
+        const fileBuffer = Buffer.from(input.fileData, "base64");
 
         // Create file record in database first
         const fileRecords = await ctx.db
@@ -83,8 +83,8 @@ export const filesRouter = router({
             fileName: input.fileName,
             fileType: input.fileType,
             fileSize: input.fileSize,
-            storagePath: '', // Will be updated after upload
-            processingStatus: 'pending',
+            storagePath: "", // Will be updated after upload
+            processingStatus: "pending",
             metadata: {},
           })
           .returning();
@@ -92,7 +92,7 @@ export const filesRouter = router({
         const fileRecord = fileRecords[0];
 
         if (!fileRecord) {
-          throw new Error('Failed to create file record');
+          throw new Error("Failed to create file record");
         }
 
         // Upload to Supabase Storage
@@ -100,7 +100,7 @@ export const filesRouter = router({
         const supabase = createSupabaseClient();
 
         const { error: uploadError } = await supabase.storage
-          .from('chatbot-files')
+          .from("chatbot-files")
           .upload(storagePath, fileBuffer, {
             contentType: input.fileType,
             upsert: false,
@@ -122,9 +122,9 @@ export const filesRouter = router({
           .where(eq(chatbotFiles.id, fileRecord.id));
 
         // In development, process file inline. In production, use QStash for async processing.
-        if (env.NODE_ENV === 'development') {
+        if (env.NODE_ENV === "development") {
           // Process file synchronously in development
-          logInfo('Processing file inline (development mode)', {
+          logInfo("Processing file inline (development mode)", {
             fileId: fileRecord.id,
             chatbotId: input.chatbotId,
             fileName: input.fileName,
@@ -135,7 +135,7 @@ export const filesRouter = router({
             fileId: fileRecord.id,
             chatbotId: input.chatbotId,
           }).catch((error) => {
-            logError(error, 'Inline file processing failed', {
+            logError(error, "Inline file processing failed", {
               fileId: fileRecord.id,
               chatbotId: input.chatbotId,
             });
@@ -150,7 +150,7 @@ export const filesRouter = router({
             },
           });
 
-          logInfo('File uploaded and processing job published', {
+          logInfo("File uploaded and processing job published", {
             fileId: fileRecord.id,
             chatbotId: input.chatbotId,
             fileName: input.fileName,
@@ -159,16 +159,16 @@ export const filesRouter = router({
 
         return {
           fileId: fileRecord.id,
-          status: 'pending' as const,
+          status: "pending" as const,
         };
       } catch (error) {
-        logError(error, 'File upload failed', {
+        logError(error, "File upload failed", {
           chatbotId: input.chatbotId,
           fileName: input.fileName,
         });
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to upload file',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to upload file",
         });
       }
     }),
@@ -186,15 +186,15 @@ export const filesRouter = router({
         .where(
           and(
             eq(chatbots.id, input.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -216,7 +216,7 @@ export const filesRouter = router({
       z.object({
         chatbotId: z.string().uuid(),
         fileId: z.string().uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify chatbot ownership
@@ -226,15 +226,15 @@ export const filesRouter = router({
         .where(
           and(
             eq(chatbots.id, input.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Chatbot not found',
+          code: "NOT_FOUND",
+          message: "Chatbot not found",
         });
       }
 
@@ -245,15 +245,15 @@ export const filesRouter = router({
         .where(
           and(
             eq(chatbotFiles.id, input.fileId),
-            eq(chatbotFiles.chatbotId, input.chatbotId)
-          )
+            eq(chatbotFiles.chatbotId, input.chatbotId),
+          ),
         )
         .limit(1);
 
       if (!file) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'File not found',
+          code: "NOT_FOUND",
+          message: "File not found",
         });
       }
 
@@ -261,11 +261,11 @@ export const filesRouter = router({
         // Delete from Supabase Storage
         const supabase = createSupabaseClient();
         const { error: storageError } = await supabase.storage
-          .from('chatbot-files')
+          .from("chatbot-files")
           .remove([file.storagePath]);
 
         if (storageError) {
-          logError(storageError, 'Failed to delete file from storage', {
+          logError(storageError, "Failed to delete file from storage", {
             fileId: input.fileId,
             storagePath: file.storagePath,
           });
@@ -281,20 +281,20 @@ export const filesRouter = router({
           .delete(chatbotFiles)
           .where(eq(chatbotFiles.id, input.fileId));
 
-        logInfo('File deleted', {
+        logInfo("File deleted", {
           fileId: input.fileId,
           chatbotId: input.chatbotId,
         });
 
         return { success: true };
       } catch (error) {
-        logError(error, 'File deletion failed', {
+        logError(error, "File deletion failed", {
           fileId: input.fileId,
           chatbotId: input.chatbotId,
         });
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to delete file',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete file",
         });
       }
     }),
@@ -314,8 +314,8 @@ export const filesRouter = router({
 
       if (!file) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'File not found',
+          code: "NOT_FOUND",
+          message: "File not found",
         });
       }
 
@@ -326,15 +326,15 @@ export const filesRouter = router({
         .where(
           and(
             eq(chatbots.id, file.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Access denied',
+          code: "FORBIDDEN",
+          message: "Access denied",
         });
       }
 
@@ -361,8 +361,8 @@ export const filesRouter = router({
 
       if (!file) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'File not found',
+          code: "NOT_FOUND",
+          message: "File not found",
         });
       }
 
@@ -373,35 +373,38 @@ export const filesRouter = router({
         .where(
           and(
             eq(chatbots.id, file.chatbotId),
-            eq(chatbots.userId, ctx.session.user.id)
-          )
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
         )
         .limit(1);
 
       if (!chatbot) {
         throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Access denied',
+          code: "FORBIDDEN",
+          message: "Access denied",
         });
       }
 
       try {
         // Generate signed URL (valid for 1 hour)
-        const signedUrl = await getSignedUrl('chatbot-files', file.storagePath, 3600);
+        const signedUrl = await getSignedUrl(
+          "chatbot-files",
+          file.storagePath,
+          3600,
+        );
 
         return {
           url: signedUrl,
           expiresAt: new Date(Date.now() + 3600 * 1000), // 1 hour from now
         };
       } catch (error) {
-        logError(error, 'Failed to generate preview URL', {
+        logError(error, "Failed to generate preview URL", {
           fileId: input.fileId,
         });
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to generate preview URL',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to generate preview URL",
         });
       }
     }),
 });
-

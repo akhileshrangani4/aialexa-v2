@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import { env } from './env';
+import { createClient } from "@supabase/supabase-js";
+import { env } from "./env";
 
 /**
  * Create Supabase client for server-side operations
@@ -12,7 +12,7 @@ export function createSupabaseClient() {
       auth: {
         persistSession: false,
       },
-    }
+    },
   );
 }
 
@@ -22,7 +22,7 @@ export function createSupabaseClient() {
 export function createSupabaseClientBrowser() {
   return createClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 }
 
@@ -32,10 +32,10 @@ export function createSupabaseClientBrowser() {
 export async function getSignedUrl(
   bucket: string,
   storagePath: string,
-  expiresIn: number = 3600
+  expiresIn: number = 3600,
 ): Promise<string> {
   const supabase = createSupabaseClient();
-  
+
   const { data, error } = await supabase.storage
     .from(bucket)
     .createSignedUrl(storagePath, expiresIn);
@@ -51,13 +51,12 @@ export async function getSignedUrl(
  * Generate signed URL for file preview (1 hour expiry) with expiry date
  */
 export async function generateSignedUrl(
-  storagePath: string
+  storagePath: string,
 ): Promise<{ url: string; expiresAt: Date }> {
-  const url = await getSignedUrl('chatbot-files', storagePath, 3600);
+  const url = await getSignedUrl("chatbot-files", storagePath, 3600);
 
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + 1);
 
   return { url, expiresAt };
 }
-

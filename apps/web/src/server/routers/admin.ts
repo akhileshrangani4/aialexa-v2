@@ -1,8 +1,15 @@
-import { router, adminProcedure } from '../trpc';
-import { z } from 'zod';
-import { user, approvedDomains, chatbots, conversations } from '@aialexa/db/schema';
-import { eq } from 'drizzle-orm';
-import { approveUser, rejectUser } from '@/lib/auth';
+import { router, adminProcedure } from "../trpc";
+import { z } from "zod";
+import {
+  user,
+  approvedDomains,
+  chatbots,
+  conversations,
+  chatbotFiles,
+} from "@aialexa/db/schema";
+import { eq, sql, desc } from "drizzle-orm";
+import { approveUser, rejectUser } from "@/lib/auth";
+import { getApprovedDomains } from "@/lib/env";
 
 export const adminRouter = router({
   /**
@@ -12,7 +19,7 @@ export const adminRouter = router({
     const pendingUsers = await ctx.db
       .select()
       .from(user)
-      .where(eq(user.status, 'pending'))
+      .where(eq(user.status, "pending"))
       .orderBy(user.createdAt);
 
     return pendingUsers;
@@ -39,7 +46,7 @@ export const adminRouter = router({
     }),
 
   /**
-   * List all approved domains
+   * List all allowed domains from database
    */
   listDomains: adminProcedure.query(async ({ ctx }) => {
     const domains = await ctx.db
@@ -51,7 +58,15 @@ export const adminRouter = router({
   }),
 
   /**
-   * Add approved domain
+   * Get allowed domains from environment variables
+   */
+  getEnvDomains: adminProcedure.query(async () => {
+    const envDomains = getApprovedDomains();
+    return envDomains;
+  }),
+
+  /**
+   * Add allowed domain
    */
   addDomain: adminProcedure
     .input(z.object({ domain: z.string().min(1) }))
@@ -68,7 +83,7 @@ export const adminRouter = router({
     }),
 
   /**
-   * Remove approved domain
+   * Remove allowed domain
    */
   removeDomain: adminProcedure
     .input(z.object({ domainId: z.string().uuid() }))
@@ -81,16 +96,42 @@ export const adminRouter = router({
     }),
 
   /**
-   * Get all chatbots (admin view)
+   * Get all chatbots (admin view) with owner info and file counts
    */
   getAllChatbots: adminProcedure.query(async ({ ctx }) => {
     const allChatbots = await ctx.db
-      .select()
+      .select({
+        id: chatbots.id,
+        name: chatbots.name,
+        description: chatbots.description,
+        model: chatbots.model,
+        createdAt: chatbots.createdAt,
+        updatedAt: chatbots.updatedAt,
+        userId: chatbots.userId,
+        userName: user.name,
+        userEmail: user.email,
+        fileCount: sql<number>`cast(count(distinct ${chatbotFiles.id}) as int)`,
+      })
       .from(chatbots)
-      .orderBy(chatbots.createdAt);
+      .leftJoin(user, eq(chatbots.userId, user.id))
+      .leftJoin(chatbotFiles, eq(chatbots.id, chatbotFiles.chatbotId))
+      .groupBy(chatbots.id, user.id)
+      .orderBy(desc(chatbots.createdAt));
 
     return allChatbots;
   }),
+
+  /**
+   * Delete any chatbot (admin only)
+   */
+  deleteChatbot: adminProcedure
+    .input(z.object({ chatbotId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      // Admin can delete any chatbot
+      await ctx.db.delete(chatbots).where(eq(chatbots.id, input.chatbotId));
+
+      return { success: true };
+    }),
 
   /**
    * Get all conversations (admin view)
@@ -100,7 +141,7 @@ export const adminRouter = router({
       z.object({
         limit: z.number().default(50),
         offset: z.number().default(0),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const allConversations = await ctx.db
@@ -113,4 +154,3 @@ export const adminRouter = router({
       return allConversations;
     }),
 });
-

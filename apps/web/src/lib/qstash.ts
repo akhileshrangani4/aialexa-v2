@@ -1,6 +1,6 @@
-import { Client } from '@upstash/qstash';
-import { env } from './env';
-import { logInfo, logError } from './logger';
+import { Client } from "@upstash/qstash";
+import { env } from "./env";
+import { logInfo, logError } from "./logger";
 
 // Create QStash client
 export const qstash = new Client({
@@ -20,18 +20,18 @@ export async function publishQStashJob(params: {
       body: params.body,
       retries: 3,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
-    logInfo('QStash job published', {
+    logInfo("QStash job published", {
       url: params.url,
       messageId: result.messageId,
     });
 
     return { messageId: result.messageId };
   } catch (error) {
-    logError(error, 'Failed to publish QStash job', {
+    logError(error, "Failed to publish QStash job", {
       url: params.url,
     });
     throw error;
@@ -61,7 +61,7 @@ export async function verifyQStashSignature(
   signature: string,
   currentSigningKey: string,
   nextSigningKey: string,
-  body: string
+  body: string,
 ): Promise<boolean> {
   try {
     const encoder = new TextEncoder();
@@ -69,23 +69,22 @@ export async function verifyQStashSignature(
 
     // Try current signing key
     const currentKey = await crypto.subtle.importKey(
-      'raw',
+      "raw",
       encoder.encode(currentSigningKey),
-      { name: 'HMAC', hash: 'SHA-256' },
+      { name: "HMAC", hash: "SHA-256" },
       false,
-      ['verify']
+      ["verify"],
     );
 
-    const currentSignatureBuffer = Uint8Array.from(
-      atob(signature),
-      (c) => c.charCodeAt(0)
+    const currentSignatureBuffer = Uint8Array.from(atob(signature), (c) =>
+      c.charCodeAt(0),
     );
 
     const isValidCurrent = await crypto.subtle.verify(
-      'HMAC',
+      "HMAC",
       currentKey,
       currentSignatureBuffer,
-      data
+      data,
     );
 
     if (isValidCurrent) {
@@ -94,24 +93,23 @@ export async function verifyQStashSignature(
 
     // Try next signing key
     const nextKey = await crypto.subtle.importKey(
-      'raw',
+      "raw",
       encoder.encode(nextSigningKey),
-      { name: 'HMAC', hash: 'SHA-256' },
+      { name: "HMAC", hash: "SHA-256" },
       false,
-      ['verify']
+      ["verify"],
     );
 
     const isValidNext = await crypto.subtle.verify(
-      'HMAC',
+      "HMAC",
       nextKey,
       currentSignatureBuffer,
-      data
+      data,
     );
 
     return isValidNext;
   } catch (error) {
-    logError(error, 'Failed to verify QStash signature');
+    logError(error, "Failed to verify QStash signature");
     return false;
   }
 }
-
