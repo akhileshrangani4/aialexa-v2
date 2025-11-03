@@ -1,13 +1,11 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ChatMessage, StreamingMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { Message } from "@/hooks/useChat";
+import {
+  ChatContainerRoot,
+  ChatContainerContent,
+  ChatContainerScrollAnchor,
+} from "@/components/ui/chat-container";
 
 interface ChatInterfaceProps {
   messages: Message[];
@@ -31,46 +29,40 @@ export function ChatInterface({
   chatbotName,
 }: ChatInterfaceProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Chat</CardTitle>
-        <CardDescription>
-          Ask questions about the course materials
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Messages */}
-          <div className="border rounded-lg p-4 h-[600px] overflow-y-auto bg-white space-y-4">
-            {messages.length === 0 && !isStreaming ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <p className="text-muted-foreground mb-2">
-                  👋 Welcome to {chatbotName}!
-                </p>
-                <p className="text-sm text-muted-foreground/70">
-                  Start by asking a question about the course.
-                </p>
-              </div>
-            ) : (
-              <>
-                {messages.map((msg, idx) => (
-                  <ChatMessage key={idx} message={msg} />
-                ))}
-                {isStreaming && <StreamingMessage content={streamingContent} />}
-                <div ref={messagesEndRef} />
-              </>
-            )}
-          </div>
+    <div className="flex flex-col h-[600px] border rounded-lg bg-background">
+      {/* Messages Container */}
+      <ChatContainerRoot className="flex-1 p-4">
+        <ChatContainerContent>
+          {messages.length === 0 && !isStreaming ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+              <p className="text-muted-foreground mb-2 text-lg">
+                👋 Welcome to {chatbotName}!
+              </p>
+              <p className="text-sm text-muted-foreground/70">
+                Start by asking a question about the course.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((msg, idx) => (
+                <ChatMessage key={idx} message={msg} />
+              ))}
+              {isStreaming && <StreamingMessage content={streamingContent} />}
+            </div>
+          )}
+          <ChatContainerScrollAnchor ref={messagesEndRef} />
+        </ChatContainerContent>
+      </ChatContainerRoot>
 
-          {/* Input */}
-          <ChatInput
-            currentMessage={currentMessage}
-            setCurrentMessage={setCurrentMessage}
-            isStreaming={isStreaming}
-            onSendMessage={handleSendMessage}
-          />
-        </div>
-      </CardContent>
-    </Card>
+      {/* Input */}
+      <div className="p-4 border-t">
+        <ChatInput
+          currentMessage={currentMessage}
+          setCurrentMessage={setCurrentMessage}
+          isStreaming={isStreaming}
+          onSendMessage={handleSendMessage}
+        />
+      </div>
+    </div>
   );
 }

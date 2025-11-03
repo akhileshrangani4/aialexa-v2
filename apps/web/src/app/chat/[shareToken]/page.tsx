@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useChat } from "@/hooks/useChat";
-import { ChatHeader, ChatInterface } from "@/components/chat";
+import { ChatInterface } from "@/components/chat";
 
 export default function SharedChatPage() {
   const params = useParams();
@@ -46,13 +46,16 @@ export default function SharedChatPage() {
 
   return (
     <div className="min-h-screen bg-secondary">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
-        <ChatHeader
-          name={chatbot.name || "Chatbot"}
-          description={chatbot.description || "No description available"}
-          model={chatbot.model}
-        />
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            {chatbot.name || "Chatbot"}
+          </h1>
+          <p className="text-muted-foreground">
+            {chatbot.description || "No description available"}
+          </p>
+        </div>
 
         {/* Chat Interface */}
         <ChatInterface
