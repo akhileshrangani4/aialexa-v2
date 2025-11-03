@@ -122,26 +122,18 @@ export default function ChatbotDetailPage() {
 
           {/* Chat Tab */}
           <TabsContent value="chat">
-            <Card>
-              <CardHeader>
-                <CardTitle>Test Your Chatbot</CardTitle>
-                <CardDescription>Chat with your AI assistant</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChatInterface
-                  messages={messages}
-                  isStreaming={isStreaming}
-                  streamingContent={streamingContent}
-                  currentMessage={currentMessage}
-                  setCurrentMessage={setCurrentMessage}
-                  handleSendMessage={handleSendMessage}
-                  messagesEndRef={
-                    messagesEndRef as React.RefObject<HTMLDivElement>
-                  }
-                  chatbotName={chatbot.name || "Chatbot"}
-                />
-              </CardContent>
-            </Card>
+            <ChatInterface
+              messages={messages}
+              isStreaming={isStreaming}
+              streamingContent={streamingContent}
+              currentMessage={currentMessage}
+              setCurrentMessage={setCurrentMessage}
+              handleSendMessage={handleSendMessage}
+              messagesEndRef={
+                messagesEndRef as React.RefObject<HTMLDivElement>
+              }
+              chatbotName={chatbot.name || "Chatbot"}
+            />
           </TabsContent>
 
           {/* Files Tab */}
