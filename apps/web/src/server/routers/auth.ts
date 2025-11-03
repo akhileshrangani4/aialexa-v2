@@ -1,5 +1,8 @@
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import type { User } from "@/types/better-auth";
+import { z } from "zod";
+import { user } from "@aialexa/db/schema";
+import { eq } from "drizzle-orm";
 
 export const authRouter = router({
   /**
@@ -25,6 +28,28 @@ export const authRouter = router({
       },
     };
   }),
+
+  /**
+   * Check user status by email (for login error handling)
+   */
+  checkUserStatus: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .query(async ({ ctx, input }) => {
+      const [foundUser] = await ctx.db
+        .select({ status: user.status })
+        .from(user)
+        .where(eq(user.email, input.email))
+        .limit(1);
+
+      if (!foundUser) {
+        return { exists: false, status: null };
+      }
+
+      return {
+        exists: true,
+        status: foundUser.status,
+      };
+    }),
 
   /**
    * Check if user's account is approved

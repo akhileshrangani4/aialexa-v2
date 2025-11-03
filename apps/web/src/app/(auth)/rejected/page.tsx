@@ -13,7 +13,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function PendingPage() {
+export default function RejectedPage() {
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -37,7 +37,7 @@ export default function PendingPage() {
           },
         });
       } else {
-        // No session exists (pending user), just redirect to login
+        // No session exists (rejected user), just redirect to login
         router.push("/login");
       }
     } catch {
@@ -50,24 +50,29 @@ export default function PendingPage() {
     <div className="min-h-screen flex items-center justify-center bg-secondary">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Account Pending Approval</CardTitle>
-          <CardDescription>Your registration has been received</CardDescription>
+          <CardTitle>Account Registration Not Approved</CardTitle>
+          <CardDescription>Your registration has been reviewed</CardDescription>
         </CardHeader>
         <CardContent>
-          <Alert>
+          <Alert variant="destructive">
             <AlertDescription>
               <p className="mb-4">
-                Your account is currently awaiting approval from an
-                administrator. You&apos;ll receive an email notification once
-                your account has been reviewed.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                This typically takes 24-48 hours during business days.
+                Unfortunately, your account registration was not approved at
+                this time.
               </p>
             </AlertDescription>
           </Alert>
 
           <div className="mt-6 space-y-4">
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="text-sm font-medium mb-2">Why might this happen?</p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Registration may be limited to specific institutions</li>
+                <li>Your email domain may not be on the approved list</li>
+                <li>Additional verification may be required</li>
+              </ul>
+            </div>
+
             <Button
               onClick={handleBackToLogin}
               variant="outline"
@@ -79,7 +84,8 @@ export default function PendingPage() {
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Questions? Contact your institution&apos;s administrator.
+                If you believe this decision was made in error, please contact
+                your institution&apos;s administrator.
               </p>
             </div>
           </div>

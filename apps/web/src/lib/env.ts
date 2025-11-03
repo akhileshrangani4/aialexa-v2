@@ -39,8 +39,8 @@ const envSchema = z.object({
 
   // App Config
   NEXT_PUBLIC_APP_URL: z.string().url(),
-  APPROVED_EMAIL_DOMAINS: z.string().default(".edu,.ac.in,.edu.in"),
-  ADMIN_EMAILS: z.string().email(),
+  ALLOWED_EMAIL_DOMAINS: z.string().default(".edu,.ac.in,.edu.in"),
+  ADMIN_EMAILS: z.string().min(1), // Comma-separated list of admin emails
   MAX_FILE_SIZE_MB: z.string().default("10"),
 
   NODE_ENV: z
@@ -61,7 +61,7 @@ function validateEnv(): Env {
         // Return dummy values based on property name patterns
         if (prop === "PORT") return 3000;
         if (prop === "NODE_ENV") return "production";
-        if (prop === "APPROVED_EMAIL_DOMAINS") return ".edu,.ac.in,.edu.in";
+        if (prop === "ALLOWED_EMAIL_DOMAINS") return ".edu,.ac.in,.edu.in";
         if (prop === "MAX_FILE_SIZE_MB") return "10";
         if (prop.includes("URL")) return "http://localhost:3000";
         if (prop.includes("EMAIL")) return "ci@localhost";
@@ -95,7 +95,7 @@ export const env = typeof window === "undefined" ? validateEnv() : ({} as Env);
 
 // Helper to get approved email domains as array
 export function getApprovedDomains(): string[] {
-  return env.APPROVED_EMAIL_DOMAINS.split(",").map((d) => d.trim());
+  return env.ALLOWED_EMAIL_DOMAINS.split(",").map((d) => d.trim());
 }
 
 // Helper to get admin emails as array

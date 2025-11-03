@@ -26,6 +26,30 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Helper to check if error is due to pending account (not a real failure)
+  const isAccountPendingError = (error: unknown): boolean => {
+    const err = error as { message?: string; code?: string };
+    const message = err.message || "";
+    const code = err.code || "";
+    return (
+      code === "FAILED_TO_CREATE_SESSION" ||
+      message === "Failed to create session" ||
+      message === "ACCOUNT_PENDING"
+    );
+  };
+
+  // Helper to handle successful registration (redirects to pending page)
+  const handleRegistrationSuccess = () => {
+    setSuccess(true);
+    setLoading(false);
+    toast.success("Registration successful!", {
+      description: "Your account is pending admin approval",
+    });
+    setTimeout(() => {
+      router.push("/pending");
+    }, 1500);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -55,6 +79,13 @@ export default function RegisterPage() {
             }, 2000);
           },
           onError: (ctx) => {
+            // Account created but session blocked = success for pending users
+            if (isAccountPendingError(ctx.error)) {
+              handleRegistrationSuccess();
+              return;
+            }
+
+            // Real error - show to user
             const errorMessage =
               ctx.error.message || "Registration failed. Please try again.";
             setError(errorMessage);
@@ -66,6 +97,13 @@ export default function RegisterPage() {
         },
       );
     } catch (err) {
+      // Account created but session blocked = success for pending users
+      if (isAccountPendingError(err)) {
+        handleRegistrationSuccess();
+        return;
+      }
+
+      // Real error - show to user
       const errorMessage =
         (err as Error).message || "An error occurred during registration";
       setError(errorMessage);
