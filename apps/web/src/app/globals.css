@@ -7,43 +7,43 @@
     /* Backgrounds - Clean white and light gray */
     --background: 0 0% 100%;
     --foreground: 220 26% 11%;
-    
+
     /* Cards - White with subtle shadows */
     --card: 0 0% 100%;
     --card-foreground: 220 26% 11%;
-    
+
     /* Popovers */
     --popover: 0 0% 100%;
     --popover-foreground: 220 26% 11%;
-    
+
     /* Primary - Green accent matching landing page */
     --primary: 142 72% 29%;
     --primary-foreground: 0 0% 100%;
-    
+
     /* Secondary - Light gray */
     --secondary: 210 20% 98%;
     --secondary-foreground: 220 26% 11%;
-    
+
     /* Muted - Gray for subtle elements */
     --muted: 210 20% 98%;
     --muted-foreground: 220 13% 34%;
-    
+
     /* Accent - Green variations */
     --accent: 142 72% 29%;
     --accent-foreground: 0 0% 100%;
-    
+
     /* Destructive - Keep red for errors */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    
+
     /* Borders and inputs - Light gray */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 142 72% 29%;
-    
+
     /* Border radius - Slightly larger for modern look */
     --radius: 0.75rem;
-    
+
     /* Chart colors - Green theme */
     --chart-1: 142 72% 29%;
     --chart-2: 160 60% 45%;
@@ -97,20 +97,20 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted)) transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: hsl(var(--muted));
     border-radius: 4px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.3);
   }

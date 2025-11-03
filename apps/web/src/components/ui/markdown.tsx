@@ -1,12 +1,12 @@
-import { cn } from "@/lib/utils"
-import { memo } from "react"
-import { Streamdown } from "streamdown"
+import { cn } from "@/lib/utils";
+import { memo } from "react";
+import { Streamdown } from "streamdown";
 
 export type MarkdownProps = {
-  children: string
-  className?: string
-  parseIncompleteMarkdown?: boolean
-}
+  children: string;
+  className?: string;
+  parseIncompleteMarkdown?: boolean;
+};
 
 function MarkdownComponent({
   children,
@@ -19,10 +19,10 @@ function MarkdownComponent({
         {children}
       </Streamdown>
     </div>
-  )
+  );
 }
 
-const Markdown = memo(MarkdownComponent)
-Markdown.displayName = "Markdown"
+const Markdown = memo(MarkdownComponent);
+Markdown.displayName = "Markdown";
 
-export { Markdown }
+export { Markdown };

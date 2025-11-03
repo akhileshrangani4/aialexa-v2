@@ -129,9 +129,7 @@ export default function ChatbotDetailPage() {
               currentMessage={currentMessage}
               setCurrentMessage={setCurrentMessage}
               handleSendMessage={handleSendMessage}
-              messagesEndRef={
-                messagesEndRef as React.RefObject<HTMLDivElement>
-              }
+              messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
               chatbotName={chatbot.name || "Chatbot"}
             />
           </TabsContent>

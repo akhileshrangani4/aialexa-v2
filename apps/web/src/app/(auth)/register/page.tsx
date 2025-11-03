@@ -131,7 +131,9 @@ export default function RegisterPage() {
                 disabled={loading || success}
                 minLength={8}
               />
-              <p className="text-xs text-muted-foreground">At least 8 characters</p>
+              <p className="text-xs text-muted-foreground">
+                At least 8 characters
+              </p>
             </div>
             <Button
               type="submit"

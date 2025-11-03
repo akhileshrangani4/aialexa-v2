@@ -376,7 +376,9 @@ export default function DashboardPage() {
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Created:</span>
+                          <span className="text-muted-foreground">
+                            Created:
+                          </span>
                           <span>
                             {new Date(chatbot.createdAt).toLocaleDateString()}
                           </span>

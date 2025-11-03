@@ -3,6 +3,13 @@
 import { useParams } from "next/navigation";
 import { useChat } from "@/hooks/useChat";
 import { ChatInterface } from "@/components/chat";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function SharedChatPage() {
   const params = useParams();
@@ -18,30 +25,50 @@ export default function SharedChatPage() {
     chatbot,
     chatbotLoading,
     handleSendMessage,
+    error,
   } = useChat(shareToken);
+
+  // Error state - show immediately if there's an error
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary px-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl">Chatbot Not Available</CardTitle>
+            <CardDescription>
+              This chatbot link is no longer active or does not exist.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 text-sm text-muted-foreground">
+              <p>This could happen if:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>The chatbot owner has disabled sharing</li>
+                <li>The share link has expired or been regenerated</li>
+                <li>The chatbot has been deleted</li>
+                <li>The link is invalid</li>
+              </ul>
+              <p className="mt-4">
+                Please contact the chatbot owner for a new share link.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Loading state
   if (chatbotLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary">
-        <p>Loading chatbot...</p>
+        <p className="text-muted-foreground">Loading chatbot...</p>
       </div>
     );
   }
 
-  // Not found
   if (!chatbot) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary">
-        <div className="max-w-md">
-          <h1 className="text-2xl font-bold mb-2">Chatbot Not Found</h1>
-          <p className="text-muted-foreground">
-            The chatbot you&apos;re looking for doesn&apos;t exist or is not
-            shared.
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

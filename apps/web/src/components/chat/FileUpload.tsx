@@ -180,7 +180,9 @@ export function FileUpload({
       </div>
 
       {filesLoading ? (
-        <p className="text-center py-8 text-muted-foreground">Loading files...</p>
+        <p className="text-center py-8 text-muted-foreground">
+          Loading files...
+        </p>
       ) : !files || files.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">No files uploaded yet</p>
