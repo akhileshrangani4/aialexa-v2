@@ -121,3 +121,17 @@
     background: hsl(var(--muted-foreground) / 0.3);
   }
 }
+
+/* Sonner Toast - Move close button to top right */
+@layer components {
+  [data-sonner-toast] {
+    padding-right: 2.5rem !important;
+  }
+
+  [data-sonner-toast] [data-close-button] {
+    left: auto !important;
+    right: 0.75rem !important;
+    top: 0.75rem !important;
+    transform: none !important;
+  }
+}

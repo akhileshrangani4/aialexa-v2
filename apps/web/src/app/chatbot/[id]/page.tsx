@@ -15,7 +15,9 @@ import { useSession } from "@/lib/auth-client";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useChatbot } from "@/hooks/useChatbot";
-import { ChatInterface, FileUpload, ChatbotSettings } from "@/components/chat";
+import { ChatInterface } from "@/components/chat/ChatInterface";
+import { FileUpload } from "@/components/chat/FileUpload";
+import { ChatbotSettings } from "@/components/chat/ChatbotSettings";
 
 export default function ChatbotDetailPage() {
   const router = useRouter();
