@@ -1,25 +1,34 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { authClient } from '@/lib/auth-client';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const utils = trpc.useUtils();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
@@ -33,26 +42,90 @@ export default function LoginPage() {
             setLoading(true);
           },
           onSuccess: () => {
-            router.push('/dashboard');
+            toast.success("Welcome back!", {
+              description: "Login successful",
+            });
+            router.push("/dashboard");
           },
-          onError: (ctx) => {
-            setError(ctx.error.message || 'Login failed. Please check your credentials.');
+          onError: async (ctx) => {
             setLoading(false);
+
+            // Check for specific error messages from Better Auth
+            const errorMessage = ctx.error.message || "";
+
+            if (errorMessage === "ACCOUNT_PENDING") {
+              toast.info("Account Pending", {
+                description: "Your account is awaiting admin approval",
+              });
+              router.push("/pending");
+              return;
+            }
+
+            if (errorMessage === "ACCOUNT_REJECTED") {
+              toast.error("Account Rejected", {
+                description: "Your registration was not approved",
+              });
+              router.push("/rejected");
+              return;
+            }
+
+            // For other errors, check user status as fallback
+            if (!errorMessage.includes("credentials") && email) {
+              try {
+                const statusResult =
+                  await utils.client.auth.checkUserStatus.query({
+                    email,
+                  });
+
+                if (statusResult.exists && statusResult.status === "pending") {
+                  toast.info("Account Pending", {
+                    description: "Your account is awaiting admin approval",
+                  });
+                  router.push("/pending");
+                  return;
+                } else if (
+                  statusResult.exists &&
+                  statusResult.status === "rejected"
+                ) {
+                  toast.error("Account Rejected", {
+                    description: "Your registration was not approved",
+                  });
+                  router.push("/rejected");
+                  return;
+                }
+              } catch {
+                // If status check fails, fall through to regular error handling
+              }
+            }
+
+            // Default error handling
+            const displayMessage =
+              errorMessage === "ACCOUNT_PENDING" ||
+              errorMessage === "ACCOUNT_REJECTED"
+                ? "Login failed. Please check your credentials."
+                : errorMessage ||
+                  "Login failed. Please check your credentials.";
+
+            setError(displayMessage);
+            toast.error("Login failed", {
+              description: displayMessage,
+            });
           },
-        }
+        },
       );
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An error occurred during login');
-      }
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred during login";
+      setError(errorMessage);
+      toast.error("Login failed", {
+        description: errorMessage,
+      });
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-secondary">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome Back</CardTitle>
@@ -90,13 +163,13 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-600">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-blue-600 hover:underline">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="text-primary hover:underline">
               Register
             </Link>
           </p>

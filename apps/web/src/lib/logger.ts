@@ -1,6 +1,6 @@
 // Simple console-based logger (pino disabled for cleaner output)
-const isDev = process.env.NODE_ENV === 'development';
-const LOG_ENABLED = process.env.ENABLE_LOGGING === 'true';
+const isDev = process.env.NODE_ENV === "development";
+const LOG_ENABLED = process.env.ENABLE_LOGGING === "true";
 
 export const logger = {
   error: (context: Record<string, unknown>, message: string) => {
@@ -21,7 +21,7 @@ export const logger = {
  * Log helper with context
  */
 export function logWithContext(
-  level: 'error' | 'warn' | 'info' | 'debug',
+  level: "error" | "warn" | "info" | "debug",
   message: string,
   context?: {
     userId?: string;
@@ -29,7 +29,7 @@ export function logWithContext(
     sessionId?: string;
     fileId?: string;
     [key: string]: unknown;
-  }
+  },
 ) {
   if (!LOG_ENABLED) return;
   logger[level](context || {}, message);
@@ -41,7 +41,7 @@ export function logWithContext(
 export async function withTiming<T>(
   fn: () => Promise<T>,
   label: string,
-  context?: Record<string, unknown>
+  context?: Record<string, unknown>,
 ): Promise<T> {
   const startTime = Date.now();
   try {
@@ -64,17 +64,42 @@ export async function withTiming<T>(
 export function logError(
   error: Error | unknown,
   message: string,
-  context?: Record<string, unknown>
+  context?: Record<string, unknown>,
 ) {
   // Always log errors
-  const errorObj = error instanceof Error ? error : new Error(String(error));
+  let errorInfo: {
+    message: string;
+    stack?: string;
+    name?: string;
+    details?: unknown;
+  };
+
+  if (error instanceof Error) {
+    // Standard Error object
+    errorInfo = {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    };
+  } else if (error && typeof error === "object") {
+    // Object with error information (e.g., from APIs)
+    const errorObj = error as Record<string, unknown>;
+    errorInfo = {
+      message: errorObj.message?.toString() || JSON.stringify(error),
+      name: errorObj.name?.toString() || "Error",
+      details: error,
+    };
+  } else {
+    // Primitive value or null/undefined
+    errorInfo = {
+      message: String(error),
+      name: "Error",
+    };
+  }
+
   console.error(`[ERROR] ${message}`, {
     ...context,
-    error: {
-      message: errorObj.message,
-      stack: errorObj.stack,
-      name: errorObj.name,
-    },
+    error: errorInfo,
   });
 }
 
@@ -101,4 +126,3 @@ export function logWarn(message: string, context?: Record<string, unknown>) {
   if (!LOG_ENABLED) return;
   logger.warn(context || {}, message);
 }
-
