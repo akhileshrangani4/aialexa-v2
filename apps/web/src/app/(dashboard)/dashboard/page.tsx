@@ -118,13 +118,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-secondary">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-2">
               Welcome back, {session.user.name}!
             </p>
           </div>
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                             })
                           }
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           Higher = more creative, Lower = more focused
                         </p>
                       </div>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
                             })
                           }
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           Maximum response length
                         </p>
                       </div>
@@ -344,11 +344,11 @@ export default function DashboardPage() {
           <CardContent>
             {chatbotsLoading ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">Loading chatbots...</p>
+                <p className="text-muted-foreground">Loading chatbots...</p>
               </div>
             ) : !chatbots || chatbots.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">No chatbots yet</p>
+                <p className="text-muted-foreground mb-4">No chatbots yet</p>
                 <Button onClick={() => setDialogOpen(true)}>
                   Create Your First Chatbot
                 </Button>
@@ -369,14 +369,14 @@ export default function DashboardPage() {
                     <CardContent>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Model:</span>
+                          <span className="text-muted-foreground">Model:</span>
                           <Badge variant="outline">
                             {MODELS.find((m) => m.value === chatbot.model)
                               ?.label || chatbot.model}
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Created:</span>
+                          <span className="text-muted-foreground">Created:</span>
                           <span>
                             {new Date(chatbot.createdAt).toLocaleDateString()}
                           </span>

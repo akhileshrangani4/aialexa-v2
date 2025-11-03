@@ -44,10 +44,10 @@ export function ChatInterface({
           <div className="border rounded-lg p-4 h-[600px] overflow-y-auto bg-white space-y-4">
             {messages.length === 0 && !isStreaming ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <p className="text-gray-500 mb-2">
+                <p className="text-muted-foreground mb-2">
                   👋 Welcome to {chatbotName}!
                 </p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted-foreground/70">
                   Start by asking a question about the course.
                 </p>
               </div>

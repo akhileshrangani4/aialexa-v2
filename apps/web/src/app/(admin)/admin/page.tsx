@@ -107,15 +107,15 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-secondary">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               Admin Dashboard
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-muted-foreground mt-2">
               Manage users, domains, and system settings
             </p>
           </div>
@@ -167,12 +167,12 @@ export default function AdminPage() {
                 )}
 
                 {usersLoading ? (
-                  <p className="text-center py-8 text-gray-500">
+                  <p className="text-center py-8 text-muted-foreground">
                     Loading users...
                   </p>
                 ) : !pendingUsers || pendingUsers.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-gray-500">No pending users</p>
+                    <p className="text-muted-foreground">No pending users</p>
                   </div>
                 ) : (
                   <Table>
@@ -246,7 +246,7 @@ export default function AdminPage() {
                   </AlertDescription>
                 </Alert>
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Configured domains will be shown here. If the list is empty,
                     all domains are allowed.
                   </p>
