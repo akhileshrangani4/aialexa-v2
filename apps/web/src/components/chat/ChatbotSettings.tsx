@@ -4,9 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { SUPPORTED_MODELS, type SupportedModel } from "@aialexa/ai/openrouter";
 
 interface ChatbotSettingsProps {
   chatbot: {
@@ -22,8 +30,35 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   const params = useParams();
   const chatbotId = params.id as string;
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Editable state
+  const [model, setModel] = useState(chatbot.model);
+  const [systemPrompt, setSystemPrompt] = useState(chatbot.systemPrompt);
+  const [temperature, setTemperature] = useState(
+    chatbot.temperature?.toString() ?? "70",
+  );
+  const [maxTokens, setMaxTokens] = useState(
+    chatbot.maxTokens?.toString() ?? "2000",
+  );
+
+  // Update local state when chatbot prop changes
+  useEffect(() => {
+    setModel(chatbot.model);
+    setSystemPrompt(chatbot.systemPrompt);
+    setTemperature(chatbot.temperature?.toString() ?? "70");
+    setMaxTokens(chatbot.maxTokens?.toString() ?? "2000");
+  }, [chatbot]);
 
   const utils = trpc.useUtils();
+
+  const updateChatbot = trpc.chatbot.update.useMutation({
+    onSuccess: async () => {
+      await utils.chatbot.get.invalidate({ id: chatbotId });
+      await utils.chatbot.getById.invalidate({ id: chatbotId });
+      setIsEditing(false);
+    },
+  });
 
   const generateShareToken = trpc.chatbot.generateShareToken.useMutation({
     onSuccess: async () => {
@@ -65,40 +100,202 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     }
   };
 
+  const handleSave = () => {
+    const tempValue = parseFloat(temperature);
+    const tokensValue = parseInt(maxTokens);
+
+    if (isNaN(tempValue) || tempValue < 0 || tempValue > 100) {
+      alert("Temperature must be between 0 and 100");
+      return;
+    }
+
+    if (isNaN(tokensValue) || tokensValue < 100 || tokensValue > 4000) {
+      alert("Max tokens must be between 100 and 4000");
+      return;
+    }
+
+    if (!systemPrompt.trim()) {
+      alert("System prompt is required");
+      return;
+    }
+
+    updateChatbot.mutate({
+      id: chatbotId,
+      data: {
+        model: model as SupportedModel,
+        systemPrompt,
+        temperature: tempValue,
+        maxTokens: tokensValue,
+      },
+    });
+  };
+
+  const handleCancel = () => {
+    setModel(chatbot.model);
+    setSystemPrompt(chatbot.systemPrompt);
+    setTemperature(chatbot.temperature?.toString() ?? "70");
+    setMaxTokens(chatbot.maxTokens?.toString() ?? "2000");
+    setIsEditing(false);
+  };
+
   return (
-    <div className="space-y-4">
-      <div>
-        <Label>Model</Label>
-        <p className="text-sm text-muted-foreground">{chatbot.model}</p>
-      </div>
-      <div>
-        <Label>System Prompt</Label>
-        <Textarea value={chatbot.systemPrompt} disabled rows={4} />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Temperature</Label>
-          <p className="text-sm text-muted-foreground">
-            {chatbot.temperature ?? "Not set"}
+    <div className="space-y-6">
+      {/* Configuration Settings Card */}
+      <div className="space-y-6 p-6 bg-muted/30 rounded-lg border">
+        {/* Model with Edit Button */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="model" className="text-base font-semibold">
+              Model
+            </Label>
+            {/* Edit/Save/Cancel buttons */}
+            <div className="flex gap-2">
+              {!isEditing ? (
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Edit Settings
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={handleCancel}
+                    variant="outline"
+                    size="sm"
+                    disabled={updateChatbot.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    size="sm"
+                    disabled={updateChatbot.isPending}
+                  >
+                    {updateChatbot.isPending ? "Saving..." : "Save Changes"}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mb-2">
+            Choose the AI model to power your chatbot
           </p>
+          {isEditing ? (
+            <Select value={model} onValueChange={setModel}>
+              <SelectTrigger id="model">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SUPPORTED_MODELS.map((m: SupportedModel) => (
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="px-3 py-2 bg-background rounded-md border">
+              <p className="text-sm">{model}</p>
+            </div>
+          )}
         </div>
-        <div>
-          <Label>Max Tokens</Label>
-          <p className="text-sm text-muted-foreground">
-            {chatbot.maxTokens ?? "Not set"}
+
+        {/* System Prompt */}
+        <div className="space-y-2">
+          <Label htmlFor="systemPrompt" className="text-base font-semibold">
+            System Prompt
+          </Label>
+          <p className="text-xs text-muted-foreground mb-2">
+            Define how your chatbot should behave and respond
           </p>
+          <Textarea
+            id="systemPrompt"
+            value={systemPrompt}
+            onChange={(e) => setSystemPrompt(e.target.value)}
+            disabled={!isEditing}
+            rows={6}
+            className={!isEditing ? "bg-background resize-none" : "resize-none"}
+          />
         </div>
-      </div>
-      <div>
-        <Label>Share Settings</Label>
-        {chatbot.shareToken ? (
+
+        {/* Temperature and Max Tokens */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
+            <Label htmlFor="temperature" className="text-base font-semibold">
+              Temperature
+            </Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Control randomness (0 = focused, 100 = creative)
+            </p>
+            {isEditing ? (
+              <Input
+                id="temperature"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={temperature}
+                onChange={(e) => setTemperature(e.target.value)}
+              />
+            ) : (
+              <div className="px-3 py-2 bg-background rounded-md border">
+                <p className="text-sm">{temperature}</p>
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxTokens" className="text-base font-semibold">
+              Max Tokens
+            </Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Maximum length of responses (100-4000)
+            </p>
+            {isEditing ? (
+              <Input
+                id="maxTokens"
+                type="number"
+                min="100"
+                max="4000"
+                step="100"
+                value={maxTokens}
+                onChange={(e) => setMaxTokens(e.target.value)}
+              />
+            ) : (
+              <div className="px-3 py-2 bg-background rounded-md border">
+                <p className="text-sm">{maxTokens}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Share Settings Card */}
+      <div className="space-y-4 p-6 bg-muted/30 rounded-lg border">
+        <div className="space-y-1">
+          <Label className="text-base font-semibold">Share Settings</Label>
+          <p className="text-xs text-muted-foreground">
+            {chatbot.shareToken
+              ? "Your chatbot is publicly accessible via the link below"
+              : "Enable sharing to generate a public link for your chatbot"}
+          </p>
+        </div>
+
+        {chatbot.shareToken ? (
+          <div className="space-y-3">
             <div className="flex gap-2">
               <Input
                 value={`${window.location.origin}/chat/${chatbot.shareToken}`}
                 readOnly
+                className="font-mono text-sm bg-background"
               />
-              <Button variant="outline" onClick={handleCopy} disabled={copied}>
+              <Button
+                variant="outline"
+                onClick={handleCopy}
+                disabled={copied}
+                className="shrink-0"
+              >
                 {copied ? "Copied!" : "Copy"}
               </Button>
             </div>
@@ -112,20 +309,13 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground mb-2">
-              Sharing is currently disabled. Enable sharing to generate a public
-              link for your chatbot.
-            </p>
-            <Button
-              onClick={handleEnableSharing}
-              disabled={generateShareToken.isPending}
-            >
-              {generateShareToken.isPending
-                ? "Generating..."
-                : "Enable Sharing"}
-            </Button>
-          </div>
+          <Button
+            onClick={handleEnableSharing}
+            disabled={generateShareToken.isPending}
+            className="w-full sm:w-auto"
+          >
+            {generateShareToken.isPending ? "Generating..." : "Enable Sharing"}
+          </Button>
         )}
       </div>
     </div>
