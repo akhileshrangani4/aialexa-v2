@@ -1,12 +1,12 @@
 # AIAlexa - Complete Setup Guide
 
-## 📋 Overview
+## Overview
 
 Production-ready AI chatbot platform built with Next.js 15, tRPC, Better Auth, and OpenRouter. This guide covers complete setup from installation to deployment.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -113,7 +113,7 @@ Visit: http://localhost:3000
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### Tech Stack
 
@@ -140,7 +140,7 @@ aialexa/
 
 ---
 
-## 🔐 Authentication & Approval
+## Authentication & Approval
 
 ### How It Works
 
@@ -181,7 +181,7 @@ If no domains configured → all emails allowed.
 
 ---
 
-## 📁 File Upload & Processing
+## File Upload & Processing
 
 ### Upload Flow
 
@@ -205,7 +205,7 @@ If no domains configured → all emails allowed.
 
 ---
 
-## 💬 Chat & RAG System
+## Chat & RAG System
 
 ### How RAG Works
 
@@ -226,7 +226,7 @@ If no domains configured → all emails allowed.
 
 ---
 
-## 📊 API Reference (tRPC)
+## API Reference (tRPC)
 
 ### Auth Router
 
@@ -275,7 +275,7 @@ If no domains configured → all emails allowed.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Test Checklist
 
@@ -316,7 +316,7 @@ If no domains configured → all emails allowed.
 
 ---
 
-## 🚀 Production Deployment (Vercel)
+## Production Deployment (Vercel)
 
 ### 1. Push to GitHub
 
@@ -362,7 +362,7 @@ In Vercel:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Build Fails
 
@@ -408,7 +408,7 @@ In Vercel:
 
 ---
 
-## 📝 Development Commands
+## Development Commands
 
 ```bash
 # Install dependencies
@@ -431,7 +431,7 @@ npm run lint
 
 ---
 
-## 🎯 Features
+## Features
 
 ### For Instructors
 
@@ -458,18 +458,18 @@ npm run lint
 
 ---
 
-## 🔒 Security
+## Security
 
-- ✅ Rate limiting on public endpoints
-- ✅ Admin approval required
-- ✅ Email domain restrictions
-- ✅ Session-based authentication
-- ✅ QStash signature verification
-- ✅ Signed URLs for files
+- Rate limiting on public endpoints
+- Admin approval required
+- Email domain restrictions
+- Session-based authentication
+- QStash signature verification
+- Signed URLs for files
 
 ---
 
-## 📊 Database Schema
+## Database Schema
 
 ### Core Tables
 
@@ -485,33 +485,33 @@ npm run lint
 
 ---
 
-## ✨ What's Included
+## What's Included
 
 ### Backend
 
-- ✅ All 6 tRPC routers implemented
-- ✅ Better Auth with database hooks
-- ✅ RAG system with semantic search
-- ✅ Async file processing
-- ✅ Email notifications
-- ✅ Rate limiting
-- ✅ Structured logging
+- All 6 tRPC routers implemented
+- Better Auth with database hooks
+- RAG system with semantic search
+- Async file processing
+- Email notifications
+- Rate limiting
+- Structured logging
 
 ### Frontend
 
-- ✅ All pages implemented
-- ✅ Full chat interface
-- ✅ File upload with drag-drop
-- ✅ Create chatbot dialog
-- ✅ Admin dashboard
-- ✅ Public chat sharing
+- All pages implemented
+- Full chat interface
+- File upload with drag-drop
+- Create chatbot dialog
+- Admin dashboard
+- Public chat sharing
 
 ---
 
-## 🎉 You're Ready!
+## You're Ready!
 
 The project is production-ready. Follow the setup steps above, and you'll have a fully functional AI chatbot platform running in minutes.
 
 For support or questions, refer to this guide and the inline code documentation.
 
-**Built with ❤️ using Next.js, tRPC, Better Auth, and OpenRouter**
+**Built with Next.js, tRPC, Better Auth, and OpenRouter**
