@@ -1,0 +1,59 @@
+---
+config:
+  look: neo
+---
+flowchart TD
+    Start([Professor Visits Site]) --> Register{Has Account?}
+    Register -->|No| RegisterForm[Fill Registration Form<br/>name, email, password]
+    RegisterForm --> CheckDomain{Email Domain<br/>Approved?}
+    CheckDomain -->|No| Rejected[Registration Rejected<br/>Invalid Domain]
+    CheckDomain -->|Yes| PendingStatus[Account Created<br/>Status: PENDING]
+    PendingStatus --> NotifyAdmin[Email Sent to Admin<br/>via Resend]
+    NotifyAdmin --> WaitApproval[Show Pending Page<br/>Wait for Admin Approval]
+    WaitApproval --> AdminReview{Admin Reviews<br/>in Admin Portal}
+    AdminReview -->|Reject| SendRejection[Email: Rejection Notification]
+    SendRejection --> RejectedPage[User Sees Rejected Page]
+    AdminReview -->|Approve| SendApproval[Email: Approval Confirmation<br/>Status: APPROVED]
+    Register -->|Yes| Login[Login Page]
+    SendApproval --> Login
+    Login --> CheckStatus{User Status?}
+    CheckStatus -->|Pending| WaitApproval
+    CheckStatus -->|Rejected| RejectedPage
+    CheckStatus -->|Approved| Dashboard[Professor Dashboard<br/>/dashboard]
+    Dashboard --> CreateBot[Click 'Create Chatbot']
+    CreateBot --> ConfigureBot[Configure Chatbot:<br/>• Name & Description<br/>• System Prompt<br/>• AI Model Selection<br/>• Temperature & Max Tokens<br/>• Welcome Message<br/>• Suggested Questions]
+    ConfigureBot --> SaveBot[Save Chatbot<br/>tRPC: chatbot.create]
+    SaveBot --> BotCreated[Chatbot Created in DB]
+    BotCreated --> UploadFiles{Upload Files?}
+    UploadFiles -->|Yes| SelectFiles[Select Files:<br/>PDF, DOCX, TXT,<br/>MD, JSON, CSV]
+    SelectFiles --> ValidateFile{Validate:<br/>Size & Type?}
+    ValidateFile -->|Fail| ShowError[Show Error Message]
+    ShowError --> SelectFiles
+    ValidateFile -->|Pass| UploadToStorage[Upload to Supabase Storage<br/>Path: chatbotId/fileId]
+    UploadToStorage --> CreateFileRecord[Create Record in<br/>chatbot_files table<br/>Status: PENDING]
+    CreateFileRecord --> EnvCheck{Environment?}
+    EnvCheck -->|Development| ProcessInline[Process File Inline<br/>file-processor.ts]
+    EnvCheck -->|Production| PublishJob[Publish to QStash<br/>/api/jobs/process-file]
+    PublishJob --> JobQueue[QStash Job Queue]
+    JobQueue --> ProcessAsync[Async File Processing]
+    ProcessInline --> ExtractText[RAG Service:<br/>Extract Text Content]
+    ProcessAsync --> ExtractText
+    ExtractText --> ChunkText[Split into Chunks<br/>1000 chars, 200 overlap]
+    ChunkText --> GenerateEmbeddings[Generate Embeddings<br/>OpenAI text-embedding-3-small]
+    GenerateEmbeddings --> StoreChunks[Store in file_chunks<br/>with vector embeddings]
+    StoreChunks --> UpdateStatus[Update File Status:<br/>COMPLETED]
+    UpdateStatus --> UploadFiles
+    UploadFiles -->|No| GenerateShare{Want to Share?}
+    GenerateShare -->|Yes| CreateShareToken[Generate Share Token<br/>nanoid-16]
+    CreateShareToken --> GetShareURL[Get Share URL:<br/>domain.com/chat/TOKEN]
+    GetShareURL --> DisplayShare[Display Share URL<br/>& Embed Code]
+    GenerateShare -->|No| TestBot[Test in Dashboard]
+    DisplayShare --> TestBot
+    TestBot --> SendTestMsg[Send Test Messages]
+    SendTestMsg --> ViewResponses[View AI Responses<br/>with Source Citations]
+    ViewResponses --> Satisfied{Satisfied?}
+    Satisfied -->|No| EditSettings[Edit Chatbot Settings<br/>or Upload More Files]
+    EditSettings --> ConfigureBot
+    Satisfied -->|Yes| Deploy[Deploy Chatbot:<br/>Share URL with Students<br/>or Embed on Website]
+    Deploy --> Monitor[Monitor Analytics:<br/>• Total Conversations<br/>• Message Count<br/>• Response Times<br/>• Popular Questions]
+    Monitor --> End([Chatbot Live & Active])
