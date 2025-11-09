@@ -24,10 +24,9 @@ flowchart TB
         OpenRouter["OpenRouter Client<br>(LLM Inference)"]
         RAGService["RAG Service<br>(Document Processing)"]
         EmbeddingGen["Embedding Generator<br>(OpenAI text-embedding-3-small)"]
-        VectorSearch["Vector Search<br>(pgvector)"]
   end
  subgraph subGraph4["Data Layer"]
-        PostgreSQL["PostgreSQL<br>(Supabase)"]
+        PostgreSQL["PostgreSQL<br>(Supabase + pgvector)"]
         Storage["Supabase Storage<br>(File Storage)"]
         Redis["Upstash Redis<br>(Rate Limiting)"]
   end
@@ -37,6 +36,7 @@ flowchart TB
   end
  subgraph subGraph6["External Services"]
         Models["AI Models<br>(Llama 3.3, Mistral,<br>Qwen, GPT-OSS)"]
+        OpenAI["OpenAI API<br>(text-embedding-3-small)"]
         Resend["Resend<br>(Email Notifications)"]
   end
  subgraph subGraph7["Database Schema"]
@@ -52,17 +52,18 @@ flowchart TB
     AdminPortal --> Middleware
     Middleware --> tRPC & Redis
     tRPC --> AuthService & ChatRouter & ChatbotRouter & FileRouter & AdminRouter & AnalyticsRouter
-    ChatRouter --> OpenRouter & VectorSearch & PostgreSQL
+    ChatRouter --> EmbeddingGen & OpenRouter & PostgreSQL
     FileRouter --> Storage & QStash & PostgreSQL
     AdminRouter --> Resend & PostgreSQL
     QStash --> FileProcessor
     FileProcessor --> RAGService & Storage & PostgreSQL
     RAGService --> EmbeddingGen
     OpenRouter --> Models
-    EmbeddingGen --> OpenRouter
+    Models --> OpenRouter
+    EmbeddingGen --> OpenAI
+    OpenAI --> EmbeddingGen
     ChatbotRouter --> PostgreSQL
     AnalyticsRouter --> PostgreSQL
     AuthService --> PostgreSQL
-    VectorSearch --> PostgreSQL
     PostgreSQL -.-> Users & Chatbots & Files & Chunks & Conversations & Messages & Analytics
     APIRoutes --> tRPC
