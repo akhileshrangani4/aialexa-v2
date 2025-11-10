@@ -5,6 +5,7 @@ import { eq, and, sql, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { SUPPORTED_MODELS } from "@aialexa/ai";
+import { checkRateLimit, chatbotCreationRateLimit } from "@/lib/rate-limit";
 
 const createChatbotSchema = z.object({
   name: z.string().min(1).max(100),
@@ -174,6 +175,24 @@ export const chatbotRouter = router({
   create: protectedProcedure
     .input(createChatbotSchema)
     .mutation(async ({ ctx, input }) => {
+      // Rate limiting: 10 chatbots per hour per user
+      const { success, reset } = await checkRateLimit(
+        chatbotCreationRateLimit,
+        ctx.session.user.id,
+        {
+          userId: ctx.session.user.id,
+          endpoint: "chatbotCreation",
+        },
+      );
+
+      if (!success) {
+        const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Too many chatbot creations. Please try again in ${Math.ceil(retryAfter / 3600)} hour(s).`,
+        });
+      }
+
       // Generate shareToken automatically since sharing is enabled by default
       const shareToken = nanoid(16);
 
