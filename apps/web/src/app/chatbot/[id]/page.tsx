@@ -18,6 +18,7 @@ import { useChatbot } from "@/hooks/useChatbot";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { FileUpload } from "@/components/chat/FileUpload";
 import { ChatbotSettings } from "@/components/chat/ChatbotSettings";
+import { WrappableText } from "@/components/ui/wrappable-text";
 
 export default function ChatbotDetailPage() {
   const router = useRouter();
@@ -106,7 +107,9 @@ export default function ChatbotDetailPage() {
             </Button>
           </Link>
           <h1 className="text-3xl font-bold text-foreground">{chatbot.name}</h1>
-          <p className="text-muted-foreground mt-2">{chatbot.description}</p>
+          <p className="text-muted-foreground mt-2">
+            <WrappableText>{chatbot.description}</WrappableText>
+          </p>
           <div className="flex gap-2 mt-4">
             <Badge>{chatbot.model}</Badge>
             {chatbot.shareToken && (

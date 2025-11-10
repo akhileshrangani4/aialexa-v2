@@ -36,6 +36,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { FormFieldWithCounter } from "@/components/ui/form-field-with-counter";
+import { WrappableText } from "@/components/ui/wrappable-text";
+import {
+  validateName,
+  validateDescription,
+  VALIDATION_LIMITS,
+} from "@/lib/validation";
 
 const MODELS = [
   { value: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B" },
@@ -109,6 +116,26 @@ export default function DashboardPage() {
 
   const handleCreateChatbot = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const nameValidation = validateName(formData.name);
+    if (!nameValidation.isValid) {
+      toast.error(nameValidation.error!, {
+        description: nameValidation.description,
+      });
+      return;
+    }
+
+    const descriptionValidation = validateDescription(
+      formData.description,
+      true,
+    );
+    if (!descriptionValidation.isValid) {
+      toast.error(descriptionValidation.error!, {
+        description: descriptionValidation.description,
+      });
+      return;
+    }
+
     createChatbot.mutate({
       name: formData.name,
       model: formData.model as
@@ -243,34 +270,37 @@ export default function DashboardPage() {
                   )}
 
                   <form onSubmit={handleCreateChatbot} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Chatbot Name *</Label>
-                      <Input
-                        id="name"
-                        placeholder="CS101 Assistant"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
+                    <FormFieldWithCounter
+                      id="name"
+                      label="Chatbot Name"
+                      value={formData.name}
+                      onChange={(value) =>
+                        setFormData({ ...formData, name: value })
+                      }
+                      maxLength={VALIDATION_LIMITS.NAME_MAX_LENGTH}
+                      warningThreshold={
+                        VALIDATION_LIMITS.NAME_WARNING_THRESHOLD
+                      }
+                      placeholder="CS101 Assistant"
+                      required
+                    />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description *</Label>
-                      <Textarea
-                        id="description"
-                        placeholder="AI assistant for Introduction to Computer Science"
-                        value={formData.description}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            description: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
+                    <FormFieldWithCounter
+                      id="description"
+                      label="Description"
+                      value={formData.description}
+                      onChange={(value) =>
+                        setFormData({ ...formData, description: value })
+                      }
+                      maxLength={VALIDATION_LIMITS.DESCRIPTION_MAX_LENGTH}
+                      warningThreshold={
+                        VALIDATION_LIMITS.DESCRIPTION_WARNING_THRESHOLD
+                      }
+                      placeholder="AI assistant for Introduction to Computer Science"
+                      type="textarea"
+                      rows={3}
+                      required
+                    />
 
                     <div className="space-y-2">
                       <Label htmlFor="model">AI Model *</Label>
@@ -396,7 +426,7 @@ export default function DashboardPage() {
                     <CardHeader>
                       <CardTitle className="text-lg">{chatbot.name}</CardTitle>
                       <CardDescription className="line-clamp-2">
-                        {chatbot.description}
+                        <WrappableText>{chatbot.description}</WrappableText>
                       </CardDescription>
                     </CardHeader>
                     <CardContent>

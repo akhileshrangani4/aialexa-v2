@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useChat } from "@/hooks/useChat";
 import { ChatInterface } from "@/components/chat/ChatInterface";
+import { WrappableText } from "@/components/ui/wrappable-text";
 import {
   Card,
   CardContent,
@@ -81,7 +82,9 @@ export default function SharedChatPage() {
             {chatbot.name || "Chatbot"}
           </h1>
           <p className="text-muted-foreground">
-            {chatbot.description || "No description available"}
+            <WrappableText>
+              {chatbot.description || "No description available"}
+            </WrappableText>
           </p>
         </div>
 

@@ -8,7 +8,7 @@ import { SUPPORTED_MODELS } from "@aialexa/ai";
 
 const createChatbotSchema = z.object({
   name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
+  description: z.string().max(200).optional(),
   systemPrompt: z.string().min(1).max(4000),
   model: z.enum(SUPPORTED_MODELS),
   temperature: z.number().min(0).max(100).default(70),

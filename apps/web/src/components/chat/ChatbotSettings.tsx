@@ -12,12 +12,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { FormFieldWithCounter } from "@/components/ui/form-field-with-counter";
+import { WrappableText } from "@/components/ui/wrappable-text";
+import { CharacterCounter } from "@/components/ui/character-counter";
 import { trpc } from "@/lib/trpc";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { SUPPORTED_MODELS, type SupportedModel } from "@aialexa/ai/openrouter";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import {
+  validateName,
+  validateDescription,
+  VALIDATION_LIMITS,
+} from "@/lib/validation";
 
 interface ChatbotSettingsProps {
   chatbot: {
@@ -156,23 +164,18 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     const tempValue = parseFloat(temperature);
     const tokensValue = parseInt(maxTokens);
 
-    if (!name.trim()) {
-      toast.error("Name is required", {
-        description: "Please provide a name for your chatbot",
+    const nameValidation = validateName(name);
+    if (!nameValidation.isValid) {
+      toast.error(nameValidation.error!, {
+        description: nameValidation.description,
       });
       return;
     }
 
-    if (name.length > 100) {
-      toast.error("Name is too long", {
-        description: "Name must be 100 characters or less",
-      });
-      return;
-    }
-
-    if (description && description.length > 500) {
-      toast.error("Description is too long", {
-        description: "Description must be 500 characters or less",
+    const descriptionValidation = validateDescription(description);
+    if (!descriptionValidation.isValid) {
+      toast.error(descriptionValidation.error!, {
+        description: descriptionValidation.description,
       });
       return;
     }
@@ -266,52 +269,66 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
         </div>
 
         {/* Name */}
-        <div className="space-y-2">
-          <Label htmlFor="name" className="text-base font-semibold">
-            Name
-          </Label>
-          <p className="text-xs text-muted-foreground mb-2">
-            The display name for your chatbot
-          </p>
-          {isEditing ? (
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter chatbot name"
-              maxLength={100}
-            />
-          ) : (
+        {isEditing ? (
+          <FormFieldWithCounter
+            id="name"
+            label="Name"
+            value={name}
+            onChange={setName}
+            maxLength={VALIDATION_LIMITS.NAME_MAX_LENGTH}
+            warningThreshold={VALIDATION_LIMITS.NAME_WARNING_THRESHOLD}
+            helperText="The display name for your chatbot"
+            placeholder="Enter chatbot name"
+            showCounter={isEditing}
+          />
+        ) : (
+          <div className="space-y-2">
+            <Label className="text-base font-semibold">Name</Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              The display name for your chatbot
+            </p>
             <div className="px-3 py-2 bg-background rounded-md border">
               <p className="text-sm">{name}</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Description */}
-        <div className="space-y-2">
-          <Label htmlFor="description" className="text-base font-semibold">
-            Description
-          </Label>
-          <p className="text-xs text-muted-foreground mb-2">
-            A brief description of what your chatbot does
-          </p>
-          {isEditing ? (
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter chatbot description (optional)"
-              rows={3}
-              maxLength={500}
-              className="resize-none"
-            />
-          ) : (
-            <div className="px-3 py-2 bg-background rounded-md border">
-              <p className="text-sm">{description || "No description"}</p>
+        {isEditing ? (
+          <FormFieldWithCounter
+            id="description"
+            label="Description"
+            value={description}
+            onChange={setDescription}
+            maxLength={VALIDATION_LIMITS.DESCRIPTION_MAX_LENGTH}
+            warningThreshold={VALIDATION_LIMITS.DESCRIPTION_WARNING_THRESHOLD}
+            helperText="A brief description of what your chatbot does"
+            placeholder="Enter chatbot description (optional)"
+            type="textarea"
+            rows={3}
+          />
+        ) : (
+          <div className="space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <Label className="text-base font-semibold">Description</Label>
+              <CharacterCounter
+                current={description.length}
+                max={VALIDATION_LIMITS.DESCRIPTION_MAX_LENGTH}
+                warningThreshold={
+                  VALIDATION_LIMITS.DESCRIPTION_WARNING_THRESHOLD
+                }
+              />
             </div>
-          )}
-        </div>
+            <p className="text-xs text-muted-foreground mb-2">
+              A brief description of what your chatbot does
+            </p>
+            <div className="px-3 py-2 bg-background rounded-md border">
+              <p className="text-sm">
+                <WrappableText>{description || "No description"}</WrappableText>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Model */}
         <div className="space-y-2">
