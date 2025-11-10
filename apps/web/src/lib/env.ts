@@ -32,7 +32,7 @@ const envSchema = z.object({
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
 
   // Upstash QStash
-  QSTASH_URL: z.string().url(),
+  QSTASH_URL: z.string().url().optional(), // Optional - only needed for local development
   QSTASH_TOKEN: z.string().min(1),
   QSTASH_CURRENT_SIGNING_KEY: z.string().min(1),
   QSTASH_NEXT_SIGNING_KEY: z.string().min(1),

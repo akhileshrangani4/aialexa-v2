@@ -18,7 +18,7 @@
     "mammoth": "^1.8.0",
     "nanoid": "^5.0.9",
     "pdf-parse": "^1.1.1",
-    "tiktoken": "^1.0.18"
+    "js-tiktoken": "^1.0.12"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
