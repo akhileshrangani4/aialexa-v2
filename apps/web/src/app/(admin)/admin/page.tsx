@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PendingUsersTab } from "@/components/admin/tabs/PendingUsersTab";
 import { AllChatbotsTab } from "@/components/admin/tabs/AllChatbotsTab";
 import { AllowedDomainsTab } from "@/components/admin/tabs/AllowedDomainsTab";
+import { AllUsersTab } from "@/components/admin/tabs/AllUsersTab";
 import { Shield } from "lucide-react";
 
 export default function AdminPage() {
@@ -27,12 +28,17 @@ export default function AdminPage() {
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="bg-white border border-border">
             <TabsTrigger value="users">Pending Users</TabsTrigger>
+            <TabsTrigger value="all-users">All Users</TabsTrigger>
             <TabsTrigger value="chatbots">All Chatbots</TabsTrigger>
             <TabsTrigger value="domains">Allowed Domains</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="mt-6">
             <PendingUsersTab />
+          </TabsContent>
+
+          <TabsContent value="all-users" className="mt-6">
+            <AllUsersTab />
           </TabsContent>
 
           <TabsContent value="chatbots" className="mt-6">

@@ -11,43 +11,57 @@ export function RejectionNotification({
 }: RejectionNotificationProps) {
   return (
     <html>
-      <body style={main}>
-        <div style={container}>
-          <h1 style={h1}>Registration Status Update</h1>
+      {/* eslint-disable-next-line @next/next/no-head-element */}
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body style={body}>
+        <table
+          role="presentation"
+          style={wrapper}
+          cellPadding="0"
+          cellSpacing="0"
+          border={0}
+        >
+          <tr>
+            <td style={cell}>
+              <p style={text}>Hi {userName},</p>
 
-          <p style={text}>Hi {userName},</p>
+              <p style={text}>
+                Thank you for your interest in AIAlexa. Unfortunately, we are
+                unable to approve your account registration at this time.
+              </p>
 
-          <p style={text}>
-            Thank you for your interest in AIAlexa. Unfortunately, we are unable
-            to approve your account registration at this time.
-          </p>
+              <p style={text}>Why might this happen?</p>
+              <ul style={list}>
+                <li>
+                  Registration may be limited to specific educational
+                  institutions
+                </li>
+                <li>Your email domain may not be on our approved list</li>
+                <li>Additional verification may be required</li>
+              </ul>
 
-          <div style={infoSection}>
-            <p style={infoText}>
-              <strong>Why might this happen?</strong>
-            </p>
-            <p style={infoItem}>
-              • Registration may be limited to specific educational institutions
-            </p>
-            <p style={infoItem}>
-              • Your email domain may not be on our approved list
-            </p>
-            <p style={infoItem}>• Additional verification may be required</p>
-          </div>
+              <p style={text}>
+                If you believe this decision was made in error or if you have
+                questions, please contact us at{" "}
+                <a href={`mailto:${supportEmail}`} style={link}>
+                  {supportEmail}
+                </a>
+                .
+              </p>
 
-          <p style={text}>
-            If you believe this decision was made in error or if you have
-            questions, please contact us at{" "}
-            <a href={`mailto:${supportEmail}`} style={link}>
-              {supportEmail}
-            </a>
-            .
-          </p>
+              <p style={text}>We appreciate your understanding.</p>
 
-          <p style={text}>We appreciate your understanding.</p>
-
-          <p style={footer}>AIAlexa Team</p>
-        </div>
+              <p style={signature}>
+                Best regards,
+                <br />
+                AIAlexa Team
+              </p>
+            </td>
+          </tr>
+        </table>
       </body>
     </html>
   );
@@ -55,68 +69,48 @@ export function RejectionNotification({
 
 export default RejectionNotification;
 
-// Styles
-const main = {
-  backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
+const body = {
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  fontSize: "16px",
+  lineHeight: "1.6",
+  color: "#333333",
   backgroundColor: "#ffffff",
-  margin: "0 auto",
-  padding: "20px 0 48px",
-  marginBottom: "64px",
-  maxWidth: "600px",
+  margin: 0,
+  padding: "20px",
 };
 
-const h1 = {
-  color: "#333",
-  fontSize: "24px",
-  fontWeight: "bold",
-  margin: "40px 0",
-  padding: "0 48px",
+const wrapper = {
+  maxWidth: "600px",
+  margin: "0 auto",
+};
+
+const cell = {
+  padding: "20px 0",
 };
 
 const text = {
-  color: "#333",
+  margin: "0 0 16px",
+  color: "#333333",
   fontSize: "16px",
-  lineHeight: "26px",
-  padding: "0 48px",
-  marginTop: "16px",
+  lineHeight: "1.6",
 };
 
-const infoSection = {
-  padding: "24px 48px",
-  backgroundColor: "#fef2f2",
-  borderLeft: "4px solid #dc2626",
-  margin: "24px 48px",
-};
-
-const infoText = {
-  color: "#991b1b",
-  fontSize: "15px",
-  marginTop: "0",
-  marginBottom: "12px",
-};
-
-const infoItem = {
-  color: "#7f1d1d",
-  fontSize: "14px",
-  lineHeight: "22px",
-  marginTop: "6px",
-  marginBottom: "6px",
+const list = {
+  margin: "0 0 16px",
+  paddingLeft: "24px",
+  color: "#333333",
+  fontSize: "16px",
+  lineHeight: "1.6",
 };
 
 const link = {
-  color: "#2563eb",
+  color: "#0066cc",
   textDecoration: "underline",
 };
 
-const footer = {
-  color: "#8898aa",
-  fontSize: "12px",
-  lineHeight: "16px",
-  padding: "0 48px",
-  marginTop: "32px",
+const signature = {
+  margin: "24px 0 0",
+  color: "#333333",
+  fontSize: "16px",
+  lineHeight: "1.6",
 };

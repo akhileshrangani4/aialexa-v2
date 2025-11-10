@@ -1,18 +1,11 @@
 import * as React from "react";
 
-interface UserRegistrationNotificationProps {
+interface AccountEnabledProps {
   userName: string;
-  userEmail: string;
-  registrationDate: string;
-  adminUrl: string;
+  loginUrl: string;
 }
 
-export function UserRegistrationNotification({
-  userName,
-  userEmail,
-  registrationDate,
-  adminUrl,
-}: UserRegistrationNotificationProps) {
+export function AccountEnabled({ userName, loginUrl }: AccountEnabledProps) {
   return (
     <html>
       {/* eslint-disable-next-line @next/next/no-head-element */}
@@ -30,35 +23,38 @@ export function UserRegistrationNotification({
         >
           <tr>
             <td style={cell}>
-              <p style={text}>Hi,</p>
+              <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                A new user has registered and is awaiting approval:
+                Great news! Your AIAlexa account has been re-enabled and you can
+                now log in again. All your chatbots and data are ready for you
+                to access.
               </p>
 
-              <p style={text}>
-                <strong>Name:</strong> {userName}
-                <br />
-                <strong>Email:</strong> {userEmail}
-                <br />
-                <strong>Registration Date:</strong> {registrationDate}
-              </p>
+              <p style={text}>You can now:</p>
+              <ul style={list}>
+                <li>Log in to your account</li>
+                <li>Access all your chatbots</li>
+                <li>Continue creating and managing chatbots</li>
+                <li>Use all platform features</li>
+              </ul>
 
               <p style={text}>
-                Please review and approve or reject this registration request.
-              </p>
-
-              <p style={text}>
-                You can access the admin dashboard here:{" "}
-                <a href={adminUrl} style={link}>
-                  {adminUrl}
+                You can log in here:{" "}
+                <a href={loginUrl} style={link}>
+                  {loginUrl}
                 </a>
+              </p>
+
+              <p style={text}>
+                Welcome back! If you have any questions or need assistance,
+                please don&apos;t hesitate to reach out.
               </p>
 
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa
+                AIAlexa Team
               </p>
             </td>
           </tr>
@@ -68,7 +64,7 @@ export function UserRegistrationNotification({
   );
 }
 
-export default UserRegistrationNotification;
+export default AccountEnabled;
 
 const body = {
   fontFamily: 'Georgia, "Times New Roman", serif',
@@ -91,6 +87,14 @@ const cell = {
 
 const text = {
   margin: "0 0 16px",
+  color: "#333333",
+  fontSize: "16px",
+  lineHeight: "1.6",
+};
+
+const list = {
+  margin: "0 0 16px",
+  paddingLeft: "24px",
   color: "#333333",
   fontSize: "16px",
   lineHeight: "1.6",

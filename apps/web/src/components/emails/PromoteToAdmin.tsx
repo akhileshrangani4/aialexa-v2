@@ -1,18 +1,11 @@
 import * as React from "react";
 
-interface UserRegistrationNotificationProps {
+interface PromoteToAdminProps {
   userName: string;
-  userEmail: string;
-  registrationDate: string;
-  adminUrl: string;
+  loginUrl: string;
 }
 
-export function UserRegistrationNotification({
-  userName,
-  userEmail,
-  registrationDate,
-  adminUrl,
-}: UserRegistrationNotificationProps) {
+export function PromoteToAdmin({ userName, loginUrl }: PromoteToAdminProps) {
   return (
     <html>
       {/* eslint-disable-next-line @next/next/no-head-element */}
@@ -30,35 +23,44 @@ export function UserRegistrationNotification({
         >
           <tr>
             <td style={cell}>
-              <p style={text}>Hi,</p>
+              <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                A new user has registered and is awaiting approval:
+                I wanted to let you know that you&apos;ve been promoted to an
+                administrator role on AIAlexa. You now have full access to
+                manage users, chatbots, and system settings.
               </p>
 
-              <p style={text}>
-                <strong>Name:</strong> {userName}
-                <br />
-                <strong>Email:</strong> {userEmail}
-                <br />
-                <strong>Registration Date:</strong> {registrationDate}
-              </p>
-
-              <p style={text}>
-                Please review and approve or reject this registration request.
-              </p>
+              <p style={text}>Your new admin capabilities include:</p>
+              <ul style={list}>
+                <li>Approve or reject user registrations</li>
+                <li>Manage user roles and permissions</li>
+                <li>Enable or disable user accounts</li>
+                <li>View and manage all chatbots</li>
+                <li>Configure system settings</li>
+              </ul>
 
               <p style={text}>
                 You can access the admin dashboard here:{" "}
-                <a href={adminUrl} style={link}>
-                  {adminUrl}
+                <a href={loginUrl} style={link}>
+                  {loginUrl}
                 </a>
+              </p>
+
+              <p style={text}>
+                Please use your admin privileges responsibly. All admin actions
+                are logged for security purposes.
+              </p>
+
+              <p style={text}>
+                Welcome to the AIAlexa admin team! We trust you&apos;ll help us
+                maintain a secure and efficient platform.
               </p>
 
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa
+                AIAlexa Admin Team
               </p>
             </td>
           </tr>
@@ -68,7 +70,7 @@ export function UserRegistrationNotification({
   );
 }
 
-export default UserRegistrationNotification;
+export default PromoteToAdmin;
 
 const body = {
   fontFamily: 'Georgia, "Times New Roman", serif',
@@ -91,6 +93,14 @@ const cell = {
 
 const text = {
   margin: "0 0 16px",
+  color: "#333333",
+  fontSize: "16px",
+  lineHeight: "1.6",
+};
+
+const list = {
+  margin: "0 0 16px",
+  paddingLeft: "24px",
   color: "#333333",
   fontSize: "16px",
   lineHeight: "1.6",
