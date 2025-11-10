@@ -9,8 +9,10 @@
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
+    "db:migrate": "npm run db:setup-extensions && drizzle-kit migrate",
+    "db:setup-extensions": "tsx scripts/setup-extensions.ts",
+    "db:setup-rls": "tsx scripts/setup-rls-policies.ts",
+    "db:push": "npm run db:setup-extensions && drizzle-kit push --force",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
@@ -21,6 +23,8 @@
   "devDependencies": {
     "drizzle-kit": "^0.31.5",
     "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2",
+    "dotenv": "^16.4.7"
   }
 }

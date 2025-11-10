@@ -67,7 +67,15 @@ ADMIN_EMAILS=admin@yourdomain.com
 
 #### Enable pgvector Extension
 
-In Supabase SQL editor:
+The extension setup runs automatically when you run `npm run db:push` or `npm run db:migrate`.
+
+To run manually:
+
+```bash
+npm run db:setup-extensions
+```
+
+Or manually in Supabase SQL Editor:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -79,9 +87,47 @@ CREATE EXTENSION IF NOT EXISTS vector;
 npm run db:push
 ```
 
+This will automatically:
+
+1. Enable required extensions (pgvector)
+2. Push the database schema
+
+#### Setup Row-Level Security (RLS) Policies
+
+**Important**: After running migrations, you must set up RLS for file-related tables (`user_files`, `file_chunks`, `chatbot_file_associations`) to allow file operations.
+
+Run the RLS setup script:
+
+```bash
+npm run db:setup-rls
+```
+
+Or manually run the SQL script in Supabase SQL Editor:
+
+```sql
+-- See packages/db/scripts/setup-rls-policies.sql
+```
+
+This disables RLS on file-related tables since authorization is handled at the application layer (tRPC).
+
 #### Create First Admin User
 
-In Supabase SQL editor:
+Use the provided script for a complete admin setup:
+
+1. Generate a bcrypt hash for your password:
+
+```bash
+node -e "const bcrypt=require('bcryptjs');bcrypt.hash('yourpassword',12).then(h=>console.log(h))"
+```
+
+2. Edit `packages/db/scripts/create-admin.sql` and replace:
+   - `email_var`: Your admin email
+   - `name_var`: Your admin name
+   - `password_hash_var`: The bcrypt hash from step 1
+
+3. Run the script in Supabase SQL Editor
+
+**Alternative** (simpler but less secure - for development only):
 
 ```sql
 INSERT INTO "user" (id, email, name, role, status, email_verified, created_at, updated_at)
@@ -281,10 +327,11 @@ If no domains configured → all emails allowed.
 
 **Database:**
 
-- [ ] pgvector enabled
-- [ ] Migrations successful
-- [ ] Admin user created
-- [ ] Storage bucket created
+- [ ] pgvector enabled (auto-runs with `npm run db:push`)
+- [ ] Migrations successful (`npm run db:push`)
+- [ ] RLS disabled on file tables (`npm run db:setup-rls`)
+- [ ] Admin user created (using `create-admin.sql`)
+- [ ] Storage bucket created (`chatbot-files`, Private)
 
 **Authentication:**
 
@@ -344,10 +391,21 @@ git push origin main
 
 ### 4. Production Database
 
-1. Enable pgvector in production
-2. Run migrations
-3. Create admin user(s)
-4. Create Storage bucket
+1. Run migrations (auto-enables extensions):
+
+   ```bash
+   npm run db:push
+   ```
+
+2. Setup RLS for file tables:
+
+   ```bash
+   npm run db:setup-rls
+   ```
+
+3. Create admin user(s) using `packages/db/scripts/create-admin.sql`
+
+4. Create Storage bucket: `chatbot-files` (Private)
 
 ### 5. Configure Domains
 
@@ -374,18 +432,21 @@ In Vercel:
 **Error**: Cannot connect  
 **Solution**:
 
-1. Check `DATABASE_URL`
-2. Enable pgvector
+1. Check `DATABASE_URL` is set correctly
+2. Run `npm run db:setup-extensions` to enable pgvector
 3. Verify database is accessible
+4. Check that RLS is disabled: `npm run db:setup-rls`
 
 ### File Upload Fails
 
 **Error**: Upload/processing fails  
 **Solution**:
 
-1. Verify Storage bucket exists: `chatbot-files`
-2. Check `SUPABASE_SERVICE_ROLE_KEY`
-3. Verify QStash credentials
+1. Verify Storage bucket exists: `chatbot-files` (Private)
+2. Check `SUPABASE_SERVICE_ROLE_KEY` is set correctly
+3. Ensure RLS is disabled: `npm run db:setup-rls`
+4. Verify QStash credentials for async processing
+5. Check Storage RLS policies allow service_role access
 
 ### AI Chat Not Working
 
@@ -421,9 +482,11 @@ npm run dev
 npm run build
 
 # Database
-npm run db:push       # Push schema
-npm run db:generate   # Generate migrations
-npm run db:studio     # Open Drizzle Studio
+npm run db:push           # Push schema (auto-runs extensions setup)
+npm run db:generate       # Generate migrations
+npm run db:setup-extensions  # Enable PostgreSQL extensions (pgvector)
+npm run db:setup-rls      # Disable RLS on file tables (run after migrations)
+npm run db:studio         # Open Drizzle Studio
 
 # Linting
 npm run lint
