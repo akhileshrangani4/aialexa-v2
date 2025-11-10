@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyQStashSignature } from "@/lib/qstash";
-import { env } from "@/lib/env";
 import { logError } from "@/lib/logger";
 import { processFile } from "@/lib/file-processor";
 
 export async function POST(req: NextRequest) {
   try {
     // Verify QStash signature
-    const signature = req.headers.get("Upstash-Signature");
+    // Check both header cases (some platforms lowercase headers)
+    const signature =
+      req.headers.get("Upstash-Signature") ||
+      req.headers.get("upstash-signature");
     if (!signature) {
       return NextResponse.json({ error: "Missing signature" }, { status: 401 });
     }
 
     const body = await req.text();
-    const isValid = await verifyQStashSignature(
-      signature,
-      env.QSTASH_CURRENT_SIGNING_KEY,
-      env.QSTASH_NEXT_SIGNING_KEY,
-      body,
-    );
+    // Use the actual request URL for verification (QStash signs the exact URL it calls)
+    // Remove query params if any, as QStash signs the base URL
+    const requestUrl = new URL(req.url);
+    requestUrl.search = ""; // Remove query params
+    const url = requestUrl.toString();
+    const isValid = await verifyQStashSignature(signature, body, url);
 
     if (!isValid) {
       logError(

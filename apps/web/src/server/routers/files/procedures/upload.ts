@@ -9,6 +9,7 @@ import { env } from "@/lib/env";
 import { logInfo, logError } from "@/lib/logger";
 import { processFile } from "@/lib/file-processor";
 import { validateFileUpload } from "../validation";
+import { checkRateLimit, fileUploadRateLimit } from "@/lib/rate-limit";
 
 export const uploadProcedure = protectedProcedure
   .input(
@@ -23,6 +24,25 @@ export const uploadProcedure = protectedProcedure
     }),
   )
   .mutation(async ({ ctx, input }) => {
+    // Rate limiting: 5 uploads per minute per user
+    const { success, reset } = await checkRateLimit(
+      fileUploadRateLimit,
+      ctx.session.user.id,
+      {
+        userId: ctx.session.user.id,
+        fileName: input.fileName,
+        endpoint: "fileUpload",
+      },
+    );
+
+    if (!success) {
+      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Too many file uploads. Please try again in ${Math.ceil(retryAfter / 60)} minute(s).`,
+      });
+    }
+
     // Validate file upload input
     const fileBuffer = validateFileUpload(input);
 

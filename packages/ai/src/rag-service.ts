@@ -32,9 +32,9 @@ export class RAGService {
     this.encoderInitialized = true;
 
     try {
-      // Dynamic import to avoid module evaluation errors
-      const { encoding_for_model } = await import("tiktoken");
-      this.encoder = encoding_for_model("gpt-4o-mini");
+      // Use js-tiktoken for better serverless compatibility (pure JS, no WASM)
+      const { encodingForModel } = await import("js-tiktoken");
+      this.encoder = encodingForModel("gpt-4o-mini");
     } catch (error) {
       console.warn(
         "Failed to initialize tiktoken, using fallback token counter",
@@ -219,9 +219,11 @@ export class RAGService {
    * Free up resources
    */
   cleanup() {
-    if (this.encoder) {
+    if (this.encoder && typeof this.encoder.free === "function") {
       this.encoder.free();
     }
+    this.encoder = null;
+    this.encoderInitialized = false;
   }
 }
 
