@@ -7,27 +7,48 @@ import { toast } from "sonner";
 import { CreateChatbotDialog } from "@/components/dashboard/chatbots/CreateChatbotDialog";
 import { ChatbotCard } from "@/components/dashboard/chatbots/ChatbotCard";
 import { EmptyChatbotsState } from "@/components/dashboard/chatbots/EmptyChatbotsState";
+import { PaginationControls } from "@/components/dashboard/files/PaginationControls";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const ITEMS_PER_PAGE = 4;
 
 export default function ChatbotsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [chatbotToDelete, setChatbotToDelete] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
 
   // Fetch chatbots
   const {
-    data: chatbots,
+    data: chatbotsData,
     isLoading: chatbotsLoading,
     refetch,
-  } = trpc.chatbot.list.useQuery();
+  } = trpc.chatbot.list.useQuery({
+    limit: ITEMS_PER_PAGE,
+    offset: currentPage * ITEMS_PER_PAGE,
+  });
+
+  const chatbots = chatbotsData?.chatbots || [];
+  const totalCount = chatbotsData?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   // Delete chatbot mutation
   const deleteChatbot = trpc.chatbot.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       setDeleteDialogOpen(false);
       setChatbotToDelete(null);
-      refetch();
+
+      // Refetch to get updated count
+      const result = await refetch();
+      const newTotalCount = result.data?.totalCount || 0;
+      const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
+
+      // If we're on a page that no longer exists, go back to the last valid page
+      if (currentPage >= newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages - 1);
+      }
+
       toast.success("Chatbot deleted successfully");
     },
     onError: (error) => {
@@ -59,6 +80,11 @@ export default function ChatbotsPage() {
             </h1>
             <p className="text-muted-foreground mt-2 text-lg">
               Create and manage your chatbots.
+              {totalCount > 0 && (
+                <span className="ml-2 font-medium text-foreground">
+                  ({totalCount} {totalCount === 1 ? "chatbot" : "chatbots"})
+                </span>
+              )}
             </p>
           </div>
           <CreateChatbotDialog
@@ -84,14 +110,31 @@ export default function ChatbotsPage() {
         ) : !chatbots || chatbots.length === 0 ? (
           <EmptyChatbotsState onCreateClick={() => setCreateDialogOpen(true)} />
         ) : (
-          <div className="grid gap-4">
-            {chatbots.map((chatbot) => (
-              <ChatbotCard
-                key={chatbot.id}
-                chatbot={chatbot}
-                onDelete={handleDelete}
+          <div className="space-y-6">
+            {totalCount > ITEMS_PER_PAGE && (
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-muted-foreground">
+                  Showing {chatbots.length} of {totalCount} chatbot
+                  {totalCount !== 1 ? "s" : ""}
+                </p>
+              </div>
+            )}
+            <div className="grid gap-4">
+              {chatbots.map((chatbot) => (
+                <ChatbotCard
+                  key={chatbot.id}
+                  chatbot={chatbot}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
               />
-            ))}
+            )}
           </div>
         )}
       </div>

@@ -1,9 +1,9 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PendingUsersTab } from "@/components/admin/PendingUsersTab";
-import { AllChatbotsTab } from "@/components/admin/AllChatbotsTab";
-import { AllowedDomainsTab } from "@/components/admin/AllowedDomainsTab";
+import { PendingUsersTab } from "@/components/admin/tabs/PendingUsersTab";
+import { AllChatbotsTab } from "@/components/admin/tabs/AllChatbotsTab";
+import { AllowedDomainsTab } from "@/components/admin/tabs/AllowedDomainsTab";
 import { Shield } from "lucide-react";
 
 export default function AdminPage() {

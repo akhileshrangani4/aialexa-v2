@@ -81,7 +81,7 @@ export default function DashboardPage() {
         <div className="grid md:grid-cols-3 gap-6">
           <StatCard
             title="Total Chatbots"
-            value={chatbots?.length || 0}
+            value={chatbots?.totalCount || 0}
             description="Active chatbots"
             icon={Bot}
             iconColor="text-primary"

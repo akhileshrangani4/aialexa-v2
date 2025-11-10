@@ -1,7 +1,7 @@
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { chatbots } from "@aialexa/db/schema";
-import { eq, and } from "drizzle-orm";
+import { chatbots, user, chatbotFiles } from "@aialexa/db/schema";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { SUPPORTED_MODELS } from "@aialexa/ai";
@@ -21,15 +21,41 @@ export const chatbotRouter = router({
   /**
    * List user's chatbots
    */
-  list: protectedProcedure.query(async ({ ctx }) => {
-    const userChatbots = await ctx.db
-      .select()
-      .from(chatbots)
-      .where(eq(chatbots.userId, ctx.session.user.id))
-      .orderBy(chatbots.createdAt);
+  list: protectedProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().min(1).max(100).default(10),
+          offset: z.number().min(0).default(0),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 10;
+      const offset = input?.offset ?? 0;
 
-    return userChatbots;
-  }),
+      // Get total count
+      const [totalCountResult] = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(chatbots)
+        .where(eq(chatbots.userId, ctx.session.user.id));
+
+      const totalCount = Number(totalCountResult?.count || 0);
+
+      // Get paginated chatbots
+      const userChatbots = await ctx.db
+        .select()
+        .from(chatbots)
+        .where(eq(chatbots.userId, ctx.session.user.id))
+        .orderBy(desc(chatbots.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      return {
+        chatbots: userChatbots,
+        totalCount,
+      };
+    }),
 
   /**
    * Get single chatbot by ID
@@ -111,6 +137,36 @@ export const chatbotRouter = router({
 
       return chatbot;
     }),
+
+  /**
+   * Get featured chatbots (public)
+   * Returns up to 4 featured chatbots with creator info and file counts
+   */
+  getFeatured: publicProcedure.query(async ({ ctx }) => {
+    const featuredChatbots = await ctx.db
+      .select({
+        id: chatbots.id,
+        name: chatbots.name,
+        description: chatbots.description,
+        createdAt: chatbots.createdAt,
+        shareToken: chatbots.shareToken,
+        customAuthorName: chatbots.customAuthorName,
+        userName: user.name,
+        userEmail: user.email,
+        fileCount: sql<number>`
+          (SELECT COUNT(*)::int 
+           FROM ${chatbotFiles} 
+           WHERE ${chatbotFiles.chatbotId} = ${chatbots.id})
+        `,
+      })
+      .from(chatbots)
+      .leftJoin(user, eq(chatbots.userId, user.id))
+      .where(eq(chatbots.featured, true))
+      .orderBy(desc(chatbots.createdAt))
+      .limit(4);
+
+    return featuredChatbots;
+  }),
 
   /**
    * Create new chatbot

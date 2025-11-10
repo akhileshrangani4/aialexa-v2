@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { RouterOutputs } from "@/lib/trpc";
 import { formatFileSize, formatDate, getStatusColor } from "./file-constants";
 
-type FileData = RouterOutputs["files"]["list"][number];
+type FileData = RouterOutputs["files"]["list"]["files"][number];
 
 interface FileCardProps {
   file: FileData;

@@ -3,22 +3,21 @@
 import { FileText } from "lucide-react";
 import Link from "next/link";
 import { QuickAddFilesSection } from "./QuickAddFilesSection";
-import type { RouterOutputs } from "@/lib/trpc";
-
-type FileData = RouterOutputs["files"]["list"][number];
 
 interface EmptyChatbotFilesStateProps {
-  allFiles?: FileData[];
   associatedFileIds: string[];
   onAddFile: (fileId: string) => void;
+  onAddFiles?: (fileIds: string[]) => void;
   isAdding?: boolean;
+  onRefetch?: () => void;
 }
 
 export function EmptyChatbotFilesState({
-  allFiles,
   associatedFileIds,
   onAddFile,
+  onAddFiles,
   isAdding = false,
+  onRefetch,
 }: EmptyChatbotFilesStateProps) {
   return (
     <div className="text-center py-12">
@@ -33,14 +32,13 @@ export function EmptyChatbotFilesState({
         </Link>{" "}
         and then associate them with this chatbot.
       </p>
-      {allFiles && allFiles.length > 0 && (
-        <QuickAddFilesSection
-          files={allFiles}
-          associatedFileIds={associatedFileIds}
-          onAddFile={onAddFile}
-          isAdding={isAdding}
-        />
-      )}
+      <QuickAddFilesSection
+        associatedFileIds={associatedFileIds}
+        onAddFile={onAddFile}
+        onAddFiles={onAddFiles}
+        isAdding={isAdding}
+        onRefetch={onRefetch}
+      />
     </div>
   );
 }

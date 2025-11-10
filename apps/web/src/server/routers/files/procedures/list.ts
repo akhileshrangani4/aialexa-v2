@@ -1,6 +1,6 @@
 import { protectedProcedure } from "@/server/trpc";
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import {
   chatbots,
@@ -11,22 +11,53 @@ import {
 /**
  * List all user files (centralized)
  */
-export const listProcedure = protectedProcedure.query(async ({ ctx }) => {
-  // Get all files for the user
-  const files = await ctx.db
-    .select()
-    .from(userFiles)
-    .where(eq(userFiles.userId, ctx.session.user.id))
-    .orderBy(userFiles.createdAt);
+export const listProcedure = protectedProcedure
+  .input(
+    z
+      .object({
+        limit: z.number().min(1).max(100).default(10),
+        offset: z.number().min(0).default(0),
+      })
+      .optional(),
+  )
+  .query(async ({ ctx, input }) => {
+    const limit = input?.limit ?? 10;
+    const offset = input?.offset ?? 0;
 
-  return files;
-});
+    // Get total count
+    const [totalCountResult] = await ctx.db
+      .select({ count: sql<number>`count(*)` })
+      .from(userFiles)
+      .where(eq(userFiles.userId, ctx.session.user.id));
+
+    const totalCount = Number(totalCountResult?.count || 0);
+
+    // Get paginated files
+    const files = await ctx.db
+      .select()
+      .from(userFiles)
+      .where(eq(userFiles.userId, ctx.session.user.id))
+      .orderBy(desc(userFiles.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      files,
+      totalCount,
+    };
+  });
 
 /**
  * List files associated with a specific chatbot
  */
 export const listForChatbotProcedure = protectedProcedure
-  .input(z.object({ chatbotId: z.string().uuid() }))
+  .input(
+    z.object({
+      chatbotId: z.string().uuid(),
+      limit: z.number().min(1).max(100).default(10).optional(),
+      offset: z.number().min(0).default(0).optional(),
+    }),
+  )
   .query(async ({ ctx, input }) => {
     // Verify chatbot ownership
     const [chatbot] = await ctx.db
@@ -47,7 +78,18 @@ export const listForChatbotProcedure = protectedProcedure
       });
     }
 
-    // Get files associated with this chatbot through junction table
+    const limit = input.limit ?? 10;
+    const offset = input.offset ?? 0;
+
+    // Get total count of associated files
+    const [totalCountResult] = await ctx.db
+      .select({ count: sql<number>`count(*)` })
+      .from(chatbotFileAssociations)
+      .where(eq(chatbotFileAssociations.chatbotId, input.chatbotId));
+
+    const totalCount = Number(totalCountResult?.count || 0);
+
+    // Get paginated files associated with this chatbot through junction table
     const associatedFiles = await ctx.db
       .select({
         id: userFiles.id,
@@ -64,7 +106,12 @@ export const listForChatbotProcedure = protectedProcedure
       .from(chatbotFileAssociations)
       .innerJoin(userFiles, eq(chatbotFileAssociations.fileId, userFiles.id))
       .where(eq(chatbotFileAssociations.chatbotId, input.chatbotId))
-      .orderBy(userFiles.createdAt);
+      .orderBy(desc(userFiles.createdAt))
+      .limit(limit)
+      .offset(offset);
 
-    return associatedFiles;
+    return {
+      files: associatedFiles,
+      totalCount,
+    };
   });

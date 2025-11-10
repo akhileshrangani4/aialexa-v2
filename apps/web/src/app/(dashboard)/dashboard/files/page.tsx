@@ -7,29 +7,53 @@ import { useFilePolling } from "@/hooks/useFilePolling";
 import { useState } from "react";
 import { toast } from "sonner";
 import { UploadFileDialog } from "@/components/dashboard/files/UploadFileDialog";
-import { FileCard } from "@/components/dashboard/files/FileCard";
+import { FileTable } from "@/components/dashboard/files/FileTable";
 import { EmptyFilesState } from "@/components/dashboard/files/EmptyFilesState";
+import { PaginationControls } from "@/components/dashboard/files/PaginationControls";
+
+const ITEMS_PER_PAGE = 10;
 
 export default function FilesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
 
   // Get all user files (centralized)
   // Automatically polls for status updates when files are processing
   const {
-    data: files,
+    data: filesData,
     isLoading: filesLoading,
     refetch,
-  } = trpc.files.list.useQuery(undefined, {
-    refetchInterval: useFilePolling(),
-  });
+  } = trpc.files.list.useQuery(
+    {
+      limit: ITEMS_PER_PAGE,
+      offset: currentPage * ITEMS_PER_PAGE,
+    },
+    {
+      refetchInterval: useFilePolling(),
+    },
+  );
+
+  const files = filesData?.files || [];
+  const totalCount = filesData?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   // Delete file mutation
   const deleteFile = trpc.files.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       setDeleteDialogOpen(false);
       setFileToDelete(null);
-      refetch();
+
+      // Refetch to get updated count
+      const result = await refetch();
+      const newTotalCount = result.data?.totalCount || 0;
+      const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
+
+      // If we're on a page that no longer exists, go back to the last valid page
+      if (currentPage >= newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages - 1);
+      }
+
       toast.success("File deleted successfully");
     },
     onError: (error) => {
@@ -61,6 +85,11 @@ export default function FilesPage() {
             </h1>
             <p className="text-muted-foreground mt-2 text-lg">
               List of all of your imported and crawled files.
+              {totalCount > 0 && (
+                <span className="ml-2 font-medium text-foreground">
+                  ({totalCount} {totalCount === 1 ? "file" : "files"})
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -90,11 +119,35 @@ export default function FilesPage() {
         ) : !files || files.length === 0 ? (
           <EmptyFilesState />
         ) : (
-          <div className="space-y-4">
-            {files.map((file) => (
-              <FileCard key={file.id} file={file} onDelete={handleDelete} />
-            ))}
-          </div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {totalCount > ITEMS_PER_PAGE && (
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">
+                      Showing {files.length} of {totalCount} file
+                      {totalCount !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                )}
+                <FileTable
+                  files={files}
+                  actionType="delete"
+                  onAction={handleDelete}
+                  showCreatedDate
+                />
+                {totalPages > 1 && (
+                  <div className="mt-4">
+                    <PaginationControls
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
 

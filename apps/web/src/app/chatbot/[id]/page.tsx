@@ -41,24 +41,15 @@ export default function ChatbotDetailPage() {
     resetChat,
   } = useChatbot(chatbotId, session);
 
-  // Fetch files associated with this chatbot
-  const {
-    data: associatedFiles,
-    isLoading: filesLoading,
-    refetch: refetchFiles,
-  } = trpc.files.listForChatbot.useQuery(
-    { chatbotId },
-    {
-      enabled: !!session && !!chatbotId,
-      refetchInterval: useFilePolling(),
-    },
-  );
-
-  // Fetch all user files for selection
-  const { data: allFiles } = trpc.files.list.useQuery(undefined, {
-    enabled: !!session,
-    refetchInterval: useFilePolling(),
-  });
+  // Fetch files associated with this chatbot (will be paginated in ChatbotFilesTab)
+  const { isLoading: filesLoading, refetch: refetchFiles } =
+    trpc.files.listForChatbot.useQuery(
+      { chatbotId, limit: 1, offset: 0 },
+      {
+        enabled: !!session && !!chatbotId,
+        refetchInterval: useFilePolling(),
+      },
+    );
 
   // Generate share token mutation
   const utils = trpc.useUtils();
@@ -175,9 +166,7 @@ export default function ChatbotDetailPage() {
           <TabsContent value="files" className="mt-6">
             <ChatbotFilesTab
               chatbotId={chatbotId}
-              associatedFiles={associatedFiles}
               filesLoading={filesLoading}
-              allFiles={allFiles}
               onRefetch={refetchFiles}
             />
           </TabsContent>

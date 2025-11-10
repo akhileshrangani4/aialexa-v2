@@ -1,5 +1,5 @@
 {
-  "id": "bbde052e-e8e2-4c6f-a5ff-cc7028641ced",
+  "id": "fc7dfa0d-c687-42e5-94a0-07dd8e0f3e2b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -433,6 +433,19 @@
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "featured": {
+          "name": "featured",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "custom_author_name": {
+          "name": "custom_author_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "embed_settings": {
           "name": "embed_settings",

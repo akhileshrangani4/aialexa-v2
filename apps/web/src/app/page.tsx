@@ -25,7 +25,7 @@ export default function HomePage() {
       <TechnologySection />
       {/* Process Section */}
       <ProcessSection />
-      {/* CTA Section */}
+      {/* Github Section */}
       <GithubSection />
       {/* Footer */}
       <Footer />
