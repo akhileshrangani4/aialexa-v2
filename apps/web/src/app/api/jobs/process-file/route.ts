@@ -29,10 +29,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse job data
-    const { fileId, chatbotId } = JSON.parse(body);
+    const { fileId } = JSON.parse(body);
 
     // Process the file using shared function
-    const result = await processFile({ fileId, chatbotId });
+    const result = await processFile({ fileId });
 
     return NextResponse.json({
       success: result.success,

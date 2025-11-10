@@ -6,8 +6,10 @@ import {
   messages,
   fileChunks,
   analytics,
+  chatbotFileAssociations,
+  userFiles,
 } from "@aialexa/db/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { createOpenRouterClient } from "@aialexa/ai";
@@ -137,25 +139,37 @@ export const chatRouter = router({
         }> = [];
 
         if (queryEmbedding) {
-          const relevantChunks = await ctx.db
-            .select({
-              id: fileChunks.id,
-              content: fileChunks.content,
-              chunkIndex: fileChunks.chunkIndex,
-              metadata: fileChunks.metadata,
-            })
-            .from(fileChunks)
-            .where(eq(fileChunks.chatbotId, input.chatbotId))
-            .orderBy(
-              sql`${fileChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}`,
-            )
-            .limit(5);
+          // Get file IDs associated with this chatbot
+          const associatedFileIds = await ctx.db
+            .select({ fileId: chatbotFileAssociations.fileId })
+            .from(chatbotFileAssociations)
+            .where(eq(chatbotFileAssociations.chatbotId, input.chatbotId));
+
+          const fileIds = associatedFileIds.map((a) => a.fileId);
+
+          const relevantChunks =
+            fileIds.length > 0
+              ? await ctx.db
+                  .select({
+                    id: fileChunks.id,
+                    content: fileChunks.content,
+                    chunkIndex: fileChunks.chunkIndex,
+                    metadata: fileChunks.metadata,
+                    fileName: userFiles.fileName,
+                  })
+                  .from(fileChunks)
+                  .innerJoin(userFiles, eq(fileChunks.fileId, userFiles.id))
+                  .where(inArray(fileChunks.fileId, fileIds))
+                  .orderBy(
+                    sql`${fileChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}`,
+                  )
+                  .limit(5)
+              : [];
 
           if (relevantChunks.length > 0) {
             contextText = "\n\nRelevant context from uploaded documents:\n\n";
             relevantChunks.forEach((chunk, index: number) => {
-              const meta = chunk.metadata as Record<string, unknown> | null;
-              const fileName = (meta?.fileName as string) || "Unknown";
+              const fileName = chunk.fileName || "Unknown";
               contextText += `[${index + 1}] ${chunk.content}\n\n`;
               sources.push({
                 fileName,
@@ -358,21 +372,32 @@ export const chatRouter = router({
           );
         }
 
-        const relevantChunks = queryEmbedding
-          ? await ctx.db
-              .select({
-                id: fileChunks.id,
-                content: fileChunks.content,
-                chunkIndex: fileChunks.chunkIndex,
-                metadata: fileChunks.metadata,
-              })
-              .from(fileChunks)
-              .where(eq(fileChunks.chatbotId, chatbot.id))
-              .orderBy(
-                sql`${fileChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}`,
-              )
-              .limit(5)
-          : [];
+        // Get file IDs associated with this chatbot
+        const associatedFileIds = await ctx.db
+          .select({ fileId: chatbotFileAssociations.fileId })
+          .from(chatbotFileAssociations)
+          .where(eq(chatbotFileAssociations.chatbotId, chatbot.id));
+
+        const fileIds = associatedFileIds.map((a) => a.fileId);
+
+        const relevantChunks =
+          queryEmbedding && fileIds.length > 0
+            ? await ctx.db
+                .select({
+                  id: fileChunks.id,
+                  content: fileChunks.content,
+                  chunkIndex: fileChunks.chunkIndex,
+                  metadata: fileChunks.metadata,
+                  fileName: userFiles.fileName,
+                })
+                .from(fileChunks)
+                .innerJoin(userFiles, eq(fileChunks.fileId, userFiles.id))
+                .where(inArray(fileChunks.fileId, fileIds))
+                .orderBy(
+                  sql`${fileChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}`,
+                )
+                .limit(5)
+            : [];
 
         // Build context from RAG chunks
         let contextText = "";
@@ -385,8 +410,7 @@ export const chatRouter = router({
         if (relevantChunks.length > 0) {
           contextText = "\n\nRelevant context from uploaded documents:\n\n";
           relevantChunks.forEach((chunk, index: number) => {
-            const meta = chunk.metadata as Record<string, unknown> | null;
-            const fileName = (meta?.fileName as string) || "Unknown";
+            const fileName = chunk.fileName || "Unknown";
             contextText += `[${index + 1}] ${chunk.content}\n\n`;
             sources.push({
               fileName,

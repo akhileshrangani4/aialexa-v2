@@ -23,8 +23,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import type { ChatbotFile } from "@/types/database";
+import { MAX_FILE_SIZE } from "@/components/dashboard/files/file-constants";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_FILE_TYPES = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -87,7 +87,8 @@ export function FileUpload({
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      const errorMsg = "File size must be less than 10MB";
+      const maxSizeMB = MAX_FILE_SIZE / 1024 / 1024;
+      const errorMsg = `File size must be less than ${maxSizeMB}MB`;
       setUploadError(errorMsg);
       toast.error("File too large", {
         description: errorMsg,

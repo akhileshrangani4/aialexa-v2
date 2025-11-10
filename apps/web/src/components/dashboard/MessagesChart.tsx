@@ -1,0 +1,174 @@
+"use client";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
+import type { RouterOutputs } from "@/lib/trpc";
+
+type MessageData = RouterOutputs["analytics"]["getTotalMessagesPerMonth"];
+
+interface MessagesChartProps {
+  data: MessageData | undefined;
+  isLoading: boolean;
+  dateOffset: number;
+  onPreviousPeriod: () => void;
+  onNextPeriod: () => void;
+}
+
+export function MessagesChart({
+  data,
+  isLoading,
+  dateOffset,
+  onPreviousPeriod,
+  onNextPeriod,
+}: MessagesChartProps) {
+  // Format message data for chart
+  const chartData =
+    data?.data?.map((item) => ({
+      date: new Date(item.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      messages: item.count,
+    })) || [];
+
+  // Format date range for display
+  const dateRange =
+    data?.startDate && data?.endDate
+      ? `${new Date(data.startDate).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })} - ${new Date(data.endDate).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })}`
+      : "";
+
+  // Check if we've reached the account creation date limit
+  const hasReachedAccountCreation =
+    data?.accountCreatedAt &&
+    data?.startDate &&
+    new Date(data.startDate).getTime() <=
+      new Date(data.accountCreatedAt).getTime();
+
+  return (
+    <Card className="border-2">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-xl font-semibold">
+              Messages Sent Over Time
+            </CardTitle>
+            <CardDescription className="text-base">
+              {dateRange || "Track your chatbot usage over time"}
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onPreviousPeriod}
+              disabled={isLoading || hasReachedAccountCreation}
+              className="h-9 w-9"
+              title={
+                hasReachedAccountCreation
+                  ? "Cannot go back further than account creation date"
+                  : "Previous 30 days"
+              }
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onNextPeriod}
+              disabled={isLoading || dateOffset === 0}
+              className="h-9 w-9"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="h-[350px] flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <span className="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <p className="text-muted-foreground">Loading chart data...</p>
+            </div>
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className="h-[350px] flex items-center justify-center border-2 border-dashed border-muted rounded-lg">
+            <div className="text-center">
+              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+              <p className="text-muted-foreground font-medium">
+                No message data available yet
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Start chatting to see your analytics
+              </p>
+            </div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--muted))"
+                opacity={0.3}
+              />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                stroke="hsl(var(--border))"
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                stroke="hsl(var(--border))"
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="messages"
+                stroke="hsl(var(--primary))"
+                strokeWidth={3}
+                dot={{ r: 5, fill: "hsl(var(--primary))" }}
+                activeDot={{ r: 7 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

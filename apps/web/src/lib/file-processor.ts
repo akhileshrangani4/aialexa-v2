@@ -1,5 +1,5 @@
 import { db } from "@aialexa/db";
-import { chatbotFiles, fileChunks } from "@aialexa/db/schema";
+import { userFiles, fileChunks } from "@aialexa/db/schema";
 import { eq } from "drizzle-orm";
 import { createSupabaseClient } from "./supabase";
 import { createOpenRouterClient, createRAGService } from "@aialexa/ai";
@@ -12,24 +12,23 @@ import { logInfo, logError } from "./logger";
  */
 export async function processFile(params: {
   fileId: string;
-  chatbotId: string;
 }): Promise<{ success: boolean; chunkCount: number }> {
-  const { fileId, chatbotId } = params;
+  const { fileId } = params;
 
   try {
-    logInfo("File processing started", { fileId, chatbotId });
+    logInfo("File processing started", { fileId });
 
     // Update status to processing
     await db
-      .update(chatbotFiles)
+      .update(userFiles)
       .set({ processingStatus: "processing" })
-      .where(eq(chatbotFiles.id, fileId));
+      .where(eq(userFiles.id, fileId));
 
     // Get file from database
     const [file] = await db
       .select()
-      .from(chatbotFiles)
-      .where(eq(chatbotFiles.id, fileId))
+      .from(userFiles)
+      .where(eq(userFiles.id, fileId))
       .limit(1);
 
     if (!file) {
@@ -67,11 +66,10 @@ export async function processFile(params: {
       openrouterClient,
     );
 
-    // Store chunks with embeddings in database
+    // Store chunks with embeddings in database (no chatbotId needed)
     const chunkRecords = await Promise.all(
       chunks.map(async (chunk, index) => ({
         fileId,
-        chatbotId,
         chunkIndex: index,
         content: chunk,
         embedding: embeddings[index],
@@ -83,7 +81,7 @@ export async function processFile(params: {
 
     // Update file status to completed
     await db
-      .update(chatbotFiles)
+      .update(userFiles)
       .set({
         processingStatus: "completed",
         metadata: {
@@ -91,11 +89,10 @@ export async function processFile(params: {
           processedAt: new Date().toISOString(),
         },
       })
-      .where(eq(chatbotFiles.id, fileId));
+      .where(eq(userFiles.id, fileId));
 
     logInfo("File processing completed", {
       fileId,
-      chatbotId,
       chunkCount: chunks.length,
     });
 
@@ -104,18 +101,18 @@ export async function processFile(params: {
       chunkCount: chunks.length,
     };
   } catch (error) {
-    logError(error, "File processing failed", { fileId, chatbotId });
+    logError(error, "File processing failed", { fileId });
 
     // Update file status to failed
     await db
-      .update(chatbotFiles)
+      .update(userFiles)
       .set({
         processingStatus: "failed",
         metadata: {
           error: error instanceof Error ? error.message : String(error),
         },
       })
-      .where(eq(chatbotFiles.id, fileId));
+      .where(eq(userFiles.id, fileId));
 
     throw error;
   }

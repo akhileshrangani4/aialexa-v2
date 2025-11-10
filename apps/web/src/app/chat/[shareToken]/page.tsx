@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useChat } from "@/hooks/useChat";
-import { ChatInterface } from "@/components/chat/ChatInterface";
+import { ChatInterface } from "@/components/chat/messages/ChatInterface";
 import { WrappableText } from "@/components/ui/wrappable-text";
 import {
   Card,

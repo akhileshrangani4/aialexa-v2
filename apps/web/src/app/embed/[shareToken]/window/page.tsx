@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useChat } from "@/hooks/useChat";
-import { ChatInterface } from "@/components/chat/ChatInterface";
+import { ChatInterface } from "@/components/chat/messages/ChatInterface";
 import { EmbedLoading } from "@/components/embed/EmbedLoading";
 import { EmbedError } from "@/components/embed/EmbedError";
 import { EmbedHeader } from "@/components/embed/EmbedHeader";

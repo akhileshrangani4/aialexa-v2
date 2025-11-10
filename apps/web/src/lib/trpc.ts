@@ -6,12 +6,16 @@ import {
   httpSubscriptionLink,
 } from "@trpc/client";
 import type { AppRouter } from "@/server/routers/_app";
+import type { inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 import { env } from "./env";
 
 // Create tRPC React hooks
 export const trpc: CreateTRPCReact<AppRouter, unknown> =
   createTRPCReact<AppRouter>();
+
+// Type helper for router outputs
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 // tRPC client configuration
 export function getTRPCClientConfig() {

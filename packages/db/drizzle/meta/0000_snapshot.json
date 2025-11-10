@@ -1,5 +1,5 @@
 {
-  "id": "465962d8-0ff4-4229-9e10-f7cea00f4f5a",
+  "id": "bbde052e-e8e2-4c6f-a5ff-cc7028641ced",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -83,8 +83,12 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -145,8 +149,12 @@
           "name": "analytics_chatbot_id_chatbots_id_fk",
           "tableFrom": "analytics",
           "tableTo": "chatbots",
-          "columnsFrom": ["chatbot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "chatbot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -194,8 +202,12 @@
           "name": "approved_domains_created_by_user_id_fk",
           "tableFrom": "approved_domains",
           "tableTo": "user",
-          "columnsFrom": ["created_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -205,9 +217,77 @@
         "approved_domains_domain_unique": {
           "name": "approved_domains_domain_unique",
           "nullsNotDistinct": false,
-          "columns": ["domain"]
+          "columns": [
+            "domain"
+          ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.chatbot_file_associations": {
+      "name": "chatbot_file_associations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "chatbot_id": {
+          "name": "chatbot_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_id": {
+          "name": "file_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "chatbot_file_associations_chatbot_id_chatbots_id_fk": {
+          "name": "chatbot_file_associations_chatbot_id_chatbots_id_fk",
+          "tableFrom": "chatbot_file_associations",
+          "tableTo": "chatbots",
+          "columnsFrom": [
+            "chatbot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "chatbot_file_associations_file_id_user_files_id_fk": {
+          "name": "chatbot_file_associations_file_id_user_files_id_fk",
+          "tableFrom": "chatbot_file_associations",
+          "tableTo": "user_files",
+          "columnsFrom": [
+            "file_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -282,8 +362,12 @@
           "name": "chatbot_files_chatbot_id_chatbots_id_fk",
           "tableFrom": "chatbot_files",
           "tableTo": "chatbots",
-          "columnsFrom": ["chatbot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "chatbot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -404,8 +488,12 @@
           "name": "chatbots_user_id_user_id_fk",
           "tableFrom": "chatbots",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -415,7 +503,9 @@
         "chatbots_share_token_unique": {
           "name": "chatbots_share_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["share_token"]
+          "columns": [
+            "share_token"
+          ]
         }
       },
       "policies": {},
@@ -473,8 +563,12 @@
           "name": "conversations_chatbot_id_chatbots_id_fk",
           "tableFrom": "conversations",
           "tableTo": "chatbots",
-          "columnsFrom": ["chatbot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "chatbot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -484,7 +578,9 @@
         "conversations_session_id_unique": {
           "name": "conversations_session_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["session_id"]
+          "columns": [
+            "session_id"
+          ]
         }
       },
       "policies": {},
@@ -504,12 +600,6 @@
         },
         "file_id": {
           "name": "file_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "chatbot_id": {
-          "name": "chatbot_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -555,21 +645,16 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "file_chunks_file_id_chatbot_files_id_fk": {
-          "name": "file_chunks_file_id_chatbot_files_id_fk",
+        "file_chunks_file_id_user_files_id_fk": {
+          "name": "file_chunks_file_id_user_files_id_fk",
           "tableFrom": "file_chunks",
-          "tableTo": "chatbot_files",
-          "columnsFrom": ["file_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "file_chunks_chatbot_id_chatbots_id_fk": {
-          "name": "file_chunks_chatbot_id_chatbots_id_fk",
-          "tableFrom": "file_chunks",
-          "tableTo": "chatbots",
-          "columnsFrom": ["chatbot_id"],
-          "columnsTo": ["id"],
+          "tableTo": "user_files",
+          "columnsFrom": [
+            "file_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -630,8 +715,12 @@
           "name": "messages_conversation_id_conversations_id_fk",
           "tableFrom": "messages",
           "tableTo": "conversations",
-          "columnsFrom": ["conversation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -703,8 +792,12 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -714,7 +807,9 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
@@ -794,9 +889,97 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_files": {
+      "name": "user_files",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_type": {
+          "name": "file_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_size": {
+          "name": "file_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "storage_path": {
+          "name": "storage_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "processing_status": {
+          "name": "processing_status",
+          "type": "processing_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_files_user_id_user_id_fk": {
+          "name": "user_files_user_id_user_id_fk",
+          "tableFrom": "user_files",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -857,17 +1040,29 @@
     "public.processing_status": {
       "name": "processing_status",
       "schema": "public",
-      "values": ["pending", "processing", "completed", "failed"]
+      "values": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": ["user", "admin"]
+      "values": [
+        "user",
+        "admin"
+      ]
     },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
-      "values": ["pending", "approved", "rejected"]
+      "values": [
+        "pending",
+        "approved",
+        "rejected"
+      ]
     }
   },
   "schemas": {},
