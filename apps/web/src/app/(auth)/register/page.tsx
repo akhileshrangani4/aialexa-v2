@@ -13,8 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useState, useMemo, useEffect } from "react";
+import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { AlertCircle } from "lucide-react";
 import { validatePasswordStrength } from "@/lib/password/password-strength";
@@ -23,12 +23,20 @@ import { PasswordRequirementsList } from "@/components/dashboard/settings/Passwo
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { data: session, isPending: sessionLoading } = useSession();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!sessionLoading && session) {
+      router.push("/dashboard");
+    }
+  }, [session, sessionLoading, router]);
 
   // Real-time password validation
   const passwordValidation = useMemo(() => {
@@ -140,6 +148,15 @@ export default function RegisterPage() {
 
   // Password requirements checklist
   const passwordRequirements = passwordValidation?.requirements || [];
+
+  // Don't render registration form if session is loading or user is already authenticated
+  if (sessionLoading || session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary">

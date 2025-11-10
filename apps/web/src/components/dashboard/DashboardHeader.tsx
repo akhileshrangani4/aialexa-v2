@@ -63,7 +63,7 @@ export function DashboardHeader() {
           <span className="text-xl font-bold text-foreground">AI Tutor</span>
         </Link>
         <Link
-          href="/support"
+          href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || ""}`}
           className="ml-2 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
         >
           Support
