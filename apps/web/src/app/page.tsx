@@ -1,11 +1,11 @@
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
-import ImageSection from "@/components/landing/ImageSection";
+import ChatbotsShowcase from "@/components/landing/ChatbotsShowcase";
 import StatsSection from "@/components/landing/StatsSection";
 import TechnologySection from "@/components/landing/TechnologySection";
 import ProcessSection from "@/components/landing/ProcessSection";
-import CTASection from "@/components/landing/CTASection";
+import GithubSection from "@/components/landing/GithubSection";
 import Footer from "@/components/landing/Footer";
 
 export default function HomePage() {
@@ -13,12 +13,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       {/* Navbar */}
       <Navbar />
-      {/* Hero Section */}
+      {/* Hero Section with background image and gradient */}
       <HeroSection />
       {/* Features Section */}
       <FeaturesSection />
-      {/* Image Section */}
-      <ImageSection />
+      {/* Chatbots Showcase Section */}
+      <ChatbotsShowcase />
       {/* Stats Section */}
       <StatsSection />
       {/* Technology Section */}
@@ -26,7 +26,7 @@ export default function HomePage() {
       {/* Process Section */}
       <ProcessSection />
       {/* CTA Section */}
-      <CTASection />
+      <GithubSection />
       {/* Footer */}
       <Footer />
     </div>
