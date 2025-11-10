@@ -1,14 +1,16 @@
 import * as React from "react";
 
-interface ApprovalConfirmationProps {
+interface DemoteFromAdminProps {
   userName: string;
   loginUrl: string;
+  supportEmail: string;
 }
 
-export function ApprovalConfirmation({
+export function DemoteFromAdmin({
   userName,
   loginUrl,
-}: ApprovalConfirmationProps) {
+  supportEmail,
+}: DemoteFromAdminProps) {
   return (
     <html>
       {/* eslint-disable-next-line @next/next/no-head-element */}
@@ -29,36 +31,36 @@ export function ApprovalConfirmation({
               <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                Great news! Your AIAlexa account has been approved by an
-                administrator. You can now log in and start creating AI-powered
-                chatbots for your courses.
+                I&apos;m writing to inform you that your administrator
+                privileges have been removed from your AIAlexa account. Your
+                account has been converted to a regular user account.
               </p>
 
-              <p style={text}>What you can do now:</p>
+              <p style={text}>What this means:</p>
               <ul style={list}>
-                <li>
-                  Create intelligent chatbots powered by multiple AI models
-                </li>
-                <li>Upload course materials (PDFs, Word docs, and more)</li>
-                <li>Share chatbots with your students via simple links</li>
-                <li>Track conversations and analyze student interactions</li>
+                <li>You can still access your account and chatbots</li>
+                <li>You retain all your existing chatbots and data</li>
+                <li>You no longer have access to admin features</li>
+                <li>You cannot manage users or system settings</li>
               </ul>
 
               <p style={text}>
-                You can log in here:{" "}
+                You can still log in to your account here:{" "}
                 <a href={loginUrl} style={link}>
                   {loginUrl}
                 </a>
               </p>
 
               <p style={text}>
-                If you have any questions or need assistance, please don&apos;t
-                hesitate to reach out.
+                If you believe this change was made in error or have any
+                questions, please contact us at{" "}
+                <a href={`mailto:${supportEmail}`} style={link}>
+                  {supportEmail}
+                </a>
+                .
               </p>
 
-              <p style={text}>
-                Welcome to AIAlexa! We&apos;re excited to have you on board.
-              </p>
+              <p style={text}>Thank you for your understanding.</p>
 
               <p style={signature}>
                 Best regards,
@@ -73,7 +75,7 @@ export function ApprovalConfirmation({
   );
 }
 
-export default ApprovalConfirmation;
+export default DemoteFromAdmin;
 
 const body = {
   fontFamily: 'Georgia, "Times New Roman", serif',

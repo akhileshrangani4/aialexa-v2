@@ -1,18 +1,14 @@
 import * as React from "react";
 
-interface UserRegistrationNotificationProps {
+interface AccountDeletedProps {
   userName: string;
-  userEmail: string;
-  registrationDate: string;
-  adminUrl: string;
+  supportEmail: string;
 }
 
-export function UserRegistrationNotification({
+export function AccountDeleted({
   userName,
-  userEmail,
-  registrationDate,
-  adminUrl,
-}: UserRegistrationNotificationProps) {
+  supportEmail,
+}: AccountDeletedProps) {
   return (
     <html>
       {/* eslint-disable-next-line @next/next/no-head-element */}
@@ -30,35 +26,46 @@ export function UserRegistrationNotification({
         >
           <tr>
             <td style={cell}>
-              <p style={text}>Hi,</p>
+              <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                A new user has registered and is awaiting approval:
+                This email confirms that your AIAlexa account has been
+                permanently deleted as requested by an administrator.
               </p>
 
-              <p style={text}>
-                <strong>Name:</strong> {userName}
-                <br />
-                <strong>Email:</strong> {userEmail}
-                <br />
-                <strong>Registration Date:</strong> {registrationDate}
-              </p>
+              <p style={text}>The following has been deleted:</p>
+              <ul style={list}>
+                <li>Your user account and authentication data</li>
+                <li>All chatbots created by you</li>
+                <li>All uploaded files and embeddings</li>
+                <li>All conversations and messages</li>
+                <li>All analytics data</li>
+              </ul>
 
               <p style={text}>
-                Please review and approve or reject this registration request.
-              </p>
-
-              <p style={text}>
-                You can access the admin dashboard here:{" "}
-                <a href={adminUrl} style={link}>
-                  {adminUrl}
+                <strong>Important:</strong> This action cannot be undone. If you
+                believe this deletion was made in error, please contact us
+                immediately at{" "}
+                <a href={`mailto:${supportEmail}`} style={link}>
+                  {supportEmail}
                 </a>
+                .
+              </p>
+
+              <p style={text}>
+                If you wish to use AIAlexa again in the future, you will need to
+                register a new account.
+              </p>
+
+              <p style={text}>
+                We&apos;re sorry to see you go. Thank you for being part of the
+                AIAlexa community.
               </p>
 
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa
+                AIAlexa Team
               </p>
             </td>
           </tr>
@@ -68,7 +75,7 @@ export function UserRegistrationNotification({
   );
 }
 
-export default UserRegistrationNotification;
+export default AccountDeleted;
 
 const body = {
   fontFamily: 'Georgia, "Times New Roman", serif',
@@ -91,6 +98,14 @@ const cell = {
 
 const text = {
   margin: "0 0 16px",
+  color: "#333333",
+  fontSize: "16px",
+  lineHeight: "1.6",
+};
+
+const list = {
+  margin: "0 0 16px",
+  paddingLeft: "24px",
   color: "#333333",
   fontSize: "16px",
   lineHeight: "1.6",
