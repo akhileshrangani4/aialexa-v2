@@ -6,15 +6,17 @@ export type MarkdownProps = {
   children: string;
   className?: string;
   parseIncompleteMarkdown?: boolean;
+  style?: React.CSSProperties;
 };
 
 function MarkdownComponent({
   children,
   className,
   parseIncompleteMarkdown = false,
+  style,
 }: MarkdownProps) {
   return (
-    <div className={cn("streamdown-content", className)}>
+    <div className={cn("streamdown-content", className)} style={style}>
       <Streamdown parseIncompleteMarkdown={parseIncompleteMarkdown}>
         {children}
       </Streamdown>

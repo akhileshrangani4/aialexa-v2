@@ -25,6 +25,7 @@ export default function SharedChatPage() {
     chatbot,
     chatbotLoading,
     handleSendMessage,
+    resetChat,
     error,
   } = useChat(shareToken);
 
@@ -73,7 +74,7 @@ export default function SharedChatPage() {
 
   return (
     <div className="min-h-screen bg-secondary">
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -94,6 +95,8 @@ export default function SharedChatPage() {
           handleSendMessage={handleSendMessage}
           messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
           chatbotName={chatbot.name || "Chatbot"}
+          resetChat={resetChat}
+          height="h-[600px] md:h-[700px] lg:h-[800px]"
         />
 
         {/* Footer */}

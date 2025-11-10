@@ -21,6 +21,8 @@ import { Trash2 } from "lucide-react";
 
 interface ChatbotSettingsProps {
   chatbot: {
+    name: string;
+    description: string | null;
     model: string;
     systemPrompt: string;
     temperature: number | null;
@@ -39,6 +41,8 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Editable state
+  const [name, setName] = useState(chatbot.name);
+  const [description, setDescription] = useState(chatbot.description ?? "");
   const [model, setModel] = useState(chatbot.model);
   const [systemPrompt, setSystemPrompt] = useState(chatbot.systemPrompt);
   const [temperature, setTemperature] = useState(
@@ -50,6 +54,8 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
 
   // Update local state when chatbot prop changes
   useEffect(() => {
+    setName(chatbot.name);
+    setDescription(chatbot.description ?? "");
     setModel(chatbot.model);
     setSystemPrompt(chatbot.systemPrompt);
     setTemperature(chatbot.temperature?.toString() ?? "70");
@@ -150,6 +156,27 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     const tempValue = parseFloat(temperature);
     const tokensValue = parseInt(maxTokens);
 
+    if (!name.trim()) {
+      toast.error("Name is required", {
+        description: "Please provide a name for your chatbot",
+      });
+      return;
+    }
+
+    if (name.length > 100) {
+      toast.error("Name is too long", {
+        description: "Name must be 100 characters or less",
+      });
+      return;
+    }
+
+    if (description && description.length > 500) {
+      toast.error("Description is too long", {
+        description: "Description must be 500 characters or less",
+      });
+      return;
+    }
+
     if (isNaN(tempValue) || tempValue < 0 || tempValue > 100) {
       toast.error("Invalid temperature", {
         description: "Temperature must be between 0 and 100",
@@ -174,6 +201,8 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     updateChatbot.mutate({
       id: chatbotId,
       data: {
+        name: name.trim(),
+        description: description.trim() || undefined,
         model: model as SupportedModel,
         systemPrompt,
         temperature: tempValue,
@@ -183,6 +212,8 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   };
 
   const handleCancel = () => {
+    setName(chatbot.name);
+    setDescription(chatbot.description ?? "");
     setModel(chatbot.model);
     setSystemPrompt(chatbot.systemPrompt);
     setTemperature(chatbot.temperature?.toString() ?? "70");
@@ -194,43 +225,99 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     <div className="space-y-6">
       {/* Configuration Settings Card */}
       <div className="space-y-6 p-6 bg-muted/30 rounded-lg border">
-        {/* Model with Edit Button */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="model" className="text-base font-semibold">
-              Model
-            </Label>
-            {/* Edit/Save/Cancel buttons */}
-            <div className="flex gap-2">
-              {!isEditing ? (
+        {/* Header with Edit Button */}
+        <div className="flex items-center justify-between pb-4 border-b">
+          <div>
+            <h3 className="text-lg font-semibold">Configuration</h3>
+            <p className="text-xs text-muted-foreground">
+              Manage your chatbot settings
+            </p>
+          </div>
+          {/* Edit/Save/Cancel buttons */}
+          <div className="flex gap-2">
+            {!isEditing ? (
+              <Button
+                onClick={() => setIsEditing(true)}
+                variant="outline"
+                size="sm"
+              >
+                Edit Settings
+              </Button>
+            ) : (
+              <>
                 <Button
-                  onClick={() => setIsEditing(true)}
+                  onClick={handleCancel}
                   variant="outline"
                   size="sm"
+                  disabled={updateChatbot.isPending}
                 >
-                  Edit Settings
+                  Cancel
                 </Button>
-              ) : (
-                <>
-                  <Button
-                    onClick={handleCancel}
-                    variant="outline"
-                    size="sm"
-                    disabled={updateChatbot.isPending}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSave}
-                    size="sm"
-                    disabled={updateChatbot.isPending}
-                  >
-                    {updateChatbot.isPending ? "Saving..." : "Save Changes"}
-                  </Button>
-                </>
-              )}
-            </div>
+                <Button
+                  onClick={handleSave}
+                  size="sm"
+                  disabled={updateChatbot.isPending}
+                >
+                  {updateChatbot.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </>
+            )}
           </div>
+        </div>
+
+        {/* Name */}
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-base font-semibold">
+            Name
+          </Label>
+          <p className="text-xs text-muted-foreground mb-2">
+            The display name for your chatbot
+          </p>
+          {isEditing ? (
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter chatbot name"
+              maxLength={100}
+            />
+          ) : (
+            <div className="px-3 py-2 bg-background rounded-md border">
+              <p className="text-sm">{name}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Description */}
+        <div className="space-y-2">
+          <Label htmlFor="description" className="text-base font-semibold">
+            Description
+          </Label>
+          <p className="text-xs text-muted-foreground mb-2">
+            A brief description of what your chatbot does
+          </p>
+          {isEditing ? (
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter chatbot description (optional)"
+              rows={3}
+              maxLength={500}
+              className="resize-none"
+            />
+          ) : (
+            <div className="px-3 py-2 bg-background rounded-md border">
+              <p className="text-sm">{description || "No description"}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Model */}
+        <div className="space-y-2">
+          <Label htmlFor="model" className="text-base font-semibold">
+            Model
+          </Label>
           <p className="text-xs text-muted-foreground mb-2">
             Choose the AI model to power your chatbot
           </p>

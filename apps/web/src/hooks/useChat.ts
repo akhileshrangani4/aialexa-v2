@@ -119,6 +119,16 @@ export function useChat(shareToken: string) {
     sendMessageWithStreaming(userMessage);
   };
 
+  const resetChat = () => {
+    setMessages([]);
+    setCurrentMessage("");
+    setSessionId("");
+    setIsStreaming(false);
+    setStreamingContent("");
+    setMessageToSend(null);
+    sourcesRef.current = [];
+  };
+
   return {
     messages,
     currentMessage,
@@ -129,6 +139,7 @@ export function useChat(shareToken: string) {
     chatbot,
     chatbotLoading,
     handleSendMessage,
+    resetChat,
     error: chatbotError,
   };
 }

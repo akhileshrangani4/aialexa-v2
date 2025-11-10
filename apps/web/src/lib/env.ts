@@ -42,6 +42,8 @@ const envSchema = z.object({
   ALLOWED_EMAIL_DOMAINS: z.string().default(".edu,.ac.in,.edu.in"),
   ADMIN_EMAILS: z.string().min(1), // Comma-separated list of admin emails
   MAX_FILE_SIZE_MB: z.string().default("10"),
+  NEXT_PUBLIC_GITHUB_URL: z.string().url().optional(),
+  NEXT_PUBLIC_CONTACT_EMAIL: z.string().email().optional(),
 
   NODE_ENV: z
     .enum(["development", "production", "test"])

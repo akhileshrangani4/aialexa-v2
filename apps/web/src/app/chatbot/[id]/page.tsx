@@ -35,6 +35,7 @@ export default function ChatbotDetailPage() {
     chatbot,
     chatbotLoading,
     handleSendMessage,
+    resetChat,
   } = useChatbot(chatbotId, session);
 
   // Fetch files
@@ -133,6 +134,7 @@ export default function ChatbotDetailPage() {
               handleSendMessage={handleSendMessage}
               messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
               chatbotName={chatbot.name || "Chatbot"}
+              resetChat={resetChat}
             />
           </TabsContent>
 
@@ -162,6 +164,8 @@ export default function ChatbotDetailPage() {
               <CardContent>
                 <ChatbotSettings
                   chatbot={{
+                    name: chatbot.name,
+                    description: chatbot.description,
                     model: chatbot.model,
                     systemPrompt: chatbot.systemPrompt,
                     temperature: chatbot.temperature,

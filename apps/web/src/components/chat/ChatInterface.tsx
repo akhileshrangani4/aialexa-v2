@@ -6,6 +6,8 @@ import {
   ChatContainerContent,
   ChatContainerScrollAnchor,
 } from "@/components/ui/chat-container";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 interface ChatInterfaceProps {
   messages: MessageType[];
@@ -16,6 +18,8 @@ interface ChatInterfaceProps {
   handleSendMessage: (e: React.FormEvent) => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   chatbotName: string;
+  resetChat: () => void;
+  height?: string;
 }
 
 export function ChatInterface({
@@ -27,9 +31,27 @@ export function ChatInterface({
   handleSendMessage,
   messagesEndRef,
   chatbotName,
+  resetChat,
+  height = "h-[600px]",
 }: ChatInterfaceProps) {
   return (
-    <div className="flex flex-col h-[600px] border rounded-lg bg-background">
+    <div className={`flex flex-col ${height} border rounded-lg bg-background`}>
+      {/* Header with Reset Button */}
+      {messages.length > 0 && (
+        <div className="flex justify-end items-center px-4 py-2.5 border-b bg-muted/30">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetChat}
+            disabled={isStreaming}
+            className="h-8 px-3 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-background border-border/50 hover:border-border transition-all duration-200"
+          >
+            <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+            New Chat
+          </Button>
+        </div>
+      )}
+
       {/* Messages Container */}
       <ChatContainerRoot className="flex-1 p-4">
         <ChatContainerContent>

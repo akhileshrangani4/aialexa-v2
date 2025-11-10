@@ -113,6 +113,16 @@ export function useChatbot(
     sendMessageWithStreaming(userMessage);
   };
 
+  const resetChat = () => {
+    setMessages([]);
+    setCurrentMessage("");
+    setSessionId("");
+    setIsStreaming(false);
+    setStreamingContent("");
+    setMessageToSend(null);
+    sourcesRef.current = [];
+  };
+
   return {
     messages,
     currentMessage,
@@ -123,5 +133,6 @@ export function useChatbot(
     chatbot,
     chatbotLoading,
     handleSendMessage,
+    resetChat,
   };
 }

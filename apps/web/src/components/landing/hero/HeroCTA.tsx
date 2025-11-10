@@ -34,4 +34,3 @@ export default function HeroCTA({ delay = 0.6 }: HeroCTAProps) {
     </motion.div>
   );
 }
-

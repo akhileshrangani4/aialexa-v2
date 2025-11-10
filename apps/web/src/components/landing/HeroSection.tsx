@@ -1,23 +1,23 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BACKGROUND_IMAGE } from './hero/constants';
-import { buildGradient } from './hero/utils';
-import HeroHeading from './hero/HeroHeading';
-import HeroSubheading from './hero/HeroSubheading';
-import HeroCTA from './hero/HeroCTA';
-import UsedBySection from './hero/UsedBySection';
+import { BACKGROUND_IMAGE } from "./hero/constants";
+import { buildGradient } from "./hero/utils";
+import HeroHeading from "./hero/HeroHeading";
+import HeroSubheading from "./hero/HeroSubheading";
+import HeroCTA from "./hero/HeroCTA";
+import UsedBySection from "./hero/UsedBySection";
 
 export default function HeroSection() {
   return (
-    <section 
+    <section
       className="min-h-screen flex flex-col items-center justify-center px-6 md:px-12 relative overflow-hidden"
       style={{
         backgroundImage: `${buildGradient()}, url('${BACKGROUND_IMAGE}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'scroll',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "scroll",
       }}
     >
       <div className="max-w-7xl mx-auto w-full relative z-10 min-h-screen flex flex-col">

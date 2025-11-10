@@ -57,6 +57,7 @@ const MessageContent = ({
   markdown = false,
   parseIncompleteMarkdown = false,
   className,
+  style,
   ...props
 }: MessageContentProps) => {
   const classNames = cn(
@@ -64,16 +65,23 @@ const MessageContent = ({
     className,
   );
 
+  const combinedStyle: React.CSSProperties = {
+    wordBreak: "break-word",
+    overflowWrap: "anywhere" as React.CSSProperties["overflowWrap"],
+    ...style,
+  };
+
   return markdown ? (
     <Markdown
       className={classNames}
       parseIncompleteMarkdown={parseIncompleteMarkdown}
+      style={combinedStyle}
       {...props}
     >
       {children as string}
     </Markdown>
   ) : (
-    <div className={classNames} {...props}>
+    <div className={classNames} style={combinedStyle} {...props}>
       {children}
     </div>
   );

@@ -36,7 +36,7 @@ export function ChatInput({
       <div className="flex items-end gap-2 w-full">
         <PromptInputTextarea
           placeholder="Ask me anything..."
-          className="flex-1 text-foreground min-h-[60px]"
+          className="flex-1 text-foreground min-h-[120px] scrollbar-thin"
         />
         <PromptInputActions>
           <Button
