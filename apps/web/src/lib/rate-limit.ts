@@ -45,6 +45,42 @@ export const passwordUpdateRateLimit = new Ratelimit({
   prefix: "@ratelimit/password-update",
 });
 
+// Rate limiter for login attempts
+// 5 attempts per 15 minutes per IP (prevents brute force)
+export const loginRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "15 m"),
+  analytics: true,
+  prefix: "@ratelimit/login",
+});
+
+// Rate limiter for registration attempts
+// 3 registrations per hour per IP (prevents spam accounts)
+export const registrationRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "1 h"),
+  analytics: true,
+  prefix: "@ratelimit/registration",
+});
+
+// Rate limiter for authenticated chat messages
+// 30 messages per minute per user (prevents abuse)
+export const authenticatedChatRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, "1 m"),
+  analytics: true,
+  prefix: "@ratelimit/authenticated-chat",
+});
+
+// Rate limiter for admin actions
+// 20 actions per minute per admin (prevents abuse)
+export const adminActionRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, "1 m"),
+  analytics: true,
+  prefix: "@ratelimit/admin-action",
+});
+
 /**
  * Check rate limit and log if exceeded
  */

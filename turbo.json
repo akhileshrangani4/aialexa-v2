@@ -6,7 +6,22 @@
     "NODE_ENV",
     "ENABLE_LOGGING",
     "PORT",
-    "SKIP_ENV_VALIDATION"
+    "SKIP_ENV_VALIDATION",
+    "DATABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "OPENAI_API_KEY",
+    "RESEND_API_KEY",
+    "RESEND_FROM_EMAIL",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "QSTASH_URL",
+    "QSTASH_TOKEN",
+    "QSTASH_CURRENT_SIGNING_KEY",
+    "QSTASH_NEXT_SIGNING_KEY",
+    "ALLOWED_EMAIL_DOMAINS",
+    "ADMIN_EMAILS"
   ],
   "tasks": {
     "build": {
@@ -18,7 +33,22 @@
         "NODE_ENV",
         "ENABLE_LOGGING",
         "PORT",
-        "SKIP_ENV_VALIDATION"
+        "SKIP_ENV_VALIDATION",
+        "DATABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "OPENAI_API_KEY",
+        "RESEND_API_KEY",
+        "RESEND_FROM_EMAIL",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "QSTASH_URL",
+        "QSTASH_TOKEN",
+        "QSTASH_CURRENT_SIGNING_KEY",
+        "QSTASH_NEXT_SIGNING_KEY",
+        "ALLOWED_EMAIL_DOMAINS",
+        "ADMIN_EMAILS"
       ]
     },
     "lint": {
