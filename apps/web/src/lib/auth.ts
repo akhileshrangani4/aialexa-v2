@@ -10,6 +10,7 @@ import {
   sendRejectionEmail,
 } from "./email";
 import { eq } from "drizzle-orm";
+import * as bcrypt from "bcryptjs";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -24,6 +25,20 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // We're using approval instead
+    password: {
+      hash: async (password: string) => {
+        return await bcrypt.hash(password, 12);
+      },
+      verify: async ({
+        hash,
+        password,
+      }: {
+        hash: string;
+        password: string;
+      }) => {
+        return await bcrypt.compare(password, hash);
+      },
+    },
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,

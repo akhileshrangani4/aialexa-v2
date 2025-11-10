@@ -13,18 +13,26 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useState, useEffect } from "react";
+import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, isPending: sessionLoading } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const utils = trpc.useUtils();
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!sessionLoading && session) {
+      router.push("/dashboard");
+    }
+  }, [session, sessionLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,6 +131,15 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // Don't render login form if session is loading or user is already authenticated
+  if (sessionLoading || session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary">

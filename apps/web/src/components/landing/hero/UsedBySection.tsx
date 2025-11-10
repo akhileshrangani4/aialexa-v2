@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { UNIVERSITIES } from './constants';
+import { UNIVERSITIES } from "./constants";
 
 interface UsedBySectionProps {
   delay?: number;
@@ -20,7 +20,7 @@ export default function UsedBySection({ delay = 0.6 }: UsedBySectionProps) {
         <p className="text-sm font-medium text-black/70 whitespace-nowrap z-10">
           Trusted By Professors At
         </p>
-        
+
         <div className="flex items-center gap-6 md:gap-8 lg:gap-10 flex-wrap justify-center">
           {UNIVERSITIES.map((university, index) => (
             <motion.div
@@ -46,4 +46,3 @@ export default function UsedBySection({ delay = 0.6 }: UsedBySectionProps) {
     </motion.div>
   );
 }
-

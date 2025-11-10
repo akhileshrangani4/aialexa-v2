@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "@/lib/providers";
 
 const inter = Inter({ subsets: ["latin"] });
-const instrumentSerif = Instrument_Serif({ 
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-instrument-serif",
@@ -80,12 +80,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [
-      { url: "/logo.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/logo.png", type: "image/png", sizes: "180x180" },
-    ],
+    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/logo.png", type: "image/png", sizes: "180x180" }],
     shortcut: "/logo.svg",
   },
   category: "education",

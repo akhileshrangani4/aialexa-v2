@@ -10,14 +10,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { trpc } from "@/lib/trpc";
 import { useSession } from "@/lib/auth-client";
 import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
 import { useChatbot } from "@/hooks/useChatbot";
-import { ChatInterface } from "@/components/chat/ChatInterface";
-import { FileUpload } from "@/components/chat/FileUpload";
-import { ChatbotSettings } from "@/components/chat/ChatbotSettings";
+import { ChatInterface } from "@/components/chat/messages/ChatInterface";
+import { ChatbotSettings } from "@/components/chat/settings/ChatbotSettings";
+import { EmbedCode } from "@/components/chat/sharing/EmbedCode";
+import { ShareLinkSection } from "@/components/chat/sharing/ShareLinkSection";
+import { ChatbotFilesTab } from "@/components/chat/files/ChatbotFilesTab";
+import { WrappableText } from "@/components/ui/wrappable-text";
+import { trpc } from "@/lib/trpc";
+import { useFilePolling } from "@/hooks/useFilePolling";
 
 export default function ChatbotDetailPage() {
   const router = useRouter();
@@ -35,28 +38,34 @@ export default function ChatbotDetailPage() {
     chatbot,
     chatbotLoading,
     handleSendMessage,
+    resetChat,
   } = useChatbot(chatbotId, session);
 
-  // Fetch files
-  const {
-    data: files,
-    isLoading: filesLoading,
-    refetch: refetchFiles,
-  } = trpc.files.list.useQuery({ chatbotId }, { enabled: !!session });
+  // Fetch files associated with this chatbot (will be paginated in ChatbotFilesTab)
+  const { isLoading: filesLoading, refetch: refetchFiles } =
+    trpc.files.listForChatbot.useQuery(
+      { chatbotId, limit: 1, offset: 0 },
+      {
+        enabled: !!session && !!chatbotId,
+        refetchInterval: useFilePolling(),
+      },
+    );
 
-  // Upload file mutation
-  const uploadFile = trpc.files.upload.useMutation({
-    onSuccess: () => {
-      refetchFiles();
+  // Generate share token mutation
+  const utils = trpc.useUtils();
+  const generateShareToken = trpc.chatbot.generateShareToken.useMutation({
+    onSuccess: async () => {
+      await utils.chatbot.get.invalidate({ id: chatbotId });
+      await utils.chatbot.getById.invalidate({ id: chatbotId });
+    },
+    onError: () => {
+      // Error handling is done in ShareLinkSection component
     },
   });
 
-  // Delete file mutation
-  const deleteFile = trpc.files.delete.useMutation({
-    onSuccess: () => {
-      refetchFiles();
-    },
-  });
+  const handleEnableSharing = () => {
+    generateShareToken.mutate({ id: chatbotId });
+  };
 
   // Loading state
   if (sessionLoading || chatbotLoading) {
@@ -76,54 +85,70 @@ export default function ChatbotDetailPage() {
   // Not found
   if (!chatbot) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card>
-          <CardHeader>
-            <CardTitle>Chatbot Not Found</CardTitle>
-            <CardDescription>
-              The chatbot you&apos;re looking for doesn&apos;t exist.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/dashboard">
-              <Button>Back to Dashboard</Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="flex-1 p-8 bg-gradient-to-b from-background to-muted/20">
+        <div className="max-w-7xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle>Chatbot Not Found</CardTitle>
+              <CardDescription>
+                The chatbot you&apos;re looking for doesn&apos;t exist.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => router.push("/dashboard")}>
+                Back to Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="flex-1 p-8 bg-gradient-to-b from-background to-muted/20">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="mb-8">
-          <Link href="/dashboard">
-            <Button variant="ghost" className="mb-4">
-              ← Back to Dashboard
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold text-foreground">{chatbot.name}</h1>
-          <p className="text-muted-foreground mt-2">{chatbot.description}</p>
-          <div className="flex gap-2 mt-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold text-foreground tracking-tight">
+              {chatbot.name}
+            </h1>
+          </div>
+          <p className="text-muted-foreground mt-2 text-lg">
+            <WrappableText>{chatbot.description}</WrappableText>
+          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-4">
             <Badge>{chatbot.model}</Badge>
-            {chatbot.shareToken && (
+            {chatbot.sharingEnabled && (
               <Badge variant="outline">Sharing Enabled</Badge>
             )}
+          </div>
+
+          {/* Share Link Section */}
+          <div className="mt-6">
+            <ShareLinkSection
+              shareToken={chatbot.shareToken}
+              sharingEnabled={chatbot.sharingEnabled}
+              onEnableSharing={handleEnableSharing}
+              isEnabling={generateShareToken.isPending}
+            />
           </div>
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="chat" className="space-y-4">
-          <TabsList>
+        <Tabs defaultValue="chat" className="space-y-6">
+          <TabsList className="bg-white border border-border">
             <TabsTrigger value="chat">Chat</TabsTrigger>
             <TabsTrigger value="files">Files</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            {chatbot.sharingEnabled && chatbot.shareToken && (
+              <TabsTrigger value="embed">Embed</TabsTrigger>
+            )}
           </TabsList>
 
           {/* Chat Tab */}
-          <TabsContent value="chat">
+          <TabsContent value="chat" className="mt-6">
             <ChatInterface
               messages={messages}
               isStreaming={isStreaming}
@@ -133,27 +158,21 @@ export default function ChatbotDetailPage() {
               handleSendMessage={handleSendMessage}
               messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
               chatbotName={chatbot.name || "Chatbot"}
+              resetChat={resetChat}
             />
           </TabsContent>
 
           {/* Files Tab */}
-          <TabsContent value="files">
-            <Card>
-              <CardHeader>
-                <FileUpload
-                  chatbotId={chatbotId}
-                  files={files || []}
-                  filesLoading={filesLoading}
-                  refetchFiles={refetchFiles}
-                  uploadFile={uploadFile}
-                  deleteFile={deleteFile}
-                />
-              </CardHeader>
-            </Card>
+          <TabsContent value="files" className="mt-6">
+            <ChatbotFilesTab
+              chatbotId={chatbotId}
+              filesLoading={filesLoading}
+              onRefetch={refetchFiles}
+            />
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings">
+          <TabsContent value="settings" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle>Chatbot Settings</CardTitle>
@@ -162,16 +181,37 @@ export default function ChatbotDetailPage() {
               <CardContent>
                 <ChatbotSettings
                   chatbot={{
+                    name: chatbot.name,
+                    description: chatbot.description,
                     model: chatbot.model,
                     systemPrompt: chatbot.systemPrompt,
                     temperature: chatbot.temperature,
                     maxTokens: chatbot.maxTokens,
                     shareToken: chatbot.shareToken,
+                    sharingEnabled: chatbot.sharingEnabled,
                   }}
                 />
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Embed Tab */}
+          {chatbot.sharingEnabled && chatbot.shareToken && (
+            <TabsContent value="embed" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Embed On Website</CardTitle>
+                  <CardDescription>
+                    Copy and paste the code below to embed your chatbot on any
+                    website
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <EmbedCode shareToken={chatbot.shareToken} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

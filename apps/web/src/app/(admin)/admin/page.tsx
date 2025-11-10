@@ -1,99 +1,45 @@
 "use client";
 
-import { useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { PendingUsersTab } from "@/components/admin/PendingUsersTab";
-import { AllChatbotsTab } from "@/components/admin/AllChatbotsTab";
-import { AllowedDomainsTab } from "@/components/admin/AllowedDomainsTab";
-import { AdminHeader } from "@/components/admin/AdminHeader";
+import { PendingUsersTab } from "@/components/admin/tabs/PendingUsersTab";
+import { AllChatbotsTab } from "@/components/admin/tabs/AllChatbotsTab";
+import { AllowedDomainsTab } from "@/components/admin/tabs/AllowedDomainsTab";
+import { Shield } from "lucide-react";
 
 export default function AdminPage() {
-  const router = useRouter();
-  const { data: session, isPending: sessionLoading } = useSession();
-
-  // Redirect to login if no session
-  useEffect(() => {
-    if (!sessionLoading && !session) {
-      router.push("/login");
-    }
-  }, [session, sessionLoading, router]);
-
-  // Loading state
-  if (sessionLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  // Check if user is admin
-  if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Redirecting...</p>
-      </div>
-    );
-  }
-
-  // Type assertion for extended user fields
-  const user = session.user as typeof session.user & {
-    role: "user" | "admin";
-    status: "pending" | "approved" | "rejected";
-  };
-
-  if (user.role !== "admin") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card>
-          <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>
-              You don&apos;t have permission to access this page.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/dashboard">
-              <Button>Back to Dashboard</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <AdminHeader />
+    <div className="flex-1 p-8 bg-gradient-to-b from-background to-muted/20">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Shield className="h-8 w-8 text-primary" />
+            <h1 className="text-4xl font-bold text-foreground tracking-tight">
+              Admin Dashboard
+            </h1>
+          </div>
+          <p className="text-muted-foreground mt-2 text-lg">
+            Manage users, chatbots, and system settings
+          </p>
+        </div>
 
+        {/* Tabs */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList>
+          <TabsList className="bg-white border border-border">
             <TabsTrigger value="users">Pending Users</TabsTrigger>
             <TabsTrigger value="chatbots">All Chatbots</TabsTrigger>
             <TabsTrigger value="domains">Allowed Domains</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="users">
+          <TabsContent value="users" className="mt-6">
             <PendingUsersTab />
           </TabsContent>
 
-          <TabsContent value="chatbots">
+          <TabsContent value="chatbots" className="mt-6">
             <AllChatbotsTab />
           </TabsContent>
 
-          <TabsContent value="domains">
+          <TabsContent value="domains" className="mt-6">
             <AllowedDomainsTab />
           </TabsContent>
         </Tabs>

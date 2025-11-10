@@ -24,19 +24,19 @@ export default function Footer() {
             >
               Contact Us
             </Link>
-            <Link 
-              href={`${process.env.NEXT_PUBLIC_GITHUB_URL || ""}`} 
-              target="_blank" 
+            <Link
+              href={`${process.env.NEXT_PUBLIC_GITHUB_URL || ""}`}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <span className="text-muted-foreground text-sm">GitHub</span>
             </Link>
-            </div>
-            <p className="text-muted-foreground text-sm">
-              © 2025 AIAlexa. All rights reserved.
-            </p>
           </div>
+          <p className="text-muted-foreground text-sm">
+            © 2025 AIAlexa. All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );

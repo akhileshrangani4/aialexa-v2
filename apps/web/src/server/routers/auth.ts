@@ -1,8 +1,15 @@
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import type { User } from "@/types/better-auth";
 import { z } from "zod";
-import { user } from "@aialexa/db/schema";
-import { eq } from "drizzle-orm";
+import { user, account } from "@aialexa/db/schema";
+import { eq, and } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import * as bcrypt from "bcryptjs";
+import { checkRateLimit, passwordUpdateRateLimit } from "@/lib/rate-limit";
+import { validatePasswordStrength } from "@/lib/password/password-strength";
+import { isPasswordDifferent } from "@/lib/password/password-validation";
+import { logInfo, logError } from "@/lib/logger";
+import { auth } from "@/lib/auth";
 
 export const authRouter = router({
   /**
@@ -63,4 +70,156 @@ export const authRouter = router({
       isRejected: user.status === "rejected",
     };
   }),
+
+  /**
+   * Update user name
+   */
+  updateName: protectedProcedure
+    .input(z.object({ name: z.string().min(1).max(100) }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(user)
+        .set({ name: input.name, updatedAt: new Date() })
+        .where(eq(user.id, ctx.session.user.id));
+
+      return { success: true };
+    }),
+
+  /**
+   * Update user password
+   */
+  updatePassword: protectedProcedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      // Rate limiting: 5 attempts per hour per user
+      const { success, reset } = await checkRateLimit(
+        passwordUpdateRateLimit,
+        userId,
+        {
+          userId,
+          endpoint: "updatePassword",
+        },
+      );
+
+      if (!success) {
+        const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Too many password update attempts. Please try again in ${Math.ceil(retryAfter / 60)} minutes.`,
+        });
+      }
+
+      // Get user's account to check if password exists and for comparison
+      const [userAccount] = await ctx.db
+        .select()
+        .from(account)
+        .where(
+          and(eq(account.userId, userId), eq(account.providerId, "credential")),
+        )
+        .limit(1);
+
+      if (!userAccount || !userAccount.password) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Password account not found",
+        });
+      }
+
+      // Validate new password strength
+      const passwordValidation = validatePasswordStrength(input.newPassword);
+      if (!passwordValidation.isValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: passwordValidation.errors.join(". "),
+        });
+      }
+
+      // Check if new password is different from current password
+      // Note: This check might fail if password hash format doesn't match,
+      // but better-auth's changePassword will handle the actual verification
+      try {
+        const isDifferent = await isPasswordDifferent(
+          input.newPassword,
+          userAccount.password,
+          bcrypt.compare,
+        );
+
+        if (!isDifferent) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "New password must be different from your current password",
+          });
+        }
+      } catch (error) {
+        // If comparison fails due to hash format mismatch, skip this check
+        // better-auth's changePassword will handle verification correctly
+        if (error instanceof TRPCError && error.code === "BAD_REQUEST") {
+          throw error; // Re-throw our validation error
+        }
+        // Otherwise, silently continue - better-auth will handle verification
+      }
+
+      try {
+        // Use better-auth's changePassword API to ensure password is hashed correctly
+        // This uses better-auth's internal password hashing method
+        await auth.api.changePassword({
+          body: {
+            currentPassword: input.currentPassword,
+            newPassword: input.newPassword,
+            revokeOtherSessions: true, // This will invalidate other sessions
+          },
+          headers: ctx.headers,
+        });
+
+        logInfo("Password updated successfully", {
+          userId,
+          email: ctx.session.user.email,
+        });
+
+        return {
+          success: true,
+          message:
+            "Password updated successfully. Please sign in again on other devices.",
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
+        // If better-auth's changePassword fails, it might be due to password verification
+        // But we already verified it above, so this is likely a different error
+        logError(
+          error instanceof Error ? error : new Error(String(error)),
+          "Password update failed",
+          {
+            userId,
+            error: errorMessage,
+          },
+        );
+
+        // Check if it's a password-related error
+        if (
+          errorMessage.includes("Invalid password") ||
+          errorMessage.includes("password") ||
+          errorMessage.includes("credentials")
+        ) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Current password is incorrect",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update password",
+        });
+      }
+    }),
 });

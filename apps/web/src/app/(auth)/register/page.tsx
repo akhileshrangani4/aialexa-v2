@@ -13,18 +13,38 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useState, useMemo, useEffect } from "react";
+import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { AlertCircle } from "lucide-react";
+import { validatePasswordStrength } from "@/lib/password/password-strength";
+import { PasswordStrengthIndicator } from "@/components/dashboard/settings/PasswordStrengthIndicator";
+import { PasswordRequirementsList } from "@/components/dashboard/settings/PasswordRequirementsList";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { data: session, isPending: sessionLoading } = useSession();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!sessionLoading && session) {
+      router.push("/dashboard");
+    }
+  }, [session, sessionLoading, router]);
+
+  // Real-time password validation
+  const passwordValidation = useMemo(() => {
+    if (!password) {
+      return null;
+    }
+    return validatePasswordStrength(password);
+  }, [password]);
 
   // Helper to check if error is due to pending account (not a real failure)
   const isAccountPendingError = (error: unknown): boolean => {
@@ -54,6 +74,18 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     setSuccess(false);
+
+    // Frontend validation
+    if (passwordValidation && !passwordValidation.isValid) {
+      const firstError =
+        passwordValidation.errors[0] || "Password does not meet requirements";
+      setError(firstError);
+      toast.error("Invalid password", {
+        description: firstError,
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -114,6 +146,18 @@ export default function RegisterPage() {
     }
   };
 
+  // Password requirements checklist
+  const passwordRequirements = passwordValidation?.requirements || [];
+
+  // Don't render registration form if session is loading or user is already authenticated
+  if (sessionLoading || session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary">
       <Card className="w-full max-w-md">
@@ -140,6 +184,7 @@ export default function RegisterPage() {
 
           {error && (
             <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -178,15 +223,50 @@ export default function RegisterPage() {
                 required
                 disabled={loading || success}
                 minLength={8}
+                maxLength={128}
               />
-              <p className="text-xs text-muted-foreground">
-                At least 8 characters
-              </p>
+
+              {/* Password Strength Indicator */}
+              {password && passwordValidation && (
+                <div className="pt-1">
+                  <PasswordStrengthIndicator validation={passwordValidation} />
+                </div>
+              )}
+
+              {/* Password Requirements */}
+              {password && (
+                <div className="pt-1">
+                  <PasswordRequirementsList
+                    requirements={passwordRequirements}
+                  />
+                </div>
+              )}
+
+              {/* Validation Errors */}
+              {password &&
+                passwordValidation &&
+                !passwordValidation.isValid &&
+                passwordValidation.errors.length > 0 && (
+                  <Alert variant="destructive" className="border mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      <ul className="list-disc list-inside space-y-1">
+                        {passwordValidation.errors.map((error, idx) => (
+                          <li key={idx}>{error}</li>
+                        ))}
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                )}
             </div>
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || success}
+              disabled={
+                loading ||
+                success ||
+                (passwordValidation ? !passwordValidation.isValid : false)
+              }
             >
               {loading ? "Registering..." : success ? "Success!" : "Register"}
             </Button>

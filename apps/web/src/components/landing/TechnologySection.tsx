@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function TechnologySection() {
   const techFeatures = [
@@ -32,9 +33,9 @@ export default function TechnologySection() {
               Built on modern infrastructure.
             </h2>
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Powered by cutting-edge open-source LLMs and
-              retrieval-augmented generation. Your chatbots understand context
-              and provide accurate, source-based answers.
+              Powered by cutting-edge open-source LLMs and retrieval-augmented
+              generation. Your chatbots understand context and provide accurate,
+              source-based answers.
             </p>
             <div className="space-y-4">
               {techFeatures.map((feature) => (
@@ -60,25 +61,20 @@ export default function TechnologySection() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7 }}
           >
-            <motion.div
-              className="aspect-square bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl overflow-hidden shadow-xl"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <svg
-                  className="w-32 h-32"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                  />
-                </svg>
+            <motion.div className="aspect-square rounded-2xl overflow-hidden relative">
+              <Image
+                src="/tech.png"
+                alt="Technology stack logos"
+                width={800}
+                height={800}
+                className="w-full h-full object-cover contrast-125"
+                priority
+              />
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white via-white/50 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-white via-white/50 to-transparent" />
+                <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-gradient-to-r from-white via-white/50 to-transparent" />
+                <div className="absolute top-0 bottom-0 right-0 w-1/3 bg-gradient-to-l from-white via-white/50 to-transparent" />
               </div>
             </motion.div>
           </motion.div>

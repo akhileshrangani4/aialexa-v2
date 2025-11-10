@@ -36,6 +36,15 @@ export const chatbotCreationRateLimit = new Ratelimit({
   prefix: "@ratelimit/chatbot-creation",
 });
 
+// Rate limiter for password updates
+// 5 attempts per hour per user (prevents brute force)
+export const passwordUpdateRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "1 h"),
+  analytics: true,
+  prefix: "@ratelimit/password-update",
+});
+
 /**
  * Check rate limit and log if exceeded
  */

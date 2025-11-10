@@ -41,7 +41,9 @@ const envSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   ALLOWED_EMAIL_DOMAINS: z.string().default(".edu,.ac.in,.edu.in"),
   ADMIN_EMAILS: z.string().min(1), // Comma-separated list of admin emails
-  MAX_FILE_SIZE_MB: z.string().default("10"),
+  NEXT_PUBLIC_MAX_FILE_SIZE_MB: z.string().default("50"),
+  NEXT_PUBLIC_GITHUB_URL: z.string().url().optional(),
+  NEXT_PUBLIC_CONTACT_EMAIL: z.string().email().optional(),
 
   NODE_ENV: z
     .enum(["development", "production", "test"])
@@ -62,7 +64,7 @@ function validateEnv(): Env {
         if (prop === "PORT") return 3000;
         if (prop === "NODE_ENV") return "production";
         if (prop === "ALLOWED_EMAIL_DOMAINS") return ".edu,.ac.in,.edu.in";
-        if (prop === "MAX_FILE_SIZE_MB") return "10";
+        if (prop === "NEXT_PUBLIC_MAX_FILE_SIZE_MB") return "50";
         if (prop.includes("URL")) return "http://localhost:3000";
         if (prop.includes("EMAIL")) return "ci@localhost";
         if (
@@ -105,5 +107,5 @@ export function getAdminEmails(): string[] {
 
 // Helper to get max file size in bytes
 export function getMaxFileSizeBytes(): number {
-  return parseInt(env.MAX_FILE_SIZE_MB) * 1024 * 1024;
+  return parseInt(env.NEXT_PUBLIC_MAX_FILE_SIZE_MB) * 1024 * 1024;
 }

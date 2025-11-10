@@ -5,8 +5,9 @@ import {
   conversations,
   messages,
   analytics,
+  user,
 } from "@aialexa/db/schema";
-import { eq, and, sql, gte, desc, count } from "drizzle-orm";
+import { eq, and, sql, gte, lte, desc, count, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const analyticsRouter = router({
@@ -233,5 +234,135 @@ export const analyticsRouter = router({
         date: row.date,
         count: row.count,
       }));
+    }),
+
+  /**
+   * Get total messages per 30 days for all user's chatbots
+   * Supports pagination with offsetDays parameter
+   */
+  getTotalMessagesPerMonth: protectedProcedure
+    .input(
+      z.object({
+        offsetDays: z.number().int().min(0).default(0), // Days to go back from today
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Get user's account creation date
+      const [userRecord] = await ctx.db
+        .select({ createdAt: user.createdAt })
+        .from(user)
+        .where(eq(user.id, ctx.session.user.id))
+        .limit(1);
+
+      if (!userRecord) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      const accountCreatedAt = userRecord.createdAt;
+
+      // Get all chatbots for the user
+      const userChatbots = await ctx.db
+        .select({ id: chatbots.id })
+        .from(chatbots)
+        .where(eq(chatbots.userId, ctx.session.user.id));
+
+      if (userChatbots.length === 0) {
+        return {
+          data: [],
+          startDate: accountCreatedAt,
+          endDate: accountCreatedAt,
+        };
+      }
+
+      const chatbotIds = userChatbots.map((cb) => cb.id);
+
+      // Get conversations for all user's chatbots
+      const conversationResults = await ctx.db
+        .select({ id: conversations.id })
+        .from(conversations)
+        .where(inArray(conversations.chatbotId, chatbotIds));
+
+      if (conversationResults.length === 0) {
+        return {
+          data: [],
+          startDate: accountCreatedAt,
+          endDate: accountCreatedAt,
+        };
+      }
+
+      const conversationIds = conversationResults.map((c) => c.id);
+
+      // Calculate date range: 30 days ending at (today - offsetDays)
+      // But don't go back further than account creation date
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() - input.offsetDays);
+      endDate.setHours(23, 59, 59, 999); // End of day
+
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 29); // 30 days total (including end date)
+      startDate.setHours(0, 0, 0, 0); // Start of day
+
+      // Ensure we don't go back further than account creation date
+      const accountCreatedAtDate = new Date(accountCreatedAt);
+      accountCreatedAtDate.setHours(0, 0, 0, 0); // Start of day
+
+      if (startDate < accountCreatedAtDate) {
+        startDate.setTime(accountCreatedAtDate.getTime());
+      }
+
+      // If end date is before account creation, use account creation date
+      if (endDate < accountCreatedAtDate) {
+        endDate.setTime(accountCreatedAtDate.getTime());
+        endDate.setHours(23, 59, 59, 999);
+      }
+
+      // Get messages grouped by day within the date range
+      const messagesData = await ctx.db
+        .select({
+          date: sql<string>`DATE(${messages.createdAt})`,
+          count: count(),
+        })
+        .from(messages)
+        .where(
+          and(
+            inArray(messages.conversationId, conversationIds),
+            gte(messages.createdAt, startDate),
+            lte(messages.createdAt, endDate),
+          ),
+        )
+        .groupBy(sql`DATE(${messages.createdAt})`)
+        .orderBy(sql`DATE(${messages.createdAt})`);
+
+      // Fill in missing days with 0 count, but only from startDate onwards
+      const dataMap = new Map<string, number>(
+        messagesData.map((row) => [row.date, Number(row.count)]),
+      );
+      const filledData: Array<{ date: string; count: number }> = [];
+
+      // Calculate actual number of days to show (may be less than 30 if account is newer)
+      const daysDiff = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const daysToShow = Math.min(30, daysDiff + 1); // +1 to include both start and end dates
+
+      for (let i = 0; i < daysToShow; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() + i);
+        const dateStr = currentDate.toISOString().split("T")[0]!;
+        filledData.push({
+          date: dateStr,
+          count: dataMap.get(dateStr) || 0,
+        });
+      }
+
+      return {
+        data: filledData,
+        startDate,
+        endDate,
+        accountCreatedAt,
+      };
     }),
 });

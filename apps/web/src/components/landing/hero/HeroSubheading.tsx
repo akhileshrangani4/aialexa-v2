@@ -7,9 +7,9 @@ interface HeroSubheadingProps {
   text?: string;
 }
 
-export default function HeroSubheading({ 
+export default function HeroSubheading({
   delay = 0.4,
-  text = "Build course-specific AI chatbots for your students. Upload materials, customize responses, and enhance learning—all for free."
+  text = "Build course-specific AI chatbots for your students. Upload materials, customize responses, and enhance learning—all for free.",
 }: HeroSubheadingProps) {
   return (
     <motion.p
@@ -22,4 +22,3 @@ export default function HeroSubheading({
     </motion.p>
   );
 }
-
