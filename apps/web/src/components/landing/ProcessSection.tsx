@@ -1,50 +1,69 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 
 export default function ProcessSection() {
+  const steps = [
+    {
+      number: "01",
+      title: "Create",
+      description:
+        "Sign up and create your first chatbot in minutes. No technical skills needed.",
+    },
+    {
+      number: "02",
+      title: "Upload",
+      description:
+        "Add your course materials. Our AI processes and indexes everything automatically.",
+    },
+    {
+      number: "03",
+      title: "Share",
+      description:
+        "Share the link with your students and watch engagement soar.",
+    },
+  ];
+
   return (
     <section id="how-it-works" className="py-20 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          className="mb-12 text-center"
+        <motion.h2
+          className="text-5xl font-serif font-light text-foreground mb-12 text-center"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-5xl font-serif font-light text-foreground mb-4">
-            Empowering Professors with Open-Access AI
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Built under the guidance of Professor Alexa Alice Joubin at Digital
-            Humanities Institute at George Washington University.
-          </p>
-        </motion.div>
+          How It Works
+        </motion.h2>
 
-        {/* Large Image */}
-        <motion.div
-          className="aspect-[21/9] rounded-2xl overflow-hidden shadow-xl relative"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-        >
-          <Image
-            src="/qsjoubin.jpg"
-            alt="Professor Alexa Alice Joubin at the QS Higher Ed Summit in Washington, D.C., June 4, 2024"
-            width={1920}
-            height={823}
-            className="w-full h-full object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-white via-white/50 to-transparent pointer-events-none" />
-        </motion.div>
-        <p className="text-sm text-muted-foreground text-center mt-4">
-          Professor Alexa Alice Joubin at the QS Higher Ed Summit in Washington,
-          D.C., June 4, 2024
-        </p>
+        <div className="grid md:grid-cols-3 gap-12">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: index * 0.15 }}
+            >
+              <motion.div
+                className="text-6xl font-serif font-light text-gray-300 mb-4"
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: index * 0.15 + 0.2 }}
+              >
+                {step.number}
+              </motion.div>
+              <h3 className="text-2xl font-semibold text-foreground mb-3">
+                {step.title}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {step.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
