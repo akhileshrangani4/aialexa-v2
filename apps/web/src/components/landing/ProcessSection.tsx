@@ -25,7 +25,7 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section className="py-20 px-6 md:px-12 bg-gray-50">
+    <section id="how-it-works" className="py-20 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
         <motion.h2
           className="text-5xl font-serif font-light text-foreground mb-12 text-center"
