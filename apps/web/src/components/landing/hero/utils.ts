@@ -1,4 +1,4 @@
-import { GRADIENT_STOPS } from './constants';
+import { GRADIENT_STOPS } from "./constants";
 
 /**
  * Builds a CSS linear gradient string from gradient stops
@@ -6,9 +6,8 @@ import { GRADIENT_STOPS } from './constants';
  */
 export function buildGradient(): string {
   const stops = GRADIENT_STOPS.map(
-    ({ position, opacity }) => `rgba(255, 255, 255, ${opacity}) ${position}%`
-  ).join(', ');
-  
+    ({ position, opacity }) => `rgba(255, 255, 255, ${opacity}) ${position}%`,
+  ).join(", ");
+
   return `linear-gradient(to bottom, ${stops})`;
 }
-

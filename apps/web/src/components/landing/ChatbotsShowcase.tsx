@@ -1,34 +1,322 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { trpc } from "@/lib/trpc";
+import { Calendar, User, FileText, ArrowRight } from "lucide-react";
+import Link from "next/link";
+
+const gradientBackgrounds = [
+  "bg-gradient-to-r from-teal-400 via-emerald-500 to-green-600",
+  "bg-gradient-to-r from-sky-300 via-cyan-400 to-teal-500",
+  "bg-gradient-to-r from-lime-300 via-emerald-400 to-green-500",
+  "bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-600",
+];
 
 export default function ChatbotsShowcase() {
+  const { data: featuredChatbots, isLoading } =
+    trpc.chatbot.getFeatured.useQuery();
+
+  // Hide section if no featured chatbots
+  if (!isLoading && (!featuredChatbots || featuredChatbots.length === 0)) {
+    return null;
+  }
+
+  const chatbotCount = featuredChatbots?.length || 0;
+  const isSingle = chatbotCount === 1;
+
   return (
     <section className="py-20 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          className="aspect-[21/9] bg-gradient-to-br from-orange-200 via-red-200 to-yellow-200 rounded-2xl overflow-hidden shadow-xl"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-        >
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            <svg
-              className="w-32 h-32"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
-        </motion.div>
+        {isLoading ? (
+          // Loading State
+          isSingle ? (
+            <div className="grid md:grid-cols-2 gap-20 items-center">
+              <div className="aspect-[4/3] bg-muted rounded-2xl animate-pulse" />
+              <div className="space-y-4">
+                <div className="h-12 bg-muted rounded animate-pulse" />
+                <div className="h-6 bg-muted rounded animate-pulse w-3/4" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-12">
+                <div className="h-12 bg-muted rounded animate-pulse mb-4 w-1/3" />
+                <div className="h-6 bg-muted rounded animate-pulse w-1/2" />
+              </div>
+              <div
+                className={`grid gap-6 ${
+                  chatbotCount === 2
+                    ? "grid-cols-1 md:grid-cols-2"
+                    : chatbotCount === 3
+                      ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                      : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+                }`}
+              >
+                {[1, 2, 3, 4].slice(0, chatbotCount || 4).map((i) => (
+                  <div
+                    key={i}
+                    className="aspect-[4/3] bg-muted rounded-2xl animate-pulse"
+                  />
+                ))}
+              </div>
+            </>
+          )
+        ) : featuredChatbots && featuredChatbots.length > 0 ? (
+          isSingle ? (
+            // Single chatbot: Inverted two-column layout
+            <div className="grid md:grid-cols-2 gap-20 items-center">
+              {/* Left: Chatbot Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.7 }}
+              >
+                {(() => {
+                  const chatbot = featuredChatbots[0];
+                  if (!chatbot) return null;
+
+                  const hasShareToken = chatbot.shareToken;
+                  const index = 0;
+
+                  const CardContent = (
+                    <div
+                      className={`group relative aspect-[4/3] rounded-2xl overflow-hidden ${
+                        hasShareToken
+                          ? "cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                          : ""
+                      } transition-all duration-300 shadow-lg hover:shadow-2xl`}
+                    >
+                      {/* Rich horizontal gradient background */}
+                      <div
+                        className={`absolute inset-0 ${gradientBackgrounds[index]}`}
+                      />
+
+                      {/* Subtle dark overlay for text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+                      {/* Content */}
+                      <div className="relative h-full p-6 md:p-8 flex flex-col justify-between z-10">
+                        {/* Top Section */}
+                        <div className="flex items-start justify-between mb-auto">
+                          <div className="flex-1 pr-4">
+                            <h3 className="text-xl md:text-2xl font-bold text-white mb-1.5 group-hover:text-white/95 transition-colors">
+                              {chatbot.name}
+                            </h3>
+                            {chatbot.description && (
+                              <p className="text-sm text-white/95 font-normal">
+                                {chatbot.description}
+                              </p>
+                            )}
+                          </div>
+                          {hasShareToken && (
+                            <div className="flex-shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
+                                <ArrowRight className="h-5 w-5 text-white" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bottom Metadata Section */}
+                        <div className="mt-auto pt-4 border-t border-white/20">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-white/95">
+                            <div className="flex items-center gap-1.5">
+                              <User className="h-4 w-4" />
+                              <span className="font-medium">
+                                {chatbot.customAuthorName ||
+                                  chatbot.userName ||
+                                  "Unknown"}
+                              </span>
+                            </div>
+                            <span className="text-white/60">•</span>
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="h-4 w-4" />
+                              <span>
+                                {new Date(chatbot.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  },
+                                )}
+                              </span>
+                            </div>
+                            <span className="text-white/60">•</span>
+                            <div className="flex items-center gap-1.5">
+                              <FileText className="h-4 w-4" />
+                              <span>
+                                {chatbot.fileCount} file
+                                {chatbot.fileCount !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+
+                  return hasShareToken ? (
+                    <Link
+                      href={`/chat/${chatbot.shareToken}`}
+                      className="block"
+                    >
+                      {CardContent}
+                    </Link>
+                  ) : (
+                    CardContent
+                  );
+                })()}
+              </motion.div>
+
+              {/* Right: Header Text */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.7 }}
+              >
+                <h2 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-6 leading-tight">
+                  Featured Chatbots
+                </h2>
+                <p className="text-muted-foreground text-lg leading-relaxed">
+                  Explore chatbots created by our community of educators and
+                  researchers. Each chatbot is carefully crafted to provide
+                  accurate, context-aware responses based on uploaded materials.
+                </p>
+              </motion.div>
+            </div>
+          ) : (
+            // Multiple chatbots: Header on top, cards below
+            <>
+              {/* Header */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.7 }}
+                className="mb-12"
+              >
+                <h2 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4">
+                  Featured Chatbots
+                </h2>
+                <p className="text-muted-foreground text-lg">
+                  Explore chatbots created by our community
+                </p>
+              </motion.div>
+
+              {/* Cards Grid */}
+              <div
+                className={`grid gap-6 ${
+                  chatbotCount === 2
+                    ? "grid-cols-1 md:grid-cols-2"
+                    : chatbotCount === 3
+                      ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                      : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+                }`}
+              >
+                {featuredChatbots.map((chatbot, index) => {
+                  const hasShareToken = chatbot.shareToken;
+
+                  const CardContent = (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-100px" }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className={`group relative aspect-[4/3] rounded-2xl overflow-hidden ${
+                        hasShareToken
+                          ? "cursor-pointer hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]"
+                          : ""
+                      } transition-all duration-300 shadow-lg hover:shadow-2xl`}
+                    >
+                      {/* Rich horizontal gradient background */}
+                      <div
+                        className={`absolute inset-0 ${gradientBackgrounds[index % gradientBackgrounds.length]}`}
+                      />
+
+                      {/* Subtle dark overlay for text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+                      {/* Content */}
+                      <div className="relative h-full p-6 flex flex-col justify-between z-10">
+                        {/* Top Section */}
+                        <div className="flex items-start justify-between mb-auto">
+                          <div className="flex-1 pr-3">
+                            <h3 className="text-lg font-bold text-white mb-1.5 group-hover:text-white/95 transition-colors line-clamp-2">
+                              {chatbot.name}
+                            </h3>
+                            {chatbot.description && (
+                              <p className="text-xs text-white/95 font-normal line-clamp-2">
+                                {chatbot.description}
+                              </p>
+                            )}
+                          </div>
+                          {hasShareToken && (
+                            <div className="flex-shrink-0">
+                              <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
+                                <ArrowRight className="h-4 w-4 text-white" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bottom Metadata Section */}
+                        <div className="mt-auto pt-3 border-t border-white/20">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-white/95">
+                            <div className="flex items-center gap-1.5">
+                              <User className="h-3.5 w-3.5" />
+                              <span className="font-medium">
+                                {chatbot.customAuthorName ||
+                                  chatbot.userName ||
+                                  "Unknown"}
+                              </span>
+                            </div>
+                            <span className="text-white/60">•</span>
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5" />
+                              <span>
+                                {new Date(chatbot.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  },
+                                )}
+                              </span>
+                            </div>
+                            <span className="text-white/60">•</span>
+                            <div className="flex items-center gap-1.5">
+                              <FileText className="h-3.5 w-3.5" />
+                              <span>
+                                {chatbot.fileCount} file
+                                {chatbot.fileCount !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+
+                  return hasShareToken ? (
+                    <Link
+                      key={chatbot.id}
+                      href={`/chat/${chatbot.shareToken}`}
+                      className="block"
+                    >
+                      {CardContent}
+                    </Link>
+                  ) : (
+                    <div key={chatbot.id}>{CardContent}</div>
+                  );
+                })}
+              </div>
+            </>
+          )
+        ) : null}
       </div>
     </section>
   );

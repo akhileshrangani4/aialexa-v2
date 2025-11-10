@@ -105,6 +105,9 @@ export const chatbots = pgTable("chatbots", {
     .$type<string[]>()
     .default([]),
   shareToken: text("share_token").unique(),
+  sharingEnabled: boolean("sharing_enabled").default(true).notNull(),
+  featured: boolean("featured").default(false).notNull(),
+  customAuthorName: text("custom_author_name"),
   embedSettings: jsonb("embed_settings")
     .$type<{
       theme: "light" | "dark";
@@ -122,7 +125,42 @@ export const chatbots = pgTable("chatbots", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Chatbot files table
+// User files table (centralized file storage)
+export const userFiles = pgTable("user_files", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  fileName: text("file_name").notNull(),
+  fileType: text("file_type").notNull(),
+  fileSize: integer("file_size").notNull(), // in bytes
+  storagePath: text("storage_path").notNull(), // Supabase Storage path
+  processingStatus: processingStatusEnum("processing_status")
+    .default("pending")
+    .notNull(),
+  metadata: jsonb("metadata")
+    .$type<{
+      error?: string;
+      chunkCount?: number;
+      processedAt?: string;
+    }>()
+    .default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Junction table: Associates files with chatbots (many-to-many)
+export const chatbotFileAssociations = pgTable("chatbot_file_associations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatbotId: uuid("chatbot_id")
+    .references(() => chatbots.id, { onDelete: "cascade" })
+    .notNull(),
+  fileId: uuid("file_id")
+    .references(() => userFiles.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Legacy chatbot files table (kept for backward compatibility during migration)
 export const chatbotFiles = pgTable("chatbot_files", {
   id: uuid("id").primaryKey().defaultRandom(),
   chatbotId: uuid("chatbot_id")
@@ -149,10 +187,7 @@ export const chatbotFiles = pgTable("chatbot_files", {
 export const fileChunks = pgTable("file_chunks", {
   id: uuid("id").primaryKey().defaultRandom(),
   fileId: uuid("file_id")
-    .references(() => chatbotFiles.id, { onDelete: "cascade" })
-    .notNull(),
-  chatbotId: uuid("chatbot_id")
-    .references(() => chatbots.id, { onDelete: "cascade" })
+    .references(() => userFiles.id, { onDelete: "cascade" })
     .notNull(),
   chunkIndex: integer("chunk_index").notNull(),
   content: text("content").notNull(),
@@ -232,6 +267,7 @@ export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   approvedDomainsCreated: many(approvedDomains),
+  files: many(userFiles),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -263,11 +299,35 @@ export const chatbotsRelations = relations(chatbots, ({ one, many }) => ({
     fields: [chatbots.userId],
     references: [user.id],
   }),
-  files: many(chatbotFiles),
+  fileAssociations: many(chatbotFileAssociations),
   conversations: many(conversations),
   analytics: many(analytics),
 }));
 
+export const userFilesRelations = relations(userFiles, ({ one, many }) => ({
+  user: one(user, {
+    fields: [userFiles.userId],
+    references: [user.id],
+  }),
+  chatbotAssociations: many(chatbotFileAssociations),
+  chunks: many(fileChunks),
+}));
+
+export const chatbotFileAssociationsRelations = relations(
+  chatbotFileAssociations,
+  ({ one }) => ({
+    chatbot: one(chatbots, {
+      fields: [chatbotFileAssociations.chatbotId],
+      references: [chatbots.id],
+    }),
+    file: one(userFiles, {
+      fields: [chatbotFileAssociations.fileId],
+      references: [userFiles.id],
+    }),
+  }),
+);
+
+// Legacy relations (kept for backward compatibility)
 export const chatbotFilesRelations = relations(
   chatbotFiles,
   ({ one, many }) => ({
@@ -275,18 +335,13 @@ export const chatbotFilesRelations = relations(
       fields: [chatbotFiles.chatbotId],
       references: [chatbots.id],
     }),
-    chunks: many(fileChunks),
   }),
 );
 
 export const fileChunksRelations = relations(fileChunks, ({ one }) => ({
-  file: one(chatbotFiles, {
+  file: one(userFiles, {
     fields: [fileChunks.fileId],
-    references: [chatbotFiles.id],
-  }),
-  chatbot: one(chatbots, {
-    fields: [fileChunks.chatbotId],
-    references: [chatbots.id],
+    references: [userFiles.id],
   }),
 }));
 

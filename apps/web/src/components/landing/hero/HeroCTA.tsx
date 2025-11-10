@@ -29,9 +29,8 @@ export default function HeroCTA({ delay = 0.6 }: HeroCTAProps) {
         size="lg"
         className="bg-white border-2 border-black text-black hover:bg-white/90 rounded-lg px-8 py-6 text-base hover:text-black font-medium transition-all duration-300"
       >
-        <Link href="#how-it-works">View Demo</Link>
+        <Link href="#how-it-works">How It Works</Link>
       </Button>
     </motion.div>
   );
 }
-

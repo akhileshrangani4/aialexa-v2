@@ -1,10 +1,11 @@
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
+import ProcessSection from "@/components/landing/ProcessSection";
 import ChatbotsShowcase from "@/components/landing/ChatbotsShowcase";
 import StatsSection from "@/components/landing/StatsSection";
 import TechnologySection from "@/components/landing/TechnologySection";
-import ProcessSection from "@/components/landing/ProcessSection";
+import InfoSection from "@/components/landing/InfoSection";
 import GithubSection from "@/components/landing/GithubSection";
 import Footer from "@/components/landing/Footer";
 
@@ -25,7 +26,9 @@ export default function HomePage() {
       <TechnologySection />
       {/* Process Section */}
       <ProcessSection />
-      {/* CTA Section */}
+      {/* Info Section */}
+      <InfoSection />
+      {/* Github Section */}
       <GithubSection />
       {/* Footer */}
       <Footer />

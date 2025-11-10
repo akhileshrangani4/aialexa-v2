@@ -25,6 +25,7 @@ export type MessageAvatarProps = {
   fallback?: string;
   delayMs?: number;
   className?: string;
+  imageClassName?: string;
 };
 
 const MessageAvatar = ({
@@ -33,10 +34,20 @@ const MessageAvatar = ({
   fallback,
   delayMs,
   className,
+  imageClassName,
 }: MessageAvatarProps) => {
   return (
-    <Avatar className={cn("h-8 w-8 shrink-0", className)}>
-      <AvatarImage src={src} alt={alt} />
+    <Avatar
+      className={cn(
+        "h-9 w-9 shrink-0 ring-2 ring-background shadow-sm",
+        className,
+      )}
+    >
+      <AvatarImage
+        src={src}
+        alt={alt}
+        className={cn("object-contain p-1.5", imageClassName)}
+      />
       {fallback && (
         <AvatarFallback delayMs={delayMs}>{fallback}</AvatarFallback>
       )}
@@ -57,23 +68,31 @@ const MessageContent = ({
   markdown = false,
   parseIncompleteMarkdown = false,
   className,
+  style,
   ...props
 }: MessageContentProps) => {
   const classNames = cn(
-    "rounded-lg p-3 text-foreground bg-secondary break-words leading-relaxed",
+    "rounded-lg px-4 py-3 text-foreground bg-secondary break-words leading-relaxed shadow-sm border border-border/50",
     className,
   );
+
+  const combinedStyle: React.CSSProperties = {
+    wordBreak: "break-word",
+    overflowWrap: "anywhere" as React.CSSProperties["overflowWrap"],
+    ...style,
+  };
 
   return markdown ? (
     <Markdown
       className={classNames}
       parseIncompleteMarkdown={parseIncompleteMarkdown}
+      style={combinedStyle}
       {...props}
     >
       {children as string}
     </Markdown>
   ) : (
-    <div className={classNames} {...props}>
+    <div className={classNames} style={combinedStyle} {...props}>
       {children}
     </div>
   );
