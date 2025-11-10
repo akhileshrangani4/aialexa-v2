@@ -22,7 +22,7 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <section className="py-32 px-6 md:px-12 bg-gray-50">
+    <section id="features" className="py-32 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-20 items-start">
           <motion.div

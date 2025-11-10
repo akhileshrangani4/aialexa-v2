@@ -9,7 +9,7 @@ export default function TechnologySection() {
       description: "Responses grounded in your uploaded materials",
     },
     {
-      title: "Multiple AI Models",
+      title: "Multiple open-source LLMs",
       description: "Choose from leading open-source language models",
     },
     {
@@ -32,7 +32,7 @@ export default function TechnologySection() {
               Built on modern infrastructure.
             </h2>
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Powered by cutting-edge open-source AI models and
+              Powered by cutting-edge open-source LLMs and
               retrieval-augmented generation. Your chatbots understand context
               and provide accurate, source-based answers.
             </p>
