@@ -20,6 +20,8 @@ interface ChatInterfaceProps {
   chatbotName: string;
   resetChat: () => void;
   height?: string;
+  hideHeader?: boolean;
+  embedMode?: boolean;
 }
 
 export function ChatInterface({
@@ -33,12 +35,20 @@ export function ChatInterface({
   chatbotName,
   resetChat,
   height = "h-[600px]",
+  hideHeader = false,
+  embedMode = false,
 }: ChatInterfaceProps) {
   return (
-    <div className={`flex flex-col ${height} border rounded-lg bg-background`}>
+    <div
+      className={`flex flex-col ${height} ${embedMode ? "" : "border rounded-lg"} bg-background overflow-hidden`}
+      style={{
+        height: height === "h-full" ? "100%" : undefined,
+        maxHeight: "100%",
+      }}
+    >
       {/* Header with Reset Button */}
-      {messages.length > 0 && (
-        <div className="flex justify-end items-center px-4 py-2.5 border-b bg-muted/30">
+      {!hideHeader && messages.length > 0 && (
+        <div className="flex justify-end items-center px-4 py-2.5 border-b bg-muted/30 flex-shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -53,31 +63,33 @@ export function ChatInterface({
       )}
 
       {/* Messages Container */}
-      <ChatContainerRoot className="flex-1 p-4">
-        <ChatContainerContent>
-          {messages.length === 0 && !isStreaming ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <p className="text-muted-foreground mb-2 text-lg">
-                👋 Welcome to {chatbotName}!
-              </p>
-              <p className="text-sm text-muted-foreground/70">
-                Start by asking a question about the course.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((msg, idx) => (
-                <ChatMessage key={idx} message={msg} />
-              ))}
-              {isStreaming && <StreamingMessage content={streamingContent} />}
-            </div>
-          )}
-          <ChatContainerScrollAnchor ref={messagesEndRef} />
-        </ChatContainerContent>
-      </ChatContainerRoot>
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+        <ChatContainerRoot className="flex-1 p-4 min-h-0 overflow-y-auto">
+          <ChatContainerContent>
+            {messages.length === 0 && !isStreaming ? (
+              <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                <p className="text-muted-foreground mb-2 text-lg">
+                  👋 Welcome to {chatbotName}!
+                </p>
+                <p className="text-sm text-muted-foreground/70">
+                  Start by asking a question about the course.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {messages.map((msg, idx) => (
+                  <ChatMessage key={idx} message={msg} />
+                ))}
+                {isStreaming && <StreamingMessage content={streamingContent} />}
+              </div>
+            )}
+            <ChatContainerScrollAnchor ref={messagesEndRef} />
+          </ChatContainerContent>
+        </ChatContainerRoot>
+      </div>
 
       {/* Input */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t flex-shrink-0">
         <ChatInput
           currentMessage={currentMessage}
           setCurrentMessage={setCurrentMessage}

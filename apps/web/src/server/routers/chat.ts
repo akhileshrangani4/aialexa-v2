@@ -278,7 +278,12 @@ export const chatRouter = router({
         const [chatbot] = await ctx.db
           .select()
           .from(chatbots)
-          .where(eq(chatbots.shareToken, input.shareToken))
+          .where(
+            and(
+              eq(chatbots.shareToken, input.shareToken),
+              eq(chatbots.sharingEnabled, true),
+            ),
+          )
           .limit(1);
 
         if (!chatbot) {

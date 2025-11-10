@@ -1,22 +1,39 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import type { ChatMessage } from "@/types/database";
+import { useChatState } from "./useChatState";
 
+/**
+ * Hook for managing chat interactions with a shared/public chatbot.
+ *
+ * This hook is used when accessing a chatbot via a share token (public link).
+ * It does not require authentication and is used for:
+ * - Public shared chatbot pages (/chat/[shareToken])
+ * - Embedded chatbot widgets
+ *
+ * @param shareToken - The share token from the chatbot's public URL
+ * @returns Chat state and handlers for shared chatbot interactions
+ *
+ * @example
+ * ```tsx
+ * const { messages, handleSendMessage, chatbot } = useChat(shareToken);
+ * ```
+ */
 export function useChat(shareToken: string) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentMessage, setCurrentMessage] = useState("");
-  const [sessionId, setSessionId] = useState<string>("");
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingContent, setStreamingContent] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const sourcesRef = useRef<
-    Array<{ fileName: string; chunkIndex: number; similarity: number }>
-  >([]);
-
-  // Auto-scroll to bottom when messages or streaming content changes
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamingContent]);
+  const {
+    messages,
+    setMessages,
+    currentMessage,
+    setCurrentMessage,
+    sessionId,
+    setSessionId,
+    isStreaming,
+    setIsStreaming,
+    streamingContent,
+    setStreamingContent,
+    messagesEndRef,
+    sourcesRef,
+    resetChat: resetChatState,
+  } = useChatState();
 
   // State for triggering subscription
   const [messageToSend, setMessageToSend] = useState<{
@@ -120,13 +137,8 @@ export function useChat(shareToken: string) {
   };
 
   const resetChat = () => {
-    setMessages([]);
-    setCurrentMessage("");
-    setSessionId("");
-    setIsStreaming(false);
-    setStreamingContent("");
+    resetChatState();
     setMessageToSend(null);
-    sourcesRef.current = [];
   };
 
   return {

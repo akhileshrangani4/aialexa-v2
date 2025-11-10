@@ -1,0 +1,82 @@
+"use client";
+
+import { useParams } from "next/navigation";
+import { useChat } from "@/hooks/useChat";
+import { ChatInterface } from "@/components/chat/ChatInterface";
+import { EmbedLoading } from "@/components/embed/EmbedLoading";
+import { EmbedError } from "@/components/embed/EmbedError";
+import { EmbedHeader } from "@/components/embed/EmbedHeader";
+import { EmbedFooter } from "@/components/embed/EmbedFooter";
+import { useEmbedVisibility } from "@/hooks/useEmbedVisibility";
+
+export default function EmbedWindowPage() {
+  const params = useParams();
+  const shareToken = params.shareToken as string;
+  const { isMounted, isVisible, withExitX, close } = useEmbedVisibility();
+
+  const {
+    messages,
+    currentMessage,
+    setCurrentMessage,
+    isStreaming,
+    streamingContent,
+    messagesEndRef,
+    chatbot,
+    chatbotLoading,
+    handleSendMessage,
+    resetChat,
+    error,
+  } = useChat(shareToken);
+
+  if (!isMounted || chatbotLoading) {
+    return <EmbedLoading />;
+  }
+
+  if (error || !chatbot) {
+    return (
+      <EmbedError
+        message={
+          error?.message === "Chatbot not found or sharing is disabled"
+            ? "This chatbot is no longer available. The owner has disabled sharing."
+            : "This chatbot is no longer available. The owner may have disabled sharing or the link may be invalid."
+        }
+      />
+    );
+  }
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col bg-background overflow-hidden">
+      {withExitX && (
+        <EmbedHeader
+          chatbotName={chatbot.name || "Chatbot"}
+          messagesCount={messages.length}
+          isStreaming={isStreaming}
+          onReset={resetChat}
+          onClose={close}
+        />
+      )}
+
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ChatInterface
+          messages={messages}
+          isStreaming={isStreaming}
+          streamingContent={streamingContent}
+          currentMessage={currentMessage}
+          setCurrentMessage={setCurrentMessage}
+          handleSendMessage={handleSendMessage}
+          messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
+          chatbotName={chatbot.name || "Chatbot"}
+          resetChat={resetChat}
+          height="h-full"
+          hideHeader={withExitX}
+          embedMode={true}
+        />
+      </div>
+      <EmbedFooter />
+    </div>
+  );
+}

@@ -18,7 +18,10 @@ import { useChatbot } from "@/hooks/useChatbot";
 import { ChatInterface } from "@/components/chat/ChatInterface";
 import { FileUpload } from "@/components/chat/FileUpload";
 import { ChatbotSettings } from "@/components/chat/ChatbotSettings";
+import { EmbedCode } from "@/components/chat/EmbedCode";
+import { ShareLinkSection } from "@/components/chat/ShareLinkSection";
 import { WrappableText } from "@/components/ui/wrappable-text";
+import { toast } from "sonner";
 
 export default function ChatbotDetailPage() {
   const router = useRouter();
@@ -59,6 +62,27 @@ export default function ChatbotDetailPage() {
       refetchFiles();
     },
   });
+
+  // Generate share token mutation
+  const utils = trpc.useUtils();
+  const generateShareToken = trpc.chatbot.generateShareToken.useMutation({
+    onSuccess: async () => {
+      await utils.chatbot.get.invalidate({ id: chatbotId });
+      await utils.chatbot.getById.invalidate({ id: chatbotId });
+      toast.success("Sharing enabled", {
+        description: "Your chatbot is now publicly accessible",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to enable sharing", {
+        description: error.message,
+      });
+    },
+  });
+
+  const handleEnableSharing = () => {
+    generateShareToken.mutate({ id: chatbotId });
+  };
 
   // Loading state
   if (sessionLoading || chatbotLoading) {
@@ -110,12 +134,20 @@ export default function ChatbotDetailPage() {
           <p className="text-muted-foreground mt-2">
             <WrappableText>{chatbot.description}</WrappableText>
           </p>
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-wrap items-center gap-2 mt-4">
             <Badge>{chatbot.model}</Badge>
-            {chatbot.shareToken && (
+            {chatbot.sharingEnabled && (
               <Badge variant="outline">Sharing Enabled</Badge>
             )}
           </div>
+
+          {/* Share Link Section */}
+          <ShareLinkSection
+            shareToken={chatbot.shareToken}
+            sharingEnabled={chatbot.sharingEnabled}
+            onEnableSharing={handleEnableSharing}
+            isEnabling={generateShareToken.isPending}
+          />
         </div>
 
         {/* Tabs */}
@@ -124,6 +156,9 @@ export default function ChatbotDetailPage() {
             <TabsTrigger value="chat">Chat</TabsTrigger>
             <TabsTrigger value="files">Files</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            {chatbot.sharingEnabled && chatbot.shareToken && (
+              <TabsTrigger value="embed">Embed</TabsTrigger>
+            )}
           </TabsList>
 
           {/* Chat Tab */}
@@ -174,11 +209,30 @@ export default function ChatbotDetailPage() {
                     temperature: chatbot.temperature,
                     maxTokens: chatbot.maxTokens,
                     shareToken: chatbot.shareToken,
+                    sharingEnabled: chatbot.sharingEnabled,
                   }}
                 />
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Embed Tab */}
+          {chatbot.sharingEnabled && chatbot.shareToken && (
+            <TabsContent value="embed">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Embed On Website</CardTitle>
+                  <CardDescription>
+                    Copy and paste the code below to embed your chatbot on any
+                    website
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <EmbedCode shareToken={chatbot.shareToken} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

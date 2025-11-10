@@ -105,6 +105,7 @@ export const chatbots = pgTable("chatbots", {
     .$type<string[]>()
     .default([]),
   shareToken: text("share_token").unique(),
+  sharingEnabled: boolean("sharing_enabled").default(true).notNull(),
   embedSettings: jsonb("embed_settings")
     .$type<{
       theme: "light" | "dark";

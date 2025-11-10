@@ -94,7 +94,12 @@ export const chatbotRouter = router({
       const [chatbot] = await ctx.db
         .select()
         .from(chatbots)
-        .where(eq(chatbots.shareToken, input.shareToken))
+        .where(
+          and(
+            eq(chatbots.shareToken, input.shareToken),
+            eq(chatbots.sharingEnabled, true),
+          ),
+        )
         .limit(1);
 
       if (!chatbot) {
@@ -113,6 +118,9 @@ export const chatbotRouter = router({
   create: protectedProcedure
     .input(createChatbotSchema)
     .mutation(async ({ ctx, input }) => {
+      // Generate shareToken automatically since sharing is enabled by default
+      const shareToken = nanoid(16);
+
       const [newChatbot] = await ctx.db
         .insert(chatbots)
         .values({
@@ -125,6 +133,8 @@ export const chatbotRouter = router({
           maxTokens: input.maxTokens,
           welcomeMessage: input.welcomeMessage,
           suggestedQuestions: input.suggestedQuestions,
+          shareToken,
+          sharingEnabled: true,
         })
         .returning();
 
@@ -228,11 +238,16 @@ export const chatbotRouter = router({
         });
       }
 
-      const shareToken = nanoid(16);
+      // Reuse existing shareToken if it exists, otherwise generate a new one
+      const shareToken = existing.shareToken || nanoid(16);
 
       const [updated] = await ctx.db
         .update(chatbots)
-        .set({ shareToken, updatedAt: new Date() })
+        .set({
+          shareToken,
+          sharingEnabled: true,
+          updatedAt: new Date(),
+        })
         .where(eq(chatbots.id, input.id))
         .returning();
 
@@ -274,9 +289,10 @@ export const chatbotRouter = router({
         });
       }
 
+      // Keep shareToken but disable sharing
       await ctx.db
         .update(chatbots)
-        .set({ shareToken: null, updatedAt: new Date() })
+        .set({ sharingEnabled: false, updatedAt: new Date() })
         .where(eq(chatbots.id, input.id));
 
       return { success: true };

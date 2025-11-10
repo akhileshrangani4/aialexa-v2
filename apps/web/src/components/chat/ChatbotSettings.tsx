@@ -36,6 +36,7 @@ interface ChatbotSettingsProps {
     temperature: number | null;
     maxTokens: number | null;
     shareToken: string | null;
+    sharingEnabled: boolean;
   };
 }
 
@@ -432,13 +433,13 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
         <div className="space-y-1">
           <Label className="text-base font-semibold">Share Settings</Label>
           <p className="text-xs text-muted-foreground">
-            {chatbot.shareToken
+            {chatbot.sharingEnabled
               ? "Your chatbot is publicly accessible via the link below"
               : "Enable sharing to generate a public link for your chatbot"}
           </p>
         </div>
 
-        {chatbot.shareToken ? (
+        {chatbot.sharingEnabled && chatbot.shareToken ? (
           <div className="space-y-3">
             <div className="flex gap-2">
               <Input

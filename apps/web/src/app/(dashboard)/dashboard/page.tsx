@@ -421,16 +421,16 @@ export default function DashboardPage() {
                 {chatbots.map((chatbot) => (
                   <Card
                     key={chatbot.id}
-                    className="hover:shadow-lg transition-shadow"
+                    className="hover:shadow-lg transition-shadow h-full flex flex-col"
                   >
-                    <CardHeader>
+                    <CardHeader className="flex-shrink-0">
                       <CardTitle className="text-lg">{chatbot.name}</CardTitle>
-                      <CardDescription className="line-clamp-2">
+                      <CardDescription className="line-clamp-2 min-h-[2.5rem]">
                         <WrappableText>{chatbot.description}</WrappableText>
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
+                    <CardContent className="flex-1 flex flex-col">
+                      <div className="space-y-2 flex-1">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Model:</span>
                           <Badge variant="outline">
@@ -446,27 +446,27 @@ export default function DashboardPage() {
                             {new Date(chatbot.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="flex gap-2 mt-4">
-                          <Link
-                            href={`/chatbot/${chatbot.id}`}
-                            className="flex-1"
-                          >
-                            <Button className="w-full" variant="outline">
-                              Open Chatbot
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              setChatbotToDelete(chatbot.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <Link
+                          href={`/chatbot/${chatbot.id}`}
+                          className="flex-1"
+                        >
+                          <Button className="w-full" variant="outline">
+                            Open Chatbot
                           </Button>
-                        </div>
+                        </Link>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            setChatbotToDelete(chatbot.id);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

@@ -1,25 +1,43 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import type { ChatMessage } from "@/types/database";
+import { useChatState } from "./useChatState";
 
+/**
+ * Hook for managing chat interactions with an authenticated chatbot.
+ *
+ * This hook is used when the user is logged in and accessing their own chatbot.
+ * It requires authentication and is used for:
+ * - Chatbot detail pages (/chatbot/[id]) - when the owner is viewing their chatbot
+ * - Authenticated chatbot interactions
+ *
+ * @param chatbotId - The ID of the chatbot (from the database)
+ * @param session - The current user session (must be authenticated)
+ * @returns Chat state and handlers for authenticated chatbot interactions
+ *
+ * @example
+ * ```tsx
+ * const { messages, handleSendMessage, chatbot } = useChatbot(chatbotId, session);
+ * ```
+ */
 export function useChatbot(
   chatbotId: string,
   session: { user: { id: string } } | null,
 ) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentMessage, setCurrentMessage] = useState("");
-  const [sessionId, setSessionId] = useState<string>("");
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingContent, setStreamingContent] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const sourcesRef = useRef<
-    Array<{ fileName: string; chunkIndex: number; similarity: number }>
-  >([]);
-
-  // Auto-scroll to bottom when messages or streaming content changes
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamingContent]);
+  const {
+    messages,
+    setMessages,
+    currentMessage,
+    setCurrentMessage,
+    sessionId,
+    setSessionId,
+    isStreaming,
+    setIsStreaming,
+    streamingContent,
+    setStreamingContent,
+    messagesEndRef,
+    sourcesRef,
+    resetChat: resetChatState,
+  } = useChatState();
 
   // State for triggering subscription
   const [messageToSend, setMessageToSend] = useState<{
@@ -114,13 +132,8 @@ export function useChatbot(
   };
 
   const resetChat = () => {
-    setMessages([]);
-    setCurrentMessage("");
-    setSessionId("");
-    setIsStreaming(false);
-    setStreamingContent("");
+    resetChatState();
     setMessageToSend(null);
-    sourcesRef.current = [];
   };
 
   return {
