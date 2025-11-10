@@ -91,6 +91,7 @@
     overflow-y: auto;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
+    scroll-behavior: smooth;
   }
 
   html::-webkit-scrollbar {
@@ -133,5 +134,15 @@
     right: 0.75rem !important;
     top: 0.75rem !important;
     transform: none !important;
+  }
+}
+
+/* Infinite scroll animation - scroll exactly 50% for seamless loop with 2 copies */
+@keyframes infinite-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }

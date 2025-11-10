@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { SiGithub } from "react-icons/si";
 
-export default function CTASection() {
+export default function GithubSection() {
   return (
-    <section className="py-32 px-6 md:px-12 bg-white">
+    <section id="github" className="py-32 px-6 md:px-12 bg-white">
       <div className="max-w-4xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -29,25 +30,15 @@ export default function CTASection() {
               <Button
                 asChild
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-base rounded-full font-medium shadow-lg"
-              >
-                <Link href="/register">Get Started Free</Link>
-              </Button>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                asChild
-                size="lg"
                 variant="outline"
                 className="border-2 px-10 py-6 text-base rounded-full font-medium"
               >
                 <Link
-                  href="https://github.com"
+                  href={process.env.NEXT_PUBLIC_GITHUB_URL || "/"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View on GitHub
+                  View on GitHub <SiGithub size={24} />
                 </Link>
               </Button>
             </motion.div>

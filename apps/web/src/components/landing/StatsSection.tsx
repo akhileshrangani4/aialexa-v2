@@ -7,11 +7,11 @@ export default function StatsSection() {
     { number: "100%", label: "Free Forever" },
     { number: "0", label: "Tracking Cookies" },
     { number: "∞", label: "Chatbots" },
-    { number: "4", label: "AI Models" },
+    { number: "4", label: "open-source LLMs" },
   ];
 
   return (
-    <section className="py-32 px-6 md:px-12 bg-gray-50">
+    <section className="py-32 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
         <motion.div
           className="text-center mb-20"
