@@ -14,6 +14,22 @@ import { createOpenRouterClient } from "@aialexa/ai";
 import { logInfo, logError } from "@/lib/logger";
 import { env } from "@/lib/env";
 
+/**
+ * Clamp maxTokens to valid range (100-4000)
+ * Ensures runtime safety even if invalid data exists in database
+ */
+function clampMaxTokens(maxTokens: number | null | undefined): number {
+  const MIN_TOKENS = 100;
+  const MAX_TOKENS = 4000;
+  const DEFAULT_TOKENS = 2000;
+
+  if (maxTokens == null || isNaN(maxTokens)) {
+    return DEFAULT_TOKENS;
+  }
+
+  return Math.max(MIN_TOKENS, Math.min(MAX_TOKENS, maxTokens));
+}
+
 export const chatRouter = router({
   /**
    * Send message to chatbot with streaming (protected - requires auth)
@@ -190,7 +206,7 @@ export const chatRouter = router({
             { role: "user", content: input.message },
           ],
           temperature: (chatbot.temperature ?? 70) / 100,
-          maxTokens: chatbot.maxTokens ?? 2000,
+          maxTokens: clampMaxTokens(chatbot.maxTokens),
         });
 
         // Stream the text
@@ -415,7 +431,7 @@ export const chatRouter = router({
             { role: "user", content: input.message },
           ],
           temperature: (chatbot.temperature ?? 70) / 100,
-          maxTokens: chatbot.maxTokens ?? 2000,
+          maxTokens: clampMaxTokens(chatbot.maxTokens),
         });
 
         // Stream the text
