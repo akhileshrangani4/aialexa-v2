@@ -76,13 +76,39 @@ export class RAGService {
    */
   private async extractPDF(buffer: Buffer): Promise<string> {
     try {
+      // Ensure we have a valid Buffer instance
+      if (!Buffer.isBuffer(buffer)) {
+        throw new Error("Invalid buffer: expected Buffer instance");
+      }
+
+      if (buffer.length === 0) {
+        throw new Error("Empty buffer: cannot extract PDF from empty buffer");
+      }
+
+      // Verify it looks like a PDF by checking the PDF header
+      const pdfHeader = buffer.subarray(0, 4).toString();
+      if (pdfHeader !== "%PDF") {
+        throw new Error(
+          `Invalid PDF format: expected PDF header, got "${pdfHeader}"`,
+        );
+      }
+
       // Dynamic import to avoid build-time execution
       const pdfParse = (await import("pdf-parse")).default;
+
+      // Pass the buffer directly - pdf-parse accepts Buffer instances
       const data = await pdfParse(buffer);
+
+      if (!data || !data.text) {
+        throw new Error("PDF parsing returned no text content");
+      }
+
       return data.text;
     } catch (error) {
       console.error("PDF extraction error:", error);
-      throw new Error("Failed to extract PDF content");
+      throw new Error(
+        `Failed to extract PDF content: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

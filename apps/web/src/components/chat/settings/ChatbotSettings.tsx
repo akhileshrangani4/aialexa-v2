@@ -373,7 +373,11 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
             onChange={(e) => setSystemPrompt(e.target.value)}
             disabled={!isEditing}
             rows={6}
-            className={!isEditing ? "bg-background resize-none" : "resize-none"}
+            className={
+              !isEditing
+                ? "bg-background resize-none"
+                : "resize-y min-h-[150px]"
+            }
           />
         </div>
 

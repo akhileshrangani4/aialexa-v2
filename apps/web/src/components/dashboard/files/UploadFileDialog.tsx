@@ -31,39 +31,35 @@ interface UploadFileDialogProps {
   existingFiles?: FileData[];
 }
 
+interface FileUploadState {
+  file: File;
+  status: "pending" | "uploading" | "success" | "error";
+  error?: string;
+}
+
 export function UploadFileDialog({
   onSuccess,
   existingFiles = [],
 }: UploadFileDialogProps) {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<globalThis.File | null>(
-    null,
-  );
+  const [selectedFiles, setSelectedFiles] = useState<FileUploadState[]>([]);
   const [uploadError, setUploadError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const uploadFile = trpc.files.upload.useMutation({
-    onSuccess: () => {
-      setUploadDialogOpen(false);
-      setSelectedFile(null);
-      setUploadError("");
-      setUploadProgress(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-      toast.success("File uploaded successfully");
-      onSuccess?.();
-    },
-    onError: (error) => {
-      setUploadProgress(false);
-      toast.error("Failed to upload file", {
-        description: error.message,
-      });
-    },
-  });
+  const uploadFile = trpc.files.upload.useMutation();
+
+  const updateFileStatus = (
+    fileName: string,
+    status: FileUploadState["status"],
+    error?: string,
+  ) => {
+    setSelectedFiles((prev) =>
+      prev.map((f) => (f.file.name === fileName ? { ...f, status, error } : f)),
+    );
+  };
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -105,29 +101,64 @@ export function UploadFileDialog({
   );
 
   const handleFileSelect = useCallback(
-    (file: File) => {
-      const error = validateFile(file);
-      if (error) {
-        setUploadError(error);
-        toast.error("Invalid file", {
-          description: error,
-        });
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+    (files: File[]) => {
+      const validFiles: FileUploadState[] = [];
+      const errors: string[] = [];
+
+      files.forEach((file) => {
+        const error = validateFile(file);
+        if (error) {
+          errors.push(`${file.name}: ${error}`);
+        } else {
+          // Check for duplicates within the selection
+          const isDuplicateInSelection = validFiles.some(
+            (f) => f.file.name === file.name,
+          );
+          if (isDuplicateInSelection) {
+            errors.push(`${file.name}: Duplicate file in selection`);
+          } else {
+            validFiles.push({ file, status: "pending" });
+          }
         }
-        return;
+      });
+
+      if (errors.length > 0) {
+        setUploadError(errors.join("; "));
+        if (errors.length === files.length) {
+          toast.error("Invalid files", {
+            description: errors[0],
+          });
+        } else {
+          toast.warning("Some files were skipped", {
+            description: `${errors.length} file(s) had errors`,
+          });
+        }
+      } else {
+        setUploadError("");
       }
 
-      setSelectedFile(file);
-      setUploadError("");
+      if (validFiles.length > 0) {
+        setSelectedFiles((prev) => {
+          // Merge with existing files, avoiding duplicates
+          const existingNames = new Set(prev.map((f) => f.file.name));
+          const newFiles = validFiles.filter(
+            (f) => !existingNames.has(f.file.name),
+          );
+          return [...prev, ...newFiles];
+        });
+      }
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     },
     [validateFile],
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      handleFileSelect(files);
     }
   };
 
@@ -149,71 +180,121 @@ export function UploadFileDialog({
       e.stopPropagation();
       setIsDragging(false);
 
-      const file = e.dataTransfer.files?.[0];
-      if (file) {
-        handleFileSelect(file);
+      const files = Array.from(e.dataTransfer.files || []);
+      if (files.length > 0) {
+        handleFileSelect(files);
       }
     },
     [handleFileSelect],
   );
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+  const uploadSingleFile = async (
+    fileState: FileUploadState,
+  ): Promise<void> => {
+    const { file } = fileState;
+    updateFileStatus(file.name, "uploading");
 
-    setUploadProgress(true);
-    const toastId = toast.loading("Uploading file...", {
-      description: "Please wait while we process your file",
-    });
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        const base64Data = base64.split(",")[1]; // Remove data:mime;base64, prefix
 
-    // Convert file to base64
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result as string;
-      const base64Data = base64.split(",")[1]; // Remove data:mime;base64, prefix
+        if (!base64Data) {
+          const errorMsg = "Failed to read file";
+          updateFileStatus(file.name, "error", errorMsg);
+          reject(new Error(errorMsg));
+          return;
+        }
 
-      if (!base64Data) {
+        try {
+          await uploadFile.mutateAsync({
+            fileName: file.name,
+            fileType: file.type,
+            fileData: base64Data,
+            fileSize: file.size,
+          });
+          updateFileStatus(file.name, "success");
+          resolve();
+        } catch (error) {
+          const errorMsg =
+            error instanceof Error ? error.message : "An error occurred";
+          updateFileStatus(file.name, "error", errorMsg);
+          reject(error);
+        }
+      };
+      reader.onerror = () => {
         const errorMsg = "Failed to read file";
-        setUploadError(errorMsg);
-        setUploadProgress(false);
-        toast.error("Upload failed", {
-          id: toastId,
-          description: errorMsg,
-        });
-        return;
-      }
-
-      try {
-        await uploadFile.mutateAsync({
-          fileName: selectedFile.name,
-          fileType: selectedFile.type,
-          fileData: base64Data,
-          fileSize: selectedFile.size,
-        });
-        toast.success("File uploaded successfully", {
-          id: toastId,
-          description: `${selectedFile.name} is being processed`,
-        });
-      } catch (error) {
-        setUploadProgress(false);
-        toast.error("Upload failed", {
-          id: toastId,
-          description:
-            error instanceof Error ? error.message : "An error occurred",
-        });
-      }
-    };
-    reader.onerror = () => {
-      setUploadProgress(false);
-      toast.error("Upload failed", {
-        id: toastId,
-        description: "Failed to read file",
-      });
-    };
-    reader.readAsDataURL(selectedFile);
+        updateFileStatus(file.name, "error", errorMsg);
+        reject(new Error(errorMsg));
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
+  const handleUpload = async () => {
+    const pendingFiles = selectedFiles.filter((f) => f.status === "pending");
+    if (pendingFiles.length === 0) return;
+
+    setIsUploading(true);
+    setUploadError("");
+    const toastId = toast.loading(
+      `Uploading ${pendingFiles.length} file(s)...`,
+      {
+        description: "Please wait while we process your files",
+      },
+    );
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Upload files sequentially to avoid overwhelming the server
+    for (const fileState of pendingFiles) {
+      try {
+        await uploadSingleFile(fileState);
+        successCount++;
+      } catch {
+        errorCount++;
+        // Error already handled in uploadSingleFile
+      }
+    }
+
+    setIsUploading(false);
+
+    // Show summary toast
+    if (successCount > 0 && errorCount === 0) {
+      toast.success(`Successfully uploaded ${successCount} file(s)`, {
+        id: toastId,
+        description: "Files are being processed",
+      });
+      // Close dialog and reset after a short delay
+      setTimeout(() => {
+        setUploadDialogOpen(false);
+        setSelectedFiles([]);
+        onSuccess?.();
+      }, 1500);
+    } else if (successCount > 0 && errorCount > 0) {
+      toast.warning(`Uploaded ${successCount} file(s), ${errorCount} failed`, {
+        id: toastId,
+        description: "Some files failed to upload",
+      });
+    } else {
+      toast.error("Failed to upload files", {
+        id: toastId,
+        description: "Please check the errors and try again",
+      });
+    }
+  };
+
+  const handleRemoveFile = (fileName: string) => {
+    setSelectedFiles((prev) => prev.filter((f) => f.file.name !== fileName));
+    if (selectedFiles.length === 1) {
+      setUploadError("");
+    }
+  };
+
+  const handleClearAll = () => {
+    setSelectedFiles([]);
     setUploadError("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -235,12 +316,12 @@ export function UploadFileDialog({
           Upload File
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Upload File</DialogTitle>
+          <DialogTitle>Upload Files</DialogTitle>
           <DialogDescription>
-            Upload PDF, Word, TXT, Markdown, JSON, or CSV files (max{" "}
-            {MAX_FILE_SIZE / 1024 / 1024}MB)
+            Upload one or more PDF, Word, TXT, Markdown, JSON, or CSV files (max{" "}
+            {MAX_FILE_SIZE / 1024 / 1024}MB each)
           </DialogDescription>
         </DialogHeader>
 
@@ -250,7 +331,7 @@ export function UploadFileDialog({
           </Alert>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
           {/* Drag and Drop Zone */}
           <div
             ref={dropZoneRef}
@@ -258,11 +339,11 @@ export function UploadFileDialog({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={cn(
-              "relative border-2 border-dashed rounded-lg p-8 transition-colors",
+              "relative border-2 border-dashed rounded-lg p-6 transition-colors flex-1 flex flex-col min-h-0",
               isDragging
                 ? "border-primary bg-primary/5"
                 : "border-muted-foreground/25 hover:border-primary/50",
-              selectedFile && "border-primary/50 bg-primary/5",
+              selectedFiles.length > 0 && "border-primary/50 bg-primary/5",
             )}
           >
             <input
@@ -271,39 +352,89 @@ export function UploadFileDialog({
               ref={fileInputRef}
               onChange={handleInputChange}
               accept=".pdf,.doc,.docx,.txt,.md,.json,.csv"
+              multiple
               className="hidden"
             />
-            {selectedFile ? (
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 w-full">
-                  <div className="flex-shrink-0">{getFileIcon()}</div>
-                  <div className="flex-1 min-w-0 pr-2" style={{ width: 0 }}>
-                    <p
-                      className="font-medium text-sm truncate"
-                      title={selectedFile.name}
+            {selectedFiles.length > 0 ? (
+              <div className="space-y-3 w-full flex-1 flex flex-col min-h-0">
+                <div className="flex items-center justify-between mb-2 flex-shrink-0">
+                  <p className="text-sm font-medium">
+                    {selectedFiles.length} file
+                    {selectedFiles.length !== 1 ? "s" : ""} selected
+                  </p>
+                  {!isUploading && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearAll}
+                      className="h-7 text-xs"
                     >
-                      {selectedFile.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {formatFileSize(selectedFile.size)}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleRemoveFile}
-                    className="h-6 w-6 flex-shrink-0 text-muted-foreground hover:text-destructive"
-                    disabled={uploadProgress}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                      Clear all
+                    </Button>
+                  )}
                 </div>
-                {uploadProgress && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Uploading...</span>
-                  </div>
-                )}
+                <div className="flex-1 overflow-y-auto space-y-2 min-h-0 pr-1">
+                  {selectedFiles.map((fileState) => (
+                    <div
+                      key={fileState.file.name}
+                      className="flex items-start gap-3 w-full p-2 rounded-md border bg-background"
+                    >
+                      <div className="flex-shrink-0 mt-0.5">
+                        {fileState.status === "success" ? (
+                          <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center">
+                            <svg
+                              className="h-3 w-3 text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+                        ) : fileState.status === "error" ? (
+                          <div className="h-5 w-5 rounded-full bg-red-500 flex items-center justify-center">
+                            <X className="h-3 w-3 text-white" />
+                          </div>
+                        ) : fileState.status === "uploading" ? (
+                          <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                        ) : (
+                          getFileIcon()
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 pr-2" style={{ width: 0 }}>
+                        <p
+                          className="font-medium text-sm truncate"
+                          title={fileState.file.name}
+                        >
+                          {fileState.file.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1 truncate">
+                          {formatFileSize(fileState.file.size)}
+                          {fileState.status === "error" && fileState.error && (
+                            <span className="text-red-600 ml-2">
+                              • {fileState.error}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      {fileState.status === "pending" && !isUploading && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveFile(fileState.file.name)}
+                          className="h-6 w-6 flex-shrink-0 text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center text-center">
@@ -321,61 +452,72 @@ export function UploadFileDialog({
                 </Label>
                 <p className="text-xs text-muted-foreground mt-1">
                   PDF, Word, TXT, Markdown, JSON, or CSV (max{" "}
-                  {MAX_FILE_SIZE / 1024 / 1024}MB)
+                  {MAX_FILE_SIZE / 1024 / 1024}MB each)
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  You can select multiple files
                 </p>
               </div>
             )}
           </div>
 
-          {/* File Info */}
-          {selectedFile && !uploadProgress && (
-            <div className="rounded-lg bg-muted/50 p-3 space-y-2">
-              <div className="flex items-center gap-2 text-sm w-full">
-                <span className="text-muted-foreground flex-shrink-0 whitespace-nowrap">
-                  File name:
-                </span>
-                <span
-                  className="font-medium truncate min-w-0 flex-1"
-                  title={selectedFile.name}
-                  style={{ width: 0 }}
-                >
-                  {selectedFile.name}
-                </span>
+          {/* File Summary */}
+          {selectedFiles.length > 0 && !isUploading && (
+            <div className="rounded-lg bg-muted/50 p-3 space-y-2 flex-shrink-0">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Total files:</span>
+                <span className="font-medium">{selectedFiles.length}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">File size:</span>
+                <span className="text-muted-foreground">Total size:</span>
                 <span className="font-medium">
-                  {formatFileSize(selectedFile.size)}
+                  {formatFileSize(
+                    selectedFiles.reduce((sum, f) => sum + f.file.size, 0),
+                  )}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">File type:</span>
-                <span className="font-medium">
-                  {selectedFile.type.split("/")[1]?.toUpperCase() ||
-                    selectedFile.type}
-                </span>
-              </div>
+              {selectedFiles.length > 10 && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground pt-1 border-t">
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Scroll to see all files</span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2 flex-shrink-0 pt-2 border-t">
             <Button
               type="button"
               variant="outline"
               onClick={() => {
                 setUploadDialogOpen(false);
-                handleRemoveFile();
+                handleClearAll();
               }}
-              disabled={uploadProgress}
+              disabled={isUploading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleUpload}
-              disabled={!selectedFile || uploadProgress}
+              disabled={
+                selectedFiles.filter((f) => f.status === "pending").length ===
+                  0 || isUploading
+              }
             >
-              {uploadProgress ? (
+              {isUploading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Uploading...
@@ -383,7 +525,8 @@ export function UploadFileDialog({
               ) : (
                 <>
                   <Upload className="h-4 w-4 mr-2" />
-                  Upload
+                  Upload{" "}
+                  {selectedFiles.length > 0 && `(${selectedFiles.length})`}
                 </>
               )}
             </Button>
