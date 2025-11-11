@@ -39,6 +39,30 @@ export const associateWithChatbotProcedure = protectedProcedure
       });
     }
 
+    // Prevent associating files that failed to process
+    if (file.processingStatus === "failed") {
+      const errorMessage = file.metadata?.error
+        ? `This file failed to process: ${file.metadata.error}. Please re-upload the file or check the file status on the Files page.`
+        : "This file failed to process. Please re-upload the file or check the file status on the Files page.";
+
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: errorMessage,
+      });
+    }
+
+    // Warn but allow associating files that are still processing
+    if (
+      file.processingStatus === "processing" ||
+      file.processingStatus === "pending"
+    ) {
+      logInfo("Associating file that is still processing", {
+        fileId: input.fileId,
+        chatbotId: input.chatbotId,
+        processingStatus: file.processingStatus,
+      });
+    }
+
     // Verify chatbot ownership
     const [chatbot] = await ctx.db
       .select()
