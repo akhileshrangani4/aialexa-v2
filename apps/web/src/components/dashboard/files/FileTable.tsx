@@ -94,14 +94,26 @@ function FileTableRow<T extends BaseFile>({
   };
 
   return (
-    <TableRow>
+    <TableRow
+      className="cursor-pointer hover:bg-muted/50"
+      onClick={() => {
+        if (showCheckbox && onToggleSelect) {
+          onToggleSelect(file.id);
+        }
+      }}
+    >
       {showCheckbox && onToggleSelect && (
-        <TableCell>
+        <TableCell
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect(file.id);
+          }}
+        >
           <input
             type="checkbox"
             checked={isSelected}
             onChange={() => onToggleSelect(file.id)}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
             aria-label={`Select ${file.fileName}`}
           />
         </TableCell>
@@ -143,8 +155,14 @@ function FileTableRow<T extends BaseFile>({
         </TableCell>
       )}
       {actionType !== "none" && (
-        <TableCell>
-          <div className="flex justify-start">{renderAction()}</div>
+        <TableCell
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <div className="flex justify-start w-full min-w-[40px]">
+            {renderAction()}
+          </div>
         </TableCell>
       )}
     </TableRow>
@@ -224,7 +242,7 @@ export function FileTable<T extends BaseFile>({
                 type="checkbox"
                 checked={allSelected}
                 onChange={onSelectAll}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                 aria-label="Select all files"
               />
             </TableHead>

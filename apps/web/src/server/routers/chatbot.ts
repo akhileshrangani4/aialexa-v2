@@ -10,7 +10,7 @@ import { checkRateLimit, chatbotCreationRateLimit } from "@/lib/rate-limit";
 const createChatbotSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(200).optional(),
-  systemPrompt: z.string().min(1).max(4000),
+  systemPrompt: z.string().min(1).max(1000000),
   model: z.enum(SUPPORTED_MODELS),
   temperature: z.number().min(0).max(100).default(70),
   maxTokens: z.number().min(100).max(4000).default(2000),
