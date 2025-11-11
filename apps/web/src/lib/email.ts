@@ -9,6 +9,9 @@ import { DemoteFromAdmin } from "@/components/emails/DemoteFromAdmin";
 import { AccountDisabled } from "@/components/emails/AccountDisabled";
 import { AccountEnabled } from "@/components/emails/AccountEnabled";
 import { AccountDeleted } from "@/components/emails/AccountDeleted";
+import { db } from "@aialexa/db";
+import { user } from "@aialexa/db/schema";
+import { eq } from "drizzle-orm";
 
 // Helper to get support email
 function getSupportEmail(): string {
@@ -22,6 +25,41 @@ function getSupportEmail(): string {
 const resend = new Resend(env.RESEND_API_KEY);
 
 /**
+ * Get admin emails from the database
+ * Falls back to environment variable if no admins found in database (for initial setup)
+ */
+async function getAdminEmailsFromDatabase(): Promise<string[]> {
+  try {
+    const adminUsers = await db
+      .select({ email: user.email })
+      .from(user)
+      .where(eq(user.role, "admin"));
+
+    const adminEmails = adminUsers
+      .map((u) => u.email)
+      .filter((email): email is string => !!email);
+
+    // If no admins found in database, fall back to environment variable
+    // This is useful for initial setup before any admins are created
+    if (adminEmails.length === 0) {
+      logInfo(
+        "No admins found in database, falling back to ADMIN_EMAILS env variable",
+      );
+      return getAdminEmails();
+    }
+
+    return adminEmails;
+  } catch (error) {
+    logError(
+      error,
+      "Failed to fetch admin emails from database, falling back to env variable",
+    );
+    // Fall back to environment variable on error
+    return getAdminEmails();
+  }
+}
+
+/**
  * Send admin notification email when new user registers
  */
 export async function sendAdminNotificationEmail(params: {
@@ -30,7 +68,7 @@ export async function sendAdminNotificationEmail(params: {
   name: string;
 }) {
   try {
-    const adminEmails = getAdminEmails();
+    const adminEmails = await getAdminEmailsFromDatabase();
     const adminUrl = `${env.NEXT_PUBLIC_APP_URL}/admin`;
 
     const { data, error } = await resend.emails.send({
@@ -52,6 +90,8 @@ export async function sendAdminNotificationEmail(params: {
     logInfo("Admin notification email sent", {
       userId: params.userId,
       email: params.email,
+      adminEmails,
+      adminCount: adminEmails.length,
       messageId: data?.id,
     });
 
