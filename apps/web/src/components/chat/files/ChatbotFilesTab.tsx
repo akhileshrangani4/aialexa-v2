@@ -86,9 +86,15 @@ export function ChatbotFilesTab({
       toast.success("File added to chatbot");
     },
     onError: (error) => {
-      toast.error("Failed to add file", {
-        description: error.message,
-      });
+      // Check if it's a failed file error
+      const isFailedFileError = error.message.includes("failed to process");
+      toast.error(
+        isFailedFileError ? "Cannot add file" : "Failed to add file",
+        {
+          description: error.message,
+          duration: 5000,
+        },
+      );
     },
   });
 
@@ -122,6 +128,19 @@ export function ChatbotFilesTab({
   };
 
   const handleAddFiles = async (fileIds: string[]) => {
+    if (fileIds.length === 0) return;
+
+    const toastId = toast.loading(
+      `Adding ${fileIds.length} file${fileIds.length !== 1 ? "s" : ""}...`,
+      {
+        description: "Please wait",
+      },
+    );
+
+    let successCount = 0;
+    let errorCount = 0;
+    const errors: Array<{ fileId: string; message: string }> = [];
+
     // Process files sequentially to avoid overwhelming the server
     for (const fileId of fileIds) {
       try {
@@ -129,16 +148,50 @@ export function ChatbotFilesTab({
           fileId,
           chatbotId,
         });
+        successCount++;
       } catch (error) {
-        // Continue with other files even if one fails
-        console.error(`Failed to add file ${fileId}:`, error);
+        errorCount++;
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        errors.push({ fileId, message: errorMessage });
+        // Show individual error for failed files
+        toast.error("Failed to add file", {
+          description: errorMessage,
+          duration: 3000,
+        });
       }
     }
+
     // Refetch after all files are processed
+    await refetchAssociatedFiles();
     onRefetch();
-    toast.success(
-      `${fileIds.length} file${fileIds.length !== 1 ? "s" : ""} added to chatbot`,
-    );
+
+    // Show summary toast
+    if (successCount > 0 && errorCount === 0) {
+      toast.success(
+        `Successfully added ${successCount} file${successCount !== 1 ? "s" : ""} to chatbot`,
+        {
+          id: toastId,
+        },
+      );
+    } else if (successCount > 0 && errorCount > 0) {
+      toast.warning(
+        `Added ${successCount} file${successCount !== 1 ? "s" : ""}, ${errorCount} failed`,
+        {
+          id: toastId,
+          description:
+            "Some files could not be added. Check individual error messages above.",
+          duration: 5000,
+        },
+      );
+    } else {
+      toast.error("Failed to add files", {
+        id: toastId,
+        description:
+          "None of the selected files could be added. Check error messages above.",
+        duration: 5000,
+      });
+    }
   };
 
   const handleRemoveFile = (fileId: string) => {
