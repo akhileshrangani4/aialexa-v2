@@ -1,0 +1,1 @@
+ALTER TABLE "chatbots" ADD COLUMN "show_sources" boolean DEFAULT false NOT NULL;

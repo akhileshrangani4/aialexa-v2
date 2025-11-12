@@ -159,6 +159,7 @@ export default function ChatbotDetailPage() {
               messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
               chatbotName={chatbot.name || "Chatbot"}
               resetChat={resetChat}
+              showSources={chatbot.showSources ?? false}
             />
           </TabsContent>
 
@@ -189,6 +190,7 @@ export default function ChatbotDetailPage() {
                     maxTokens: chatbot.maxTokens,
                     shareToken: chatbot.shareToken,
                     sharingEnabled: chatbot.sharingEnabled,
+                    showSources: chatbot.showSources ?? false,
                   }}
                 />
               </CardContent>

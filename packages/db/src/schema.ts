@@ -106,6 +106,7 @@ export const chatbots = pgTable("chatbots", {
     .default([]),
   shareToken: text("share_token").unique(),
   sharingEnabled: boolean("sharing_enabled").default(true).notNull(),
+  showSources: boolean("show_sources").default(false).notNull(),
   featured: boolean("featured").default(false).notNull(),
   customAuthorName: text("custom_author_name"),
   embedSettings: jsonb("embed_settings")

@@ -74,6 +74,7 @@ export default function EmbedWindowPage() {
           height="h-full"
           hideHeader={withExitX}
           embedMode={true}
+          showSources={chatbot.showSources ?? false}
         />
       </div>
       <EmbedFooter />

@@ -16,6 +16,7 @@ const createChatbotSchema = z.object({
   maxTokens: z.number().min(100).max(4000).default(2000),
   welcomeMessage: z.string().max(500).optional(),
   suggestedQuestions: z.array(z.string()).max(5).default([]),
+  showSources: z.boolean().optional(),
 });
 
 export const chatbotRouter = router({
