@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -49,6 +50,7 @@ export function CreateChatbotDialog({
   onOpenChange: controlledOnOpenChange,
   trigger,
 }: CreateChatbotDialogProps) {
+  const router = useRouter();
   const [internalOpen, setInternalOpen] = useState(false);
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
@@ -59,11 +61,15 @@ export function CreateChatbotDialog({
     : setInternalOpen;
 
   const createChatbot = trpc.chatbot.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       setDialogOpen(false);
       setFormData(DEFAULT_FORM_DATA);
       toast.success("Chatbot created successfully!");
       onSuccess?.();
+      // Redirect to the newly created chatbot
+      if (data?.id) {
+        router.push(`/chatbot/${data.id}`);
+      }
     },
     onError: (error) => {
       toast.error("Failed to create chatbot", {

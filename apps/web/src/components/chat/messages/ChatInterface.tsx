@@ -7,7 +7,9 @@ import {
   ChatContainerScrollAnchor,
 } from "@/components/ui/chat-container";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Download } from "lucide-react";
+import { exportChatAsText } from "@/lib/export-chat";
+import { toast } from "sonner";
 
 interface ChatInterfaceProps {
   messages: MessageType[];
@@ -22,6 +24,7 @@ interface ChatInterfaceProps {
   height?: string;
   hideHeader?: boolean;
   embedMode?: boolean;
+  showSources?: boolean;
 }
 
 export function ChatInterface({
@@ -37,6 +40,7 @@ export function ChatInterface({
   height = "h-[600px]",
   hideHeader = false,
   embedMode = false,
+  showSources = false,
 }: ChatInterfaceProps) {
   return (
     <div
@@ -46,9 +50,29 @@ export function ChatInterface({
         maxHeight: "100%",
       }}
     >
-      {/* Header with Reset Button */}
+      {/* Header with Reset and Export Buttons */}
       {!hideHeader && messages.length > 0 && (
-        <div className="flex justify-end items-center px-4 py-2.5 border-b bg-muted/30 flex-shrink-0">
+        <div className="flex justify-end items-center gap-2 px-4 py-2.5 border-b bg-muted/30 flex-shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              try {
+                exportChatAsText(messages, chatbotName);
+                toast.success("Chat exported successfully");
+              } catch (error) {
+                toast.error("Failed to export chat", {
+                  description:
+                    error instanceof Error ? error.message : "Unknown error",
+                });
+              }
+            }}
+            disabled={isStreaming}
+            className="h-8 px-3 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-background border-border/50 hover:border-border transition-all duration-200"
+          >
+            <Download className="h-3.5 w-3.5 mr-1.5" />
+            Export Chat
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -78,7 +102,11 @@ export function ChatInterface({
             ) : (
               <div className="space-y-4">
                 {messages.map((msg, idx) => (
-                  <ChatMessage key={idx} message={msg} />
+                  <ChatMessage
+                    key={idx}
+                    message={msg}
+                    showSources={showSources}
+                  />
                 ))}
                 {isStreaming && <StreamingMessage content={streamingContent} />}
               </div>

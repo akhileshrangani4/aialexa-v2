@@ -100,6 +100,7 @@ export default function SharedChatPage() {
           chatbotName={chatbot.name || "Chatbot"}
           resetChat={resetChat}
           height="h-[600px] md:h-[700px] lg:h-[800px]"
+          showSources={chatbot.showSources ?? false}
         />
 
         {/* Footer */}

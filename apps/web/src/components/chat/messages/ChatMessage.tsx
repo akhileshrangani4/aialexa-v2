@@ -8,13 +8,39 @@ import {
 } from "@/components/ui/message";
 import { CopyButton } from "@/components/ui/copy-button";
 import { TypingLoader } from "@/components/ui/loader";
+import { Badge } from "@/components/ui/badge";
+import { FileText } from "lucide-react";
+import { useMemo } from "react";
 
 interface ChatMessageProps {
   message: MessageType;
+  showSources?: boolean;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  showSources = false,
+}: ChatMessageProps) {
   const isUser = message.role === "user";
+
+  // Deduplicate sources by fileName and get the highest similarity for each
+  const uniqueSources = useMemo(() => {
+    const sources = message.sources;
+    if (!sources || sources.length === 0) return [];
+
+    return sources.reduce(
+      (acc, source) => {
+        const existing = acc.find((s) => s.fileName === source.fileName);
+        if (!existing) {
+          acc.push({ ...source });
+        } else if (source.similarity > existing.similarity) {
+          existing.similarity = source.similarity;
+        }
+        return acc;
+      },
+      [] as typeof sources,
+    );
+  }, [message.sources]);
 
   if (isUser) {
     return (
@@ -52,6 +78,25 @@ export function ChatMessage({ message }: ChatMessageProps) {
           <MessageContent markdown={true} className="bg-secondary">
             {message.content}
           </MessageContent>
+          {/* Display sources if available and enabled */}
+          {showSources && uniqueSources.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <FileText className="h-3.5 w-3.5" />
+                <span className="font-medium">Sources:</span>
+              </div>
+              {uniqueSources.map((source, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="text-xs font-normal"
+                  title={`Similarity: ${(source.similarity * 100).toFixed(1)}%`}
+                >
+                  {source.fileName}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </Message>
       <div className="pl-12">

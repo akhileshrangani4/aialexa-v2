@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,7 @@ interface ChatbotSettingsProps {
     maxTokens: number | null;
     shareToken: string | null;
     sharingEnabled: boolean;
+    showSources?: boolean;
   };
 }
 
@@ -60,6 +62,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
   const [maxTokens, setMaxTokens] = useState(
     chatbot.maxTokens?.toString() ?? "2000",
   );
+  const [showSources, setShowSources] = useState(chatbot.showSources ?? false);
 
   // Update local state when chatbot prop changes
   useEffect(() => {
@@ -69,6 +72,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     setSystemPrompt(chatbot.systemPrompt);
     setTemperature(chatbot.temperature?.toString() ?? "70");
     setMaxTokens(chatbot.maxTokens?.toString() ?? "2000");
+    setShowSources(chatbot.showSources ?? false);
   }, [chatbot]);
 
   const utils = trpc.useUtils();
@@ -84,6 +88,29 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     },
     onError: (error) => {
       toast.error("Failed to save settings", {
+        description: error.message,
+      });
+    },
+  });
+
+  const updateShowSources = trpc.chatbot.update.useMutation({
+    onSuccess: async (_, variables) => {
+      const newValue = variables.data.showSources ?? false;
+      await utils.chatbot.get.invalidate({ id: chatbotId });
+      await utils.chatbot.getById.invalidate({ id: chatbotId });
+      toast.success(
+        newValue ? "Sources display enabled" : "Sources display disabled",
+        {
+          description: newValue
+            ? "Source citations will now be shown below assistant messages"
+            : "Source citations will no longer be displayed",
+        },
+      );
+    },
+    onError: (error) => {
+      // Revert the toggle on error
+      setShowSources(chatbot.showSources ?? false);
+      toast.error("Failed to update setting", {
         description: error.message,
       });
     },
@@ -161,6 +188,14 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     deleteChatbot.mutate({ id: chatbotId });
   };
 
+  const handleToggleShowSources = (checked: boolean) => {
+    setShowSources(checked);
+    updateShowSources.mutate({
+      id: chatbotId,
+      data: { showSources: checked },
+    });
+  };
+
   const handleSave = () => {
     const tempValue = parseFloat(temperature);
     const tokensValue = parseInt(maxTokens);
@@ -211,6 +246,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
         systemPrompt,
         temperature: tempValue,
         maxTokens: tokensValue,
+        showSources: showSources,
       },
     });
   };
@@ -222,6 +258,7 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
     setSystemPrompt(chatbot.systemPrompt);
     setTemperature(chatbot.temperature?.toString() ?? "70");
     setMaxTokens(chatbot.maxTokens?.toString() ?? "2000");
+    setShowSources(chatbot.showSources ?? false);
     setIsEditing(false);
   };
 
@@ -429,6 +466,33 @@ export function ChatbotSettings({ chatbot }: ChatbotSettingsProps) {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Display Settings Card */}
+      <div className="space-y-4 p-6 bg-muted/30 rounded-lg border">
+        <div className="space-y-1">
+          <Label className="text-base font-semibold">Display Settings</Label>
+          <p className="text-xs text-muted-foreground">
+            Configure how messages are displayed in the chat
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label htmlFor="showSources" className="text-sm font-medium">
+              Show Sources
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Display source file citations below assistant messages
+            </p>
+          </div>
+          <Switch
+            id="showSources"
+            checked={showSources}
+            onCheckedChange={handleToggleShowSources}
+            disabled={updateShowSources.isPending}
+          />
         </div>
       </div>
 
