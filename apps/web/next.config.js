@@ -12,6 +12,7 @@ const nextConfig = {
   // Externalize pdf-parse to avoid bundling issues
   // pdf-parse uses Node.js-specific modules that can't be bundled by webpack
   serverExternalPackages: ["pdf-parse"],
+  output: "standalone",
 };
 
 export default nextConfig;
