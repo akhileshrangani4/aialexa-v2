@@ -33,6 +33,7 @@
     "@upstash/qstash": "^2.8.4",
     "@upstash/ratelimit": "^2.0.6",
     "@upstash/redis": "^1.34.4",
+    "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.3.27",
     "class-variance-authority": "^0.7.1",
@@ -45,7 +46,8 @@
     "next": "15.5.7",
     "pino": "^9.7.0",
     "pino-pretty": "^13.1.2",
-    "react": "^19.1.0",
+    "postcss": "^8.4.49",
+    "react": "^19.1.2",
     "react-dom": "^19.1.0",
     "react-email": "^3.0.7",
     "react-hook-form": "^7.65.0",
@@ -60,12 +62,10 @@
     "streamdown": "^1.4.0",
     "superjson": "^2.2.2",
     "tailwind-merge": "^2.6.0",
+    "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "use-stick-to-bottom": "^1.1.1",
-    "zod": "^3.25.76",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.17"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
