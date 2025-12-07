@@ -24,4 +24,3 @@ export function SessionTracker({ queryClient }: { queryClient: QueryClient }) {
 
   return null;
 }
-
