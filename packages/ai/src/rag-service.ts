@@ -140,7 +140,7 @@ export class RAGService {
       const mammoth = await import("mammoth");
       const result = await mammoth.extractRawText({ buffer });
 
-      // Sanitize the text to remove null bytes
+      // Sanitize the text to remove null bytes and other problematic characters
       const sanitizedText = this.sanitizeText(result.value);
 
       if (!sanitizedText) {
