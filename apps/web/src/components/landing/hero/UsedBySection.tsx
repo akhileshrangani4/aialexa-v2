@@ -9,14 +9,14 @@ interface UsedBySectionProps {
   delay?: number;
 }
 
+const DUPLICATION_COUNT = 4;
+
 export default function UsedBySection({ delay = 0.6 }: UsedBySectionProps) {
-  // Triple duplicate for smooth infinite scroll
-  const duplicatedUniversities = [
-    ...UNIVERSITIES,
-    ...UNIVERSITIES,
-    ...UNIVERSITIES,
-    ...UNIVERSITIES,
-  ];
+  // Duplicate universities array for smooth infinite scroll
+  const duplicatedUniversities = Array.from(
+    { length: DUPLICATION_COUNT },
+    () => UNIVERSITIES
+  ).flat();
 
   return (
     <motion.div
