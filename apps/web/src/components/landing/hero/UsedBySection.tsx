@@ -15,7 +15,7 @@ export default function UsedBySection({ delay = 0.6 }: UsedBySectionProps) {
   // Duplicate universities array for smooth infinite scroll
   const duplicatedUniversities = Array.from(
     { length: DUPLICATION_COUNT },
-    () => UNIVERSITIES
+    () => UNIVERSITIES,
   ).flat();
 
   return (

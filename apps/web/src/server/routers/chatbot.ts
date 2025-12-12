@@ -1,6 +1,6 @@
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { chatbots, user, chatbotFiles } from "@aialexa/db/schema";
+import { chatbots, user, chatbotFileAssociations } from "@aialexa/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
@@ -157,8 +157,8 @@ export const chatbotRouter = router({
         userEmail: user.email,
         fileCount: sql<number>`
           (SELECT COUNT(*)::int 
-           FROM ${chatbotFiles} 
-           WHERE ${chatbotFiles.chatbotId} = ${chatbots.id})
+           FROM ${chatbotFileAssociations} 
+           WHERE ${chatbotFileAssociations.chatbotId} = ${chatbots.id})
         `,
       })
       .from(chatbots)
