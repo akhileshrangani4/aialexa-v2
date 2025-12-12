@@ -1,0 +1,58 @@
+---
+config:
+  layout: dagre
+  look: neo
+---
+flowchart TD
+    Start(["Student Gets Chatbot Link"]) --> AccessURL["Access Chatbot URL:<br>domain.com/chat/SHARE_TOKEN"]
+    AccessURL --> ValidateToken{"Valid Share<br>Token?"}
+    ValidateToken -- No --> NotFound["Show 404:<br>Chatbot Not Found"]
+    ValidateToken -- Yes --> LoadChatbot["Load Chatbot Data:<br>tRPC: chatbot.getByShareToken"]
+    LoadChatbot --> CheckSession{"Has Session ID?"}
+    CheckSession -- No --> CreateSession["Generate Session ID<br>nanoid"]
+    CheckSession -- Yes --> LoadHistory["Load Chat History:<br>Last 50 messages"]
+    CreateSession --> DisplayInterface["Display Chat Interface:<br>• Welcome Message<br>• Suggested Questions<br>• Chat Input Box<br>• Theme &amp; Styling"]
+    LoadHistory --> DisplayInterface
+    DisplayInterface --> StudentAction{"Student Action?"}
+    StudentAction -- Click Suggested --> SelectQuestion["Click Suggested Question"]
+    SelectQuestion --> PopulateInput["Populate Input Field"]
+    PopulateInput --> SendMessage["Click Send or Press Enter"]
+    StudentAction -- Type Message --> TypeMessage["Type Custom Question"]
+    TypeMessage --> SendMessage
+    SendMessage --> ShowTyping@{ label: "Show 'AI is typing...' Indicator" }
+    ShowTyping --> CreateConversation{"Conversation<br>Exists?"}
+    CreateConversation -- No --> NewConversation["Create Conversation Record:<br>chatbotId + sessionId"]
+    CreateConversation -- Yes --> UseExisting["Use Existing Conversation"]
+    NewConversation --> SaveUserMsg["Save User Message<br>in messages table"]
+    UseExisting --> SaveUserMsg
+    SaveUserMsg --> LoadContext["Load Last 10 Messages<br>for Context"]
+    LoadContext --> RAGProcess{"Files Uploaded<br>to Chatbot?"}
+    RAGProcess -- Yes --> GenerateQueryEmbed["Generate Query Embedding<br>OpenAI API"]
+    GenerateQueryEmbed --> VectorSearch["pgvector Search:<br>Find Top 5 Similar Chunks<br>Using Cosine Similarity"]
+    VectorSearch --> BuildContext["Build Context String:<br>Relevant Document Excerpts<br>with Source Citations"]
+    BuildContext --> PreparePrompt["Prepare AI Prompt:<br>System Prompt +<br>Context + History +<br>User Message"]
+    RAGProcess -- No --> SimplePrompt["Prepare AI Prompt:<br>System Prompt +<br>History +<br>User Message"]
+    SimplePrompt --> PreparePrompt
+    PreparePrompt --> SendToAI["Send to OpenRouter:<br>Stream Text Response"]
+    SendToAI --> ReceiveStream["Receive Streaming Chunks"]
+    ReceiveStream --> DisplayChunk["Display Token by Token<br>in Chat Bubble"]
+    DisplayChunk --> MoreChunks{"More Chunks?"}
+    MoreChunks -- Yes --> ReceiveStream
+    MoreChunks -- No --> StreamComplete["Stream Complete"]
+    StreamComplete --> SaveAIMsg["Save AI Response<br>in messages table<br>with metadata"]
+    SaveAIMsg --> ShowSources{"Has Sources?"}
+    ShowSources -- Yes --> DisplaySources["Display Source Citations:<br>• File Name<br>• Chunk Index<br>• Similarity Score"]
+    ShowSources -- No --> SkipSources["No Sources to Display"]
+    DisplaySources --> TrackAnalytics["Track Analytics:<br>• Event: message_sent<br>• Response Time<br>• Message Length<br>• RAG Used: true/false"]
+    SkipSources --> TrackAnalytics
+    TrackAnalytics --> HideTyping["Hide Typing Indicator"]
+    HideTyping --> ReadyForNext["Ready for Next Question"]
+    ReadyForNext --> AnotherQuestion{"Ask Another<br>Question?"}
+    AnotherQuestion -- Yes --> StudentAction
+    AnotherQuestion -- No --> ViewHistory["Browse Chat History"]
+    ViewHistory --> Export{"Export Chat?"}
+    Export -- Yes --> GenerateExport["Generate Export:<br>PDF or Text Format"]
+    Export -- No --> CloseTab["Close Browser Tab"]
+    GenerateExport --> End(["Session Saved<br>Can Resume Later"])
+    CloseTab --> End
+    ShowTyping@{ shape: rect}

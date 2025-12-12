@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { SiGithub } from "react-icons/si";
+import { env } from "@/lib/env";
 
 export default function GithubSection() {
   return (
@@ -20,9 +21,10 @@ export default function GithubSection() {
             <br />
             Forever free.
           </h2>
-          <p className="text-muted-foreground text-lg mb-12 leading-relaxed max-w-2xl mx-auto">
-            Built by educators, for educators. Contribute on GitHub, self-host
-            your instance, or use our hosted version. Your choice.
+          <p className="text-muted-foreground text-lg mb-12 leading-[1.8] max-w-3xl mx-auto">
+            Built by educators for educators. Contribute to best practices.
+            Share pedagogical ideas. Collaborate on GitHub. Use our hosted AI or
+            host it yourself.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -34,11 +36,11 @@ export default function GithubSection() {
                 className="border-2 px-10 py-6 text-base rounded-full font-medium"
               >
                 <Link
-                  href={process.env.NEXT_PUBLIC_GITHUB_URL || "/"}
+                  href={env.NEXT_PUBLIC_GITHUB_URL || "/"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View on GitHub <SiGithub size={24} />
+                  View our code on GitHub <SiGithub size={24} />
                 </Link>
               </Button>
             </motion.div>

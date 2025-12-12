@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { env } from "@/lib/env";
 
 export default function InfoSection() {
   return (
@@ -18,7 +19,16 @@ export default function InfoSection() {
             Empowering Professors with Open-Access AI
           </h2>
           <p className="text-sm text-muted-foreground">
-            Built under the guidance of Professor Alexa Alice Joubin at Digital
+            Built by{" "}
+            <a
+              href={env.NEXT_PUBLIC_LINKEDIN_URL || "/"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline font-medium"
+            >
+              Akhilesh Rangani
+            </a>{" "}
+            under the guidance of Professor Alexa Alice Joubin at Digital
             Humanities Institute at George Washington University.
           </p>
         </motion.div>
@@ -32,7 +42,7 @@ export default function InfoSection() {
           transition={{ duration: 0.7 }}
         >
           <Image
-            src="/qsjoubin.jpg"
+            src="/qs-ai.png"
             alt="Professor Alexa Alice Joubin at the QS Higher Ed Summit in Washington, D.C., June 4, 2024"
             width={1920}
             height={823}
