@@ -13,7 +13,7 @@ export default function HeroSubheading({
 }: HeroSubheadingProps) {
   return (
     <motion.p
-      className="text-base md:text-lg lg:text-xl mb-8 leading-relaxed max-w-2xl mx-auto font-normal text-black"
+      className="text-base md:text-lg lg:text-xl mb-8 leading-relaxed max-w-3xl mx-auto font-normal text-black"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay }}

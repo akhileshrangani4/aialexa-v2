@@ -29,7 +29,7 @@ export default function HeroSection() {
           className="flex flex-col items-center justify-center text-center flex-1"
         >
           <HeroHeading />
-          <HeroSubheading />
+          <HeroSubheading text="Build open-access, course-specific AI chatbots using open-source LLMs for your students. Upload materials and customize responses—all for free." />
           <HeroCTA />
         </motion.div>
 
