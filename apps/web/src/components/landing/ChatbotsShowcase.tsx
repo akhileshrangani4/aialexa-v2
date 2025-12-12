@@ -4,13 +4,14 @@ import { motion } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 import { Calendar, User, FileText, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
-const gradientBackgrounds = [
-  "bg-gradient-to-r from-teal-400 via-emerald-500 to-green-600",
-  "bg-gradient-to-r from-sky-300 via-cyan-400 to-teal-500",
-  "bg-gradient-to-r from-lime-300 via-emerald-400 to-green-500",
-  "bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-600",
-];
+const backgroundImages = [
+  "/assets/featured chatbots bg/1.jpg",
+  "/assets/featured chatbots bg/2.jpg",
+  "/assets/featured chatbots bg/3.jpg",
+  "/assets/featured chatbots bg/4.jpg",
+] as const;
 
 export default function ChatbotsShowcase() {
   const { data: featuredChatbots, isLoading } =
@@ -87,13 +88,25 @@ export default function ChatbotsShowcase() {
                           : ""
                       } transition-all duration-300 shadow-lg hover:shadow-2xl`}
                     >
-                      {/* Rich horizontal gradient background */}
-                      <div
-                        className={`absolute inset-0 ${gradientBackgrounds[index]}`}
+                      {/* Background image */}
+                      <Image
+                        src={
+                          backgroundImages[index % backgroundImages.length] ||
+                          backgroundImages[0]
+                        }
+                        alt=""
+                        fill
+                        className="object-cover opacity-70"
                       />
 
-                      {/* Subtle dark overlay for text readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      {/* Subtle overlay for cohesion */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-800/30 to-slate-900/40" />
+
+                      {/* Bottom gradient for text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/20" />
+
+                      {/* Inset shadow from all sides */}
+                      <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.4)]" />
 
                       {/* Content */}
                       <div className="relative h-full p-6 md:p-8 flex flex-col justify-between z-10">
@@ -231,13 +244,25 @@ export default function ChatbotsShowcase() {
                           : ""
                       } transition-all duration-300 shadow-lg hover:shadow-2xl`}
                     >
-                      {/* Rich horizontal gradient background */}
-                      <div
-                        className={`absolute inset-0 ${gradientBackgrounds[index % gradientBackgrounds.length]}`}
+                      {/* Background image */}
+                      <Image
+                        src={
+                          backgroundImages[index % backgroundImages.length] ||
+                          backgroundImages[0]
+                        }
+                        alt=""
+                        fill
+                        className="object-cover opacity-70"
                       />
 
-                      {/* Subtle dark overlay for text readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      {/* Subtle overlay for cohesion */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-800/30 to-slate-900/40" />
+
+                      {/* Bottom gradient for text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/20" />
+
+                      {/* Inset shadow from all sides */}
+                      <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.4)]" />
 
                       {/* Content */}
                       <div className="relative h-full p-6 flex flex-col justify-between z-10">
