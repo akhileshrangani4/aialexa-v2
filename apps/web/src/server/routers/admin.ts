@@ -5,7 +5,7 @@ import {
   approvedDomains,
   chatbots,
   conversations,
-  chatbotFiles,
+  chatbotFileAssociations,
   userFiles,
 } from "@aialexa/db/schema";
 import { eq, sql, desc } from "drizzle-orm";
@@ -165,11 +165,14 @@ export const adminRouter = router({
           userName: user.name,
           userEmail: user.email,
           userRole: user.role,
-          fileCount: sql<number>`cast(count(distinct ${chatbotFiles.id}) as int)`,
+          fileCount: sql<number>`cast(count(distinct ${chatbotFileAssociations.id}) as int)`,
         })
         .from(chatbots)
         .leftJoin(user, eq(chatbots.userId, user.id))
-        .leftJoin(chatbotFiles, eq(chatbots.id, chatbotFiles.chatbotId))
+        .leftJoin(
+          chatbotFileAssociations,
+          eq(chatbots.id, chatbotFileAssociations.chatbotId),
+        )
         .groupBy(chatbots.id, user.id)
         .orderBy(desc(chatbots.createdAt))
         .limit(input.limit)
