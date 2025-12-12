@@ -50,7 +50,7 @@ export class RAGService {
   private sanitizeText(text: string): string {
     return text
       .replace(/\0/g, "") // Remove null bytes
-      .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, " ") // Replace control characters with spaces
+      .replace(/[\x01-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, " ") // Replace control characters with spaces (excluding null byte)
       .trim();
   }
 
