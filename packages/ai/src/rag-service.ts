@@ -44,6 +44,17 @@ export class RAGService {
   }
 
   /**
+   * Sanitize text to remove null bytes and control characters
+   * PostgreSQL text fields cannot store null bytes (0x00)
+   */
+  private sanitizeText(text: string): string {
+    return text
+      .replace(/\0/g, "") // Remove null bytes
+      .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, " ") // Replace control characters with spaces
+      .trim();
+  }
+
+  /**
    * Extract text content from various file types
    */
   async extractContent(buffer: Buffer, mimeType: string): Promise<string> {
@@ -60,7 +71,8 @@ export class RAGService {
         case "text/markdown":
         case "text/csv":
         case "application/json":
-          return buffer.toString("utf-8");
+          // Sanitize text files as well
+          return this.sanitizeText(buffer.toString("utf-8"));
 
         default:
           throw new Error(`Unsupported file type: ${mimeType}`);
@@ -103,7 +115,14 @@ export class RAGService {
         throw new Error("PDF parsing returned no text content");
       }
 
-      return data.text;
+      // Sanitize the text to remove null bytes and other problematic characters
+      const sanitizedText = this.sanitizeText(data.text);
+
+      if (!sanitizedText) {
+        throw new Error("PDF contains no readable text content");
+      }
+
+      return sanitizedText;
     } catch (error) {
       console.error("PDF extraction error:", error);
       throw new Error(
@@ -120,7 +139,15 @@ export class RAGService {
       // Dynamic import to avoid build-time execution
       const mammoth = await import("mammoth");
       const result = await mammoth.extractRawText({ buffer });
-      return result.value;
+
+      // Sanitize the text to remove null bytes
+      const sanitizedText = this.sanitizeText(result.value);
+
+      if (!sanitizedText) {
+        throw new Error("Word document contains no readable text content");
+      }
+
+      return sanitizedText;
     } catch (error) {
       console.error("Word extraction error:", error);
       throw new Error("Failed to extract Word document content");
