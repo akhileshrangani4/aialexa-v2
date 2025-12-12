@@ -44,6 +44,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_MAX_FILE_SIZE_MB: z.string().default("50"),
   NEXT_PUBLIC_GITHUB_URL: z.string().url().optional(),
   NEXT_PUBLIC_CONTACT_EMAIL: z.string().email().optional(),
+  NEXT_PUBLIC_LINKEDIN_URL: z.string().url().optional(),
 
   NODE_ENV: z
     .enum(["development", "production", "test"])

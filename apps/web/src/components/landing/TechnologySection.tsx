@@ -15,7 +15,8 @@ export default function TechnologySection() {
     },
     {
       title: "Fast & Reliable",
-      description: "Built on modern serverless infrastructure",
+      description:
+        "Built on modern serverless infrastructure that is scalable and efficient.",
     },
   ];
 
