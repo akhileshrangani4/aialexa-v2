@@ -5,6 +5,7 @@ import ProcessSection from "@/components/landing/ProcessSection";
 import ChatbotsShowcase from "@/components/landing/ChatbotsShowcase";
 import StatsSection from "@/components/landing/StatsSection";
 import TechnologySection from "@/components/landing/TechnologySection";
+import ComparisonSection from "@/components/landing/ComparisonSection";
 import InfoSection from "@/components/landing/InfoSection";
 import GithubSection from "@/components/landing/GithubSection";
 import Footer from "@/components/landing/Footer";
@@ -26,6 +27,8 @@ export default function HomePage() {
       <TechnologySection />
       {/* Process Section */}
       <ProcessSection />
+      {/* Comparison Section */}
+      <ComparisonSection />
       {/* Info Section */}
       <InfoSection />
       {/* Github Section */}

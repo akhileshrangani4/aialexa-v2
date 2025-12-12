@@ -33,20 +33,20 @@ export default function ProcessSection() {
 
   const diagrams = [
     {
-      src: "/diagrams/architecture/system_architecture.png",
+      src: "/diagrams/architecture/system_architecture_simple.png",
       title: "System Architecture",
       description:
         "Our architecture leverages modern serverless infrastructure to deliver a scalable, efficient platform. Built with Next.js, tRPC, and Supabase, the system seamlessly integrates multiple open-source LLMs with vector-based retrieval for accurate, context-aware responses.",
     },
     {
-      src: "/diagrams/flowcharts/professor.png",
-      title: "Professor Flow",
+      src: "/diagrams/flowcharts/professorsimple.png",
+      title: "Professor Flow Chart",
       description:
         "Professors can easily create and customize chatbots by uploading course materials, selecting an LLM, and configuring behavior settings. The intuitive workflow ensures your chatbot is ready to deploy in minutes.",
     },
     {
-      src: "/diagrams/flowcharts/student.png",
-      title: "Student Flow",
+      src: "/diagrams/flowcharts/studentsimple.png",
+      title: "Student Flow Chart",
       description:
         "Students interact with chatbots through a clean, accessible interface. Each query is processed using RAG technology to retrieve relevant information from uploaded materials, ensuring accurate and contextual responses.",
     },
