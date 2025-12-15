@@ -3,9 +3,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { RouterOutputs } from "@/lib/trpc";
-import { formatFileSize, formatDate, getStatusColor } from "./file-constants";
+import { formatFileSize, formatDate } from "./file-constants";
+import { FileStatusBadge } from "./FileStatusBadge";
 
 type FileData = RouterOutputs["files"]["list"]["files"][number];
 
@@ -35,15 +35,12 @@ export function FileCard({ file, onDelete }: FileCardProps) {
                 {formatFileSize(file.fileSize)}
               </span>
               <span>•</span>
-              <span
-                className={cn(
-                  "font-medium",
-                  getStatusColor(file.processingStatus),
-                )}
-              >
-                {file.processingStatus.charAt(0).toUpperCase() +
-                  file.processingStatus.slice(1)}
-              </span>
+              <FileStatusBadge
+                status={file.processingStatus}
+                metadata={file.metadata || undefined}
+                showProgress={false}
+                size="sm"
+              />
               <span>•</span>
               <span>{formatDate(file.createdAt)}</span>
             </div>
