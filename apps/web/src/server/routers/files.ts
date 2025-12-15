@@ -14,6 +14,7 @@ import {
   getPreviewUrlProcedure,
   getTotalCountProcedure,
 } from "./files/procedures/status";
+import { retryProcedure } from "./files/procedures/retry";
 
 export const filesRouter = router({
   /**
@@ -60,4 +61,9 @@ export const filesRouter = router({
    * Get total files count for user
    */
   getTotalCount: getTotalCountProcedure,
+
+  /**
+   * Retry processing for a failed or stuck file
+   */
+  retry: retryProcedure,
 });
