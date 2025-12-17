@@ -23,6 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { validateDomainForAllowlist } from "@/lib/domain-validation";
 
 export function AllowedDomainsTab() {
   const [newDomain, setNewDomain] = useState("");
@@ -75,17 +76,20 @@ export function AllowedDomainsTab() {
       return;
     }
 
-    // Domain validation - allows both regular domains (example.com, edu.eg)
-    // and TLD patterns (.de, .edu, .edu.in) for wildcard matching
-    const domainRegex =
-      /^\.?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
-    if (!domainRegex.test(newDomain.trim())) {
-      toast.error("Please enter a valid domain (e.g., example.com, .de, .edu)");
+    const trimmedDomain = newDomain.trim().toLowerCase();
+
+    // Use shared validation utility (same logic as backend)
+    const validation = validateDomainForAllowlist(trimmedDomain);
+    if (!validation.valid) {
+      toast.error("⚠️ Invalid domain", {
+        description: validation.reason,
+        duration: 8000,
+      });
       return;
     }
 
     await addDomainMutation.mutateAsync({
-      domain: newDomain.trim().toLowerCase(),
+      domain: trimmedDomain,
     });
   };
 
@@ -107,10 +111,45 @@ export function AllowedDomainsTab() {
         <CardContent>
           <Alert className="mb-6">
             <AlertDescription>
-              Users with email addresses from these domains can register for an
-              account. They will still require manual admin approval before
-              accessing the platform. If no domains are configured, all email
-              domains are allowed to register.
+              <div className="space-y-2">
+                <p>
+                  Users with email addresses from these domains can register for
+                  an account. They will still require manual admin approval
+                  before accessing the platform. If no domains are configured,
+                  all email domains are allowed to register.
+                </p>
+                <div className="pt-2 text-xs">
+                  <p className="font-semibold mb-1">Examples:</p>
+                  <ul className="list-disc list-inside space-y-0.5 ml-2">
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">.edu</code>{" "}
+                      - Allows all US educational institutions
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        .ac.uk
+                      </code>{" "}
+                      - Allows all UK academic institutions
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        stanford.edu
+                      </code>{" "}
+                      - Only Stanford University
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        uni-bonn.de
+                      </code>{" "}
+                      - Only University of Bonn (Germany)
+                    </li>
+                  </ul>
+                  <p className="mt-2 text-amber-600 dark:text-amber-500 font-medium">
+                    ⚠️ Avoid broad country TLDs like .de, .fr, .uk - use
+                    specific domains instead
+                  </p>
+                </div>
+              </div>
             </AlertDescription>
           </Alert>
 
@@ -121,7 +160,7 @@ export function AllowedDomainsTab() {
                 <>
                   <Input
                     type="text"
-                    placeholder="Enter domain (e.g., example.com, .de, .edu)"
+                    placeholder="Enter domain (e.g., .edu, .ac.uk, stanford.edu, uni-bonn.de)"
                     value={newDomain}
                     onChange={(e) => setNewDomain(e.target.value)}
                     onKeyDown={(e) => {

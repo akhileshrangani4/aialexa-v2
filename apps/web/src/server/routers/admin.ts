@@ -24,6 +24,7 @@ import {
   sendAccountEnabledEmail,
   sendAccountDeletedEmail,
 } from "@/lib/email";
+import { validateDomainForAllowlist } from "@/lib/domain-validation";
 
 export const adminRouter = router({
   /**
@@ -102,14 +103,40 @@ export const adminRouter = router({
 
   /**
    * Add allowed domain
+   * Validates against Public Suffix List to prevent broad TLDs
    */
   addDomain: adminProcedure
     .input(z.object({ domain: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
+      // Server-side validation using Public Suffix List
+      const validation = validateDomainForAllowlist(input.domain);
+      if (!validation.valid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: validation.reason || "Invalid domain",
+        });
+      }
+
+      const normalizedDomain = input.domain.trim().toLowerCase();
+
+      // Check if domain already exists
+      const existing = await ctx.db
+        .select()
+        .from(approvedDomains)
+        .where(eq(approvedDomains.domain, normalizedDomain))
+        .limit(1);
+
+      if (existing.length > 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "This domain is already in the allowed list",
+        });
+      }
+
       const [newDomain] = await ctx.db
         .insert(approvedDomains)
         .values({
-          domain: input.domain,
+          domain: normalizedDomain,
           createdBy: ctx.session.user.id,
         })
         .returning();

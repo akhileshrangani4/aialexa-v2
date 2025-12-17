@@ -57,6 +57,7 @@ export default function EmbedWindowPage() {
           isStreaming={isStreaming}
           onReset={resetChat}
           onClose={close}
+          messages={messages}
         />
       )}
 
