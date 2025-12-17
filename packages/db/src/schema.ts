@@ -144,6 +144,20 @@ export const userFiles = pgTable("user_files", {
       error?: string;
       chunkCount?: number;
       processedAt?: string;
+      // Processing progress tracking
+      processingProgress?: {
+        stage:
+          | "downloading"
+          | "extracting"
+          | "chunking"
+          | "embedding"
+          | "storing";
+        percentage: number; // 0-100
+        currentChunk?: number;
+        totalChunks?: number;
+        startedAt?: string;
+        lastUpdatedAt?: string;
+      };
     }>()
     .default({}),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -179,6 +193,20 @@ export const chatbotFiles = pgTable("chatbot_files", {
       error?: string;
       chunkCount?: number;
       processedAt?: string;
+      // Processing progress tracking
+      processingProgress?: {
+        stage:
+          | "downloading"
+          | "extracting"
+          | "chunking"
+          | "embedding"
+          | "storing";
+        percentage: number; // 0-100
+        currentChunk?: number;
+        totalChunks?: number;
+        startedAt?: string;
+        lastUpdatedAt?: string;
+      };
     }>()
     .default({}),
   createdAt: timestamp("created_at").defaultNow().notNull(),

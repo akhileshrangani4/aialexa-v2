@@ -11,9 +11,10 @@ export class RAGService {
 
   constructor() {
     // Initialize text splitter with optimal chunk size
+    // Increased from 1000 to 2500 to reduce number of chunks for large files
     this.textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
+      chunkSize: 2500,
+      chunkOverlap: 250,
       separators: ["\n\n", "\n", ".", " ", ""],
     });
 

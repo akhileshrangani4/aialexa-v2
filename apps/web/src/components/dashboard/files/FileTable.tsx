@@ -9,9 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileText, Trash2, X, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { formatFileSize, formatDate, getStatusColor } from "./file-constants";
+import { FileText, Trash2, X, Plus, RefreshCw } from "lucide-react";
+import { formatFileSize, formatDate } from "./file-constants";
+import { FileStatusBadge } from "./FileStatusBadge";
 
 // Generic file type that works with both list and listForChatbot responses
 type BaseFile = {
@@ -20,6 +20,19 @@ type BaseFile = {
   fileType: string;
   fileSize: number;
   processingStatus: string;
+  metadata?: {
+    error?: string;
+    chunkCount?: number;
+    processedAt?: string;
+    processingProgress?: {
+      stage: "downloading" | "extracting" | "chunking" | "embedding" | "storing";
+      percentage: number;
+      currentChunk?: number;
+      totalChunks?: number;
+      startedAt?: string;
+      lastUpdatedAt?: string;
+    };
+  };
   createdAt?: Date;
 };
 
@@ -35,6 +48,9 @@ interface FileTableRowProps<T extends BaseFile> {
   actionType?: ActionType;
   onAction?: (fileId: string) => void;
   actionDisabled?: boolean;
+  // Retry props
+  onRetry?: (fileId: string) => void;
+  retryDisabled?: boolean;
   // Display options
   showCreatedDate?: boolean;
 }
@@ -47,8 +63,24 @@ function FileTableRow<T extends BaseFile>({
   actionType = "none",
   onAction,
   actionDisabled = false,
+  onRetry,
+  retryDisabled = false,
   showCreatedDate = false,
 }: FileTableRowProps<T>) {
+  // Check if file is failed or stuck
+  const isStuck =
+    file.processingStatus === "processing" &&
+    file.metadata?.processingProgress?.lastUpdatedAt &&
+    Date.now() -
+      new Date(file.metadata.processingProgress.lastUpdatedAt).getTime() >
+      30 * 60 * 1000; // 30 minutes
+
+  // Allow retry for failed, stuck, pending, or actively processing files
+  const canRetry =
+    file.processingStatus === "failed" ||
+    file.processingStatus === "pending" ||
+    file.processingStatus === "processing"; // Allow cancel/retry even during active processing
+
   const renderAction = () => {
     if (actionType === "none" || !onAction) return null;
 
@@ -60,14 +92,35 @@ function FileTableRow<T extends BaseFile>({
     switch (actionType) {
       case "delete":
         return (
-          <Button
-            variant="ghost"
-            size="icon"
-            {...commonProps}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center justify-end gap-1 min-w-[72px]">
+            {canRetry && onRetry && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRetry(file.id);
+                }}
+                disabled={retryDisabled}
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 flex-shrink-0"
+                title={
+                  file.processingStatus === "processing" && !isStuck
+                    ? "Cancel and restart processing"
+                    : "Retry processing"
+                }
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              {...commonProps}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 flex-shrink-0"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         );
       case "remove":
         return (
@@ -137,15 +190,12 @@ function FileTableRow<T extends BaseFile>({
         </span>
       </TableCell>
       <TableCell>
-        <span
-          className={cn(
-            "text-sm font-medium whitespace-nowrap",
-            getStatusColor(file.processingStatus),
-          )}
-        >
-          {file.processingStatus.charAt(0).toUpperCase() +
-            file.processingStatus.slice(1)}
-        </span>
+        <FileStatusBadge
+          status={file.processingStatus}
+          metadata={file.metadata}
+          showProgress={true}
+          size="sm"
+        />
       </TableCell>
       {showCreatedDate && file.createdAt && (
         <TableCell>
@@ -159,10 +209,9 @@ function FileTableRow<T extends BaseFile>({
           onClick={(e) => {
             e.stopPropagation();
           }}
+          className="text-right"
         >
-          <div className="flex justify-start w-full min-w-[40px]">
-            {renderAction()}
-          </div>
+          {renderAction()}
         </TableCell>
       )}
     </TableRow>
@@ -181,6 +230,9 @@ interface FileTableProps<T extends BaseFile> {
   actionType?: ActionType;
   onAction?: (fileId: string) => void;
   actionDisabled?: boolean;
+  // Retry props
+  onRetry?: (fileId: string) => void;
+  retryDisabled?: boolean;
   // Display options
   showCreatedDate?: boolean;
   // Empty state
@@ -197,6 +249,8 @@ export function FileTable<T extends BaseFile>({
   actionType = "none",
   onAction,
   actionDisabled = false,
+  onRetry,
+  retryDisabled = false,
   showCreatedDate = false,
   emptyMessage = "No files found",
 }: FileTableProps<T>) {
@@ -214,13 +268,14 @@ export function FileTable<T extends BaseFile>({
   const hasActions = actionType !== "none";
 
   // Calculate file name width: remaining space after other columns
+  // Status: 20% for progress bars, Actions: 12% for consistent button spacing
   const fixedWidth =
     (hasCheckbox ? 3 : 0) +
     10 +
     10 +
-    12 +
+    20 +
     (hasCreated ? 15 : 0) +
-    (hasActions ? 15 : 0);
+    (hasActions ? 12 : 0);
   const fileNameWidth = 100 - fixedWidth;
 
   return (
@@ -230,9 +285,9 @@ export function FileTable<T extends BaseFile>({
         <col style={{ width: `${fileNameWidth}%` }} />
         <col style={{ width: "10%" }} />
         <col style={{ width: "10%" }} />
-        <col style={{ width: "12%" }} />
+        <col style={{ width: "20%" }} />
         {hasCreated && <col style={{ width: "15%" }} />}
-        {hasActions && <col style={{ width: "15%" }} />}
+        {hasActions && <col style={{ width: "12%" }} />}
       </colgroup>
       <TableHeader>
         <TableRow>
@@ -255,7 +310,7 @@ export function FileTable<T extends BaseFile>({
             <TableHead className="whitespace-nowrap">Created</TableHead>
           )}
           {actionType !== "none" && (
-            <TableHead className="whitespace-nowrap">Actions</TableHead>
+            <TableHead className="whitespace-nowrap text-right">Actions</TableHead>
           )}
         </TableRow>
       </TableHeader>
@@ -270,6 +325,8 @@ export function FileTable<T extends BaseFile>({
             actionType={actionType}
             onAction={onAction}
             actionDisabled={actionDisabled}
+            onRetry={onRetry}
+            retryDisabled={retryDisabled}
             showCreatedDate={showCreatedDate}
           />
         ))}
