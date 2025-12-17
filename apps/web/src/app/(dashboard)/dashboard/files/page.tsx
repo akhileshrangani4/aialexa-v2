@@ -285,10 +285,7 @@ export default function FilesPage() {
                   </div>
                 </div>
                 <FileTable
-                  files={files.map((file) => ({
-                    ...file,
-                    metadata: file.metadata || undefined,
-                  }))}
+                  files={files}
                   showCheckbox
                   selectedFiles={selectedFiles}
                   onToggleSelect={handleToggleFile}
