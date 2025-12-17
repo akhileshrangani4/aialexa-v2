@@ -1,13 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { env } from "@/lib/env";
 
-export interface FileUploadInput {
-  fileName: string;
-  fileType: string;
-  fileSize: number;
-  fileData: string;
-}
-
 /**
  * Supported MIME types for file uploads
  */
@@ -36,6 +29,20 @@ export const EXTENSION_MIME_MAP: Record<string, string[]> = {
   json: ["application/json"],
   csv: ["text/csv"],
 } as const;
+
+/**
+ * User-friendly file type names for error messages
+ */
+export const FILE_TYPE_DISPLAY_NAMES: Record<string, string> = {
+  "application/pdf": "PDF",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    "Word (.docx)",
+  "application/msword": "Word (.doc)",
+  "text/plain": "Text",
+  "text/markdown": "Markdown",
+  "application/json": "JSON",
+  "text/csv": "CSV",
+};
 
 /**
  * Validates file name for invalid characters and length
@@ -95,15 +102,17 @@ export function validateFileType(fileType: string): void {
       fileType as (typeof SUPPORTED_FILE_TYPES)[number],
     )
   ) {
+    const displayName = FILE_TYPE_DISPLAY_NAMES[fileType] || fileType;
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: `Unsupported file type: ${fileType}. Supported types: PDF, Word (.doc, .docx), TXT, Markdown, JSON, CSV`,
+      message: `Unsupported file type: ${displayName}. Supported types: PDF, Word (.doc, .docx), Text, Markdown, JSON, CSV`,
     });
   }
 }
 
 /**
  * Validates that file extension matches the declared MIME type
+ * This prevents file type spoofing attacks
  */
 export function validateExtensionMatchesMimeType(
   fileName: string,
@@ -114,78 +123,10 @@ export function validateExtensionMatchesMimeType(
   const validMimeTypes = EXTENSION_MIME_MAP[extension];
 
   if (extension && validMimeTypes && !validMimeTypes.includes(fileType)) {
+    const displayName = FILE_TYPE_DISPLAY_NAMES[fileType] || fileType;
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: `File extension (.${extension}) does not match file type (${fileType})`,
+      message: `File extension (.${extension}) does not match file type (${displayName}). This may indicate a renamed or corrupted file.`,
     });
   }
-}
-
-/**
- * Validates base64 file data format
- */
-export function validateBase64Data(fileData: string): void {
-  const base64Regex = /^data:[\w+-]+(\/[\w+-]+)?;base64,([A-Za-z0-9+/=]+)$/;
-  const isBase64DataUrl = base64Regex.test(fileData);
-  const isBase64String = /^[A-Za-z0-9+/=]+$/.test(fileData.replace(/\s/g, ""));
-
-  if (!isBase64DataUrl && !isBase64String) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Invalid file data format. Expected base64 encoded data",
-    });
-  }
-}
-
-/**
- * Validates and decodes base64 file data
- */
-export function decodeBase64FileData(
-  fileData: string,
-  expectedSize: number,
-): Buffer {
-  // Extract base64 data (remove data URL prefix if present)
-  const base64Data = fileData.includes(",") ? fileData.split(",")[1] : fileData;
-
-  if (!base64Data) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Invalid file data. Base64 data is missing",
-    });
-  }
-
-  // Decode base64 file data
-  let fileBuffer: Buffer;
-  try {
-    fileBuffer = Buffer.from(base64Data, "base64");
-  } catch {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Failed to decode file data. Invalid base64 encoding",
-    });
-  }
-
-  // Verify decoded buffer size matches reported file size
-  if (fileBuffer.length !== expectedSize) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message:
-        "File size mismatch. The decoded file size does not match the reported size",
-    });
-  }
-
-  return fileBuffer;
-}
-
-/**
- * Validates all file upload input
- */
-export function validateFileUpload(input: FileUploadInput): Buffer {
-  validateFileName(input.fileName);
-  validateFileSize(input.fileSize);
-  validateFileType(input.fileType);
-  validateExtensionMatchesMimeType(input.fileName, input.fileType);
-  validateBase64Data(input.fileData);
-
-  return decodeBase64FileData(input.fileData, input.fileSize);
 }

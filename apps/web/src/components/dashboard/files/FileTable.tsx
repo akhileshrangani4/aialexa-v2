@@ -9,9 +9,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileText, Trash2, X, Plus, RefreshCw } from "lucide-react";
-import { formatFileSize, formatDate } from "./file-constants";
+import {
+  FileText,
+  Trash2,
+  X,
+  Plus,
+  RefreshCw,
+  Download,
+  Eye,
+} from "lucide-react";
+import {
+  formatFileSize,
+  formatDate,
+  getFileTypeDisplayName,
+} from "./file-constants";
 import { FileStatusBadge } from "./FileStatusBadge";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // Generic file type that works with both list and listForChatbot responses
 type BaseFile = {
@@ -25,7 +39,12 @@ type BaseFile = {
     chunkCount?: number;
     processedAt?: string;
     processingProgress?: {
-      stage: "downloading" | "extracting" | "chunking" | "embedding" | "storing";
+      stage:
+        | "downloading"
+        | "extracting"
+        | "chunking"
+        | "embedding"
+        | "storing";
       percentage: number;
       currentChunk?: number;
       totalChunks?: number;
@@ -67,6 +86,8 @@ function FileTableRow<T extends BaseFile>({
   retryDisabled = false,
   showCreatedDate = false,
 }: FileTableRowProps<T>) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   // Check if file is failed or stuck
   const isStuck =
     file.processingStatus === "processing" &&
@@ -81,69 +102,164 @@ function FileTableRow<T extends BaseFile>({
     file.processingStatus === "pending" ||
     file.processingStatus === "processing"; // Allow cancel/retry even during active processing
 
+  // Check if file can be viewed (only completed files)
+  const canView = file.processingStatus === "completed";
+
+  // Check if file type is viewable in browser (PDFs)
+  const isViewable = file.fileType === "application/pdf";
+
+  // Handle file view/download - uses secure authenticated endpoint
+  const handleFileClick = async (
+    e: React.MouseEvent,
+    forceDownload = false,
+  ) => {
+    e.stopPropagation();
+
+    if (!canView) {
+      toast.error("File is not ready", {
+        description: "Please wait for the file to finish processing",
+      });
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      // Use secure authenticated endpoint - session is validated on every request
+      const downloadParam =
+        forceDownload || !isViewable ? "?download=true" : "";
+      const url = `/api/files/${file.id}/download${downloadParam}`;
+
+      if (forceDownload || !isViewable) {
+        // Download the file
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = file.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Download started");
+      } else {
+        // Open in new tab (for PDFs)
+        // Note: Session cookie will be sent automatically
+        window.open(url, "_blank");
+      }
+    } catch (error) {
+      toast.error("Failed to access file", {
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const renderAction = () => {
-    if (actionType === "none" || !onAction) return null;
-
-    const commonProps = {
-      onClick: () => onAction(file.id),
-      disabled: actionDisabled,
-    };
-
-    switch (actionType) {
-      case "delete":
-        return (
-          <div className="flex items-center justify-end gap-1 min-w-[72px]">
-            {canRetry && onRetry && (
+    return (
+      <div className="flex items-center justify-end gap-1">
+        {/* View/Download buttons - only for completed files */}
+        {canView && (
+          <>
+            {isViewable && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onRetry(file.id);
+                  handleFileClick(e, false);
                 }}
-                disabled={retryDisabled}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 w-8 flex-shrink-0"
-                title={
-                  file.processingStatus === "processing" && !isStuck
-                    ? "Cancel and restart processing"
-                    : "Retry processing"
-                }
+                disabled={isDownloading}
+                className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
+                title="View in new tab"
               >
-                <RefreshCw className="h-4 w-4" />
+                <Eye className="h-4 w-4" />
               </Button>
             )}
             <Button
               variant="ghost"
               size="icon"
-              {...commonProps}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 flex-shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFileClick(e, true);
+              }}
+              disabled={isDownloading}
+              className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
+              title="Download"
             >
-              <Trash2 className="h-4 w-4" />
+              <Download className="h-4 w-4" />
             </Button>
-          </div>
-        );
-      case "remove":
-        return (
+          </>
+        )}
+
+        {/* Retry button - for failed/processing files */}
+        {canRetry && onRetry && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRetry(file.id);
+            }}
+            disabled={retryDisabled}
+            className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
+            title={
+              file.processingStatus === "processing" && !isStuck
+                ? "Cancel and restart"
+                : "Retry processing"
+            }
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        )}
+
+        {/* Action buttons based on action type */}
+        {actionType === "delete" && onAction && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(file.id);
+            }}
+            disabled={actionDisabled}
+            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+
+        {actionType === "remove" && onAction && (
           <Button
             variant="ghost"
             size="sm"
-            {...commonProps}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(file.id);
+            }}
+            disabled={actionDisabled}
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
-            <X className="h-4 w-4 mr-2" />
+            <X className="h-4 w-4 mr-1" />
             Remove
           </Button>
-        );
-      case "add":
-        return (
-          <Button size="sm" variant="outline" {...commonProps}>
-            <Plus className="h-4 w-4 mr-2" />
+        )}
+
+        {actionType === "add" && onAction && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(file.id);
+            }}
+            disabled={actionDisabled}
+          >
+            <Plus className="h-4 w-4 mr-1" />
             Add
           </Button>
-        );
-      default:
-        return null;
-    }
+        )}
+      </div>
+    );
   };
 
   return (
@@ -156,16 +272,15 @@ function FileTableRow<T extends BaseFile>({
       }}
     >
       {showCheckbox && onToggleSelect && (
-        <TableCell
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleSelect(file.id);
-          }}
-        >
+        <TableCell onClick={(e) => e.stopPropagation()}>
           <input
             type="checkbox"
             checked={isSelected}
-            onChange={() => onToggleSelect(file.id)}
+            onChange={(e) => {
+              e.stopPropagation();
+              onToggleSelect(file.id);
+            }}
+            onClick={(e) => e.stopPropagation()}
             className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
             aria-label={`Select ${file.fileName}`}
           />
@@ -181,7 +296,7 @@ function FileTableRow<T extends BaseFile>({
       </TableCell>
       <TableCell>
         <span className="text-sm text-muted-foreground whitespace-nowrap">
-          {file.fileType.split("/")[1]?.toUpperCase() || file.fileType}
+          {getFileTypeDisplayName(file.fileType)}
         </span>
       </TableCell>
       <TableCell>
@@ -204,16 +319,14 @@ function FileTableRow<T extends BaseFile>({
           </span>
         </TableCell>
       )}
-      {actionType !== "none" && (
-        <TableCell
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="text-right"
-        >
-          {renderAction()}
-        </TableCell>
-      )}
+      <TableCell
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className="text-right"
+      >
+        {renderAction()}
+      </TableCell>
     </TableRow>
   );
 }
@@ -265,17 +378,11 @@ export function FileTable<T extends BaseFile>({
   // Use percentage-based widths for consistent alignment across all tables
   const hasCheckbox = showCheckbox && onSelectAll;
   const hasCreated = showCreatedDate;
-  const hasActions = actionType !== "none";
 
   // Calculate file name width: remaining space after other columns
-  // Status: 20% for progress bars, Actions: 12% for consistent button spacing
+  // Status: 20% for progress bars, Actions: 12% for icon buttons
   const fixedWidth =
-    (hasCheckbox ? 3 : 0) +
-    10 +
-    10 +
-    20 +
-    (hasCreated ? 15 : 0) +
-    (hasActions ? 12 : 0);
+    (hasCheckbox ? 3 : 0) + 10 + 10 + 20 + (hasCreated ? 15 : 0) + 12; // Actions column with icon buttons
   const fileNameWidth = 100 - fixedWidth;
 
   return (
@@ -287,7 +394,7 @@ export function FileTable<T extends BaseFile>({
         <col style={{ width: "10%" }} />
         <col style={{ width: "20%" }} />
         {hasCreated && <col style={{ width: "15%" }} />}
-        {hasActions && <col style={{ width: "12%" }} />}
+        <col style={{ width: "12%" }} />
       </colgroup>
       <TableHeader>
         <TableRow>
@@ -309,9 +416,9 @@ export function FileTable<T extends BaseFile>({
           {showCreatedDate && (
             <TableHead className="whitespace-nowrap">Created</TableHead>
           )}
-          {actionType !== "none" && (
-            <TableHead className="whitespace-nowrap text-right">Actions</TableHead>
-          )}
+          <TableHead className="whitespace-nowrap text-right">
+            Actions
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

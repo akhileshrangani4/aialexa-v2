@@ -78,14 +78,18 @@ export default function FilesPage() {
     onSuccess: (_, variables) => {
       const file = files.find((f) => f.id === variables.fileId);
       const wasProcessing =
-        file?.processingStatus === "processing" && 
+        file?.processingStatus === "processing" &&
         file?.metadata?.processingProgress?.lastUpdatedAt &&
-        Date.now() - new Date(file.metadata.processingProgress.lastUpdatedAt).getTime() < 30 * 60 * 1000;
-      
+        Date.now() -
+          new Date(file.metadata.processingProgress.lastUpdatedAt).getTime() <
+          30 * 60 * 1000;
+
       toast.success(
-        wasProcessing ? "Processing cancelled and restarted" : "File processing restarted",
+        wasProcessing
+          ? "Processing cancelled and restarted"
+          : "File processing restarted",
         {
-          description: wasProcessing 
+          description: wasProcessing
             ? "The file will be processed again from the beginning"
             : "The file will be processed again",
         },

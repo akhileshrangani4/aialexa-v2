@@ -28,6 +28,23 @@ export const ALLOWED_EXTENSIONS = [
   ".csv",
 ] as const;
 
+// User-friendly file type names for error messages
+export const FILE_TYPE_DISPLAY_NAMES: Record<string, string> = {
+  "application/pdf": "PDF",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    "Word (.docx)",
+  "application/msword": "Word (.doc)",
+  "text/plain": "Text",
+  "text/markdown": "Markdown",
+  "application/json": "JSON",
+  "text/csv": "CSV",
+};
+
+// Helper to get user-friendly file type name
+export const getFileTypeDisplayName = (mimeType: string): string => {
+  return FILE_TYPE_DISPLAY_NAMES[mimeType] || mimeType;
+};
+
 // Validate file name
 export const validateFileName = (fileName: string): string | null => {
   if (!fileName || fileName.trim().length === 0) {
