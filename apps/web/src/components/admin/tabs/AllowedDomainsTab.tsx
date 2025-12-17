@@ -23,6 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { parse, getPublicSuffix } from "tldts";
 
 export function AllowedDomainsTab() {
   const [newDomain, setNewDomain] = useState("");
@@ -75,17 +76,107 @@ export function AllowedDomainsTab() {
       return;
     }
 
-    // Domain validation - allows both regular domains (example.com, edu.eg)
-    // and TLD patterns (.de, .edu, .edu.in) for wildcard matching
+    const trimmedDomain = newDomain.trim().toLowerCase();
+
+    // Basic format validation
     const domainRegex =
       /^\.?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
-    if (!domainRegex.test(newDomain.trim())) {
-      toast.error("Please enter a valid domain (e.g., example.com, .de, .edu)");
+    if (!domainRegex.test(trimmedDomain)) {
+      toast.error(
+        "Please enter a valid domain (e.g., .edu, stanford.edu, uni-bonn.de)",
+      );
+      return;
+    }
+
+    // Safe educational TLDs that are allowed (specific to educational institutions)
+    const safeEducationalTLDs = [
+      ".edu",
+      "edu", // US education
+      ".ac.uk",
+      "ac.uk", // UK academia
+      ".ac.in",
+      "ac.in", // India academia
+      ".edu.in",
+      "edu.in", // India education
+      ".ac.nz",
+      "ac.nz", // New Zealand academia
+      ".ac.za",
+      "ac.za", // South Africa academia
+      ".ac.jp",
+      "ac.jp", // Japan academia
+      ".ac.kr",
+      "ac.kr", // South Korea academia
+      ".ac.cn",
+      "ac.cn", // China academia
+      ".ac.il",
+      "ac.il", // Israel academia
+      ".edu.au",
+      "edu.au", // Australia education
+      ".edu.cn",
+      "edu.cn", // China education
+      ".edu.br",
+      "edu.br", // Brazil education
+      ".edu.mx",
+      "edu.mx", // Mexico education
+      ".edu.ar",
+      "edu.ar", // Argentina education
+      ".edu.co",
+      "edu.co", // Colombia education
+      ".edu.eg",
+      "edu.eg", // Egypt education
+      ".edu.pk",
+      "edu.pk", // Pakistan education
+      ".edu.sg",
+      "edu.sg", // Singapore education
+      ".edu.my",
+      "edu.my", // Malaysia education
+      ".edu.ph",
+      "edu.ph", // Philippines education
+    ];
+
+    // If it's a safe educational TLD, allow it immediately
+    if (safeEducationalTLDs.includes(trimmedDomain)) {
+      await addDomainMutation.mutateAsync({
+        domain: trimmedDomain,
+      });
+      return;
+    }
+
+    // Use tldts to parse the domain using the Public Suffix List (industry standard)
+    // Add a dummy prefix if the domain starts with a dot for proper parsing
+    const testDomain = trimmedDomain.startsWith(".")
+      ? `example${trimmedDomain}`
+      : trimmedDomain;
+
+    const parsed = parse(testDomain);
+    const publicSuffix = getPublicSuffix(testDomain);
+
+    // Check if what they entered is ONLY a public suffix (too broad)
+    const domainWithoutDot = trimmedDomain.startsWith(".")
+      ? trimmedDomain.slice(1)
+      : trimmedDomain;
+
+    // If the domain without dot equals the public suffix, it's just a TLD (too broad)
+    if (publicSuffix && domainWithoutDot === publicSuffix) {
+      toast.error("⚠️ Broad TLD detected", {
+        description: `Adding "${trimmedDomain}" will allow ALL emails from this domain type. For security, please add specific institutions instead (e.g., "stanford.edu" or "uni-bonn.de", not "${trimmedDomain}")`,
+        duration: 8000,
+      });
+      return;
+    }
+
+    // If parsed domain is null or invalid, block it
+    if (!parsed.domain) {
+      toast.error("Invalid domain", {
+        description:
+          "Please enter a valid domain name or educational TLD pattern",
+        duration: 6000,
+      });
       return;
     }
 
     await addDomainMutation.mutateAsync({
-      domain: newDomain.trim().toLowerCase(),
+      domain: trimmedDomain,
     });
   };
 
@@ -107,10 +198,45 @@ export function AllowedDomainsTab() {
         <CardContent>
           <Alert className="mb-6">
             <AlertDescription>
-              Users with email addresses from these domains can register for an
-              account. They will still require manual admin approval before
-              accessing the platform. If no domains are configured, all email
-              domains are allowed to register.
+              <div className="space-y-2">
+                <p>
+                  Users with email addresses from these domains can register for
+                  an account. They will still require manual admin approval
+                  before accessing the platform. If no domains are configured,
+                  all email domains are allowed to register.
+                </p>
+                <div className="pt-2 text-xs">
+                  <p className="font-semibold mb-1">Examples:</p>
+                  <ul className="list-disc list-inside space-y-0.5 ml-2">
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">.edu</code>{" "}
+                      - Allows all US educational institutions
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        .ac.uk
+                      </code>{" "}
+                      - Allows all UK academic institutions
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        stanford.edu
+                      </code>{" "}
+                      - Only Stanford University
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        uni-bonn.de
+                      </code>{" "}
+                      - Only University of Bonn (Germany)
+                    </li>
+                  </ul>
+                  <p className="mt-2 text-amber-600 dark:text-amber-500 font-medium">
+                    ⚠️ Avoid broad country TLDs like .de, .fr, .uk - use
+                    specific domains instead
+                  </p>
+                </div>
+              </div>
             </AlertDescription>
           </Alert>
 
@@ -121,7 +247,7 @@ export function AllowedDomainsTab() {
                 <>
                   <Input
                     type="text"
-                    placeholder="Enter domain (e.g., example.com, .de, .edu)"
+                    placeholder="Enter domain (e.g., .edu, .ac.uk, stanford.edu, uni-bonn.de)"
                     value={newDomain}
                     onChange={(e) => setNewDomain(e.target.value)}
                     onKeyDown={(e) => {
