@@ -11,28 +11,23 @@ import { logInfo, logError } from "./logger";
  */
 async function updateProgress(
   fileId: string,
-  stage:
-    | "downloading"
-    | "extracting"
-    | "chunking"
-    | "embedding"
-    | "storing",
+  stage: "downloading" | "extracting" | "chunking" | "embedding" | "storing",
   percentage: number,
   currentChunk?: number,
   totalChunks?: number,
 ) {
   const now = new Date().toISOString();
-  
+
   // Get current file to preserve existing metadata
   const [currentFile] = await db
     .select()
     .from(userFiles)
     .where(eq(userFiles.id, fileId))
     .limit(1);
-  
+
   const existingMetadata = currentFile?.metadata || {};
   const startedAt = existingMetadata?.processingProgress?.startedAt || now;
-  
+
   await db
     .update(userFiles)
     .set({
@@ -116,11 +111,17 @@ export async function processFile(params: {
 
     if (error || !data) {
       // File might have been deleted from storage
-      if (error.message?.includes("not found") || error.message?.includes("does not exist")) {
-        logInfo("File storage not found (likely deleted), skipping processing", {
-          fileId,
-          storagePath: file.storagePath,
-        });
+      if (
+        error.message?.includes("not found") ||
+        error.message?.includes("does not exist")
+      ) {
+        logInfo(
+          "File storage not found (likely deleted), skipping processing",
+          {
+            fileId,
+            storagePath: file.storagePath,
+          },
+        );
         return {
           success: false,
           chunkCount: 0,
@@ -189,7 +190,13 @@ export async function processFile(params: {
       const progress =
         embeddingProgressStart +
         (batchEnd / chunks.length) * embeddingProgressRange;
-      await updateProgress(fileId, "embedding", progress, batchEnd, chunks.length);
+      await updateProgress(
+        fileId,
+        "embedding",
+        progress,
+        batchEnd,
+        chunks.length,
+      );
 
       logInfo(`Batch ${Math.floor(i / BATCH_SIZE) + 1} completed`, {
         fileId,
