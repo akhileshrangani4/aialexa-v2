@@ -75,11 +75,12 @@ export function AllowedDomainsTab() {
       return;
     }
 
-    // Basic domain validation
+    // Domain validation - allows both regular domains (example.com, edu.eg)
+    // and TLD patterns (.de, .edu, .edu.in) for wildcard matching
     const domainRegex =
-      /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/;
+      /^\.?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
     if (!domainRegex.test(newDomain.trim())) {
-      toast.error("Please enter a valid domain (e.g., example.com)");
+      toast.error("Please enter a valid domain (e.g., example.com, .de, .edu)");
       return;
     }
 
@@ -120,7 +121,7 @@ export function AllowedDomainsTab() {
                 <>
                   <Input
                     type="text"
-                    placeholder="Enter domain (e.g., example.com)"
+                    placeholder="Enter domain (e.g., example.com, .de, .edu)"
                     value={newDomain}
                     onChange={(e) => setNewDomain(e.target.value)}
                     onKeyDown={(e) => {
