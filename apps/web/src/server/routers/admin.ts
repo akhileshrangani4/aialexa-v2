@@ -24,6 +24,103 @@ import {
   sendAccountEnabledEmail,
   sendAccountDeletedEmail,
 } from "@/lib/email";
+import { parse, getPublicSuffix } from "tldts";
+
+// Safe educational TLDs that are allowed (specific to educational institutions)
+const SAFE_EDUCATIONAL_TLDS = [
+  ".edu",
+  "edu", // US education
+  ".ac.uk",
+  "ac.uk", // UK academia
+  ".ac.in",
+  "ac.in", // India academia
+  ".edu.in",
+  "edu.in", // India education
+  ".ac.nz",
+  "ac.nz", // New Zealand academia
+  ".ac.za",
+  "ac.za", // South Africa academia
+  ".ac.jp",
+  "ac.jp", // Japan academia
+  ".ac.kr",
+  "ac.kr", // South Korea academia
+  ".ac.cn",
+  "ac.cn", // China academia
+  ".ac.il",
+  "ac.il", // Israel academia
+  ".edu.au",
+  "edu.au", // Australia education
+  ".edu.cn",
+  "edu.cn", // China education
+  ".edu.br",
+  "edu.br", // Brazil education
+  ".edu.mx",
+  "edu.mx", // Mexico education
+  ".edu.ar",
+  "edu.ar", // Argentina education
+  ".edu.co",
+  "edu.co", // Colombia education
+  ".edu.eg",
+  "edu.eg", // Egypt education
+  ".edu.pk",
+  "edu.pk", // Pakistan education
+  ".edu.sg",
+  "edu.sg", // Singapore education
+  ".edu.my",
+  "edu.my", // Malaysia education
+  ".edu.ph",
+  "edu.ph", // Philippines education
+];
+
+/**
+ * Validates a domain using the Public Suffix List
+ * Returns { valid: true } or { valid: false, reason: string }
+ */
+function validateDomainForAllowlist(domain: string): {
+  valid: boolean;
+  reason?: string;
+} {
+  const trimmedDomain = domain.trim().toLowerCase();
+
+  // Basic format validation
+  const domainRegex =
+    /^\.?[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
+  if (!domainRegex.test(trimmedDomain)) {
+    return { valid: false, reason: "Invalid domain format" };
+  }
+
+  // Safe educational TLDs are always allowed
+  if (SAFE_EDUCATIONAL_TLDS.includes(trimmedDomain)) {
+    return { valid: true };
+  }
+
+  // Use tldts to parse the domain using the Public Suffix List
+  const testDomain = trimmedDomain.startsWith(".")
+    ? `example${trimmedDomain}`
+    : trimmedDomain;
+
+  const parsed = parse(testDomain);
+  const publicSuffix = getPublicSuffix(testDomain);
+
+  // Check if what they entered is ONLY a public suffix (too broad)
+  const domainWithoutDot = trimmedDomain.startsWith(".")
+    ? trimmedDomain.slice(1)
+    : trimmedDomain;
+
+  if (publicSuffix && domainWithoutDot === publicSuffix) {
+    return {
+      valid: false,
+      reason: `"${trimmedDomain}" is a broad TLD that would allow ALL emails from this domain type. Please add specific domains instead (e.g., "uni-bonn.de" not "${trimmedDomain}")`,
+    };
+  }
+
+  // If parsed domain is null or invalid, reject it
+  if (!parsed.domain) {
+    return { valid: false, reason: "Invalid domain name" };
+  }
+
+  return { valid: true };
+}
 
 export const adminRouter = router({
   /**
@@ -102,14 +199,40 @@ export const adminRouter = router({
 
   /**
    * Add allowed domain
+   * Validates against Public Suffix List to prevent broad TLDs
    */
   addDomain: adminProcedure
     .input(z.object({ domain: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
+      // Server-side validation using Public Suffix List
+      const validation = validateDomainForAllowlist(input.domain);
+      if (!validation.valid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: validation.reason || "Invalid domain",
+        });
+      }
+
+      const normalizedDomain = input.domain.trim().toLowerCase();
+
+      // Check if domain already exists
+      const existing = await ctx.db
+        .select()
+        .from(approvedDomains)
+        .where(eq(approvedDomains.domain, normalizedDomain))
+        .limit(1);
+
+      if (existing.length > 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "This domain is already in the allowed list",
+        });
+      }
+
       const [newDomain] = await ctx.db
         .insert(approvedDomains)
         .values({
-          domain: input.domain,
+          domain: normalizedDomain,
           createdBy: ctx.session.user.id,
         })
         .returning();
