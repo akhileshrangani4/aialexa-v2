@@ -97,8 +97,9 @@ export class OpenRouterClient {
   /**
    * Generate embedding for text using OpenAI's text-embedding-3-small
    * Note: OpenRouter doesn't support embeddings, so this uses OpenAI directly
+   * Includes retry logic for rate limit errors
    */
-  async generateEmbedding(text: string): Promise<number[]> {
+  async generateEmbedding(text: string, retries = 3): Promise<number[]> {
     if (!this.openaiClient) {
       throw new Error(
         "OpenAI API key required for embeddings. OpenRouter does not support embeddings. " +
@@ -110,21 +111,67 @@ export class OpenRouterClient {
       "text-embedding-3-small",
     );
 
-    const { embedding } = await embed({
-      model: embeddingModel,
-      value: text,
-    });
-
-    return embedding;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const { embedding } = await embed({
+          model: embeddingModel,
+          value: text,
+        });
+        return embedding;
+      } catch (error: any) {
+        lastError = error;
+        
+        // Check if it's a rate limit error
+        const isRateLimit = 
+          error.message?.includes('Rate limit') || 
+          error.message?.includes('rate_limit') ||
+          error.message?.includes('429');
+        
+        if (isRateLimit && attempt < retries - 1) {
+          // Exponential backoff: 1s, 2s, 4s
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(`Rate limit hit, waiting ${delay}ms before retry ${attempt + 1}/${retries}`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        // If not rate limit or last attempt, throw
+        throw error;
+      }
+    }
+    
+    throw lastError || new Error('Failed to generate embedding');
   }
 
   /**
-   * Generate embeddings for multiple texts
+   * Generate embeddings for multiple texts with rate limiting
+   * Process texts sequentially with small delays to avoid rate limits
    */
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
-    const embeddings = await Promise.all(
-      texts.map((text) => this.generateEmbedding(text)),
-    );
+    const embeddings: number[][] = [];
+    
+    // Process in smaller micro-batches with delays to respect rate limits
+    const MICRO_BATCH_SIZE = 10; // Process 10 at a time
+    const DELAY_MS = 100; // 100ms delay between micro-batches
+    
+    for (let i = 0; i < texts.length; i += MICRO_BATCH_SIZE) {
+      const microBatch = texts.slice(i, Math.min(i + MICRO_BATCH_SIZE, texts.length));
+      
+      // Process micro-batch in parallel
+      const microBatchEmbeddings = await Promise.all(
+        microBatch.map((text) => this.generateEmbedding(text)),
+      );
+      
+      embeddings.push(...microBatchEmbeddings);
+      
+      // Add delay between micro-batches to avoid rate limits (except for last batch)
+      if (i + MICRO_BATCH_SIZE < texts.length) {
+        await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+      }
+    }
+    
     return embeddings;
   }
 }
