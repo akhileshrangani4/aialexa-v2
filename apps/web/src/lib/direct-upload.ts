@@ -11,100 +11,14 @@ export interface UploadProgress {
   percentage: number;
 }
 
-export interface DirectUploadOptions {
-  file: File;
-  onProgress?: (progress: UploadProgress) => void;
-}
-
 export interface DirectUploadResult {
   fileId: string;
   status: "pending";
 }
 
 /**
- * Upload a file directly to Supabase Storage
- * This bypasses the API and avoids body size limits
- */
-export async function directUploadFile(
-  options: DirectUploadOptions,
-): Promise<DirectUploadResult> {
-  const { file, onProgress } = options;
-
-  // Step 1: Request a signed upload URL from the API
-  const createUploadUrlMutation = trpc.files.createUploadUrl.useMutation();
-
-  const uploadUrlData = await createUploadUrlMutation.mutateAsync({
-    fileName: file.name,
-    fileType: file.type,
-    fileSize: file.size,
-  });
-
-  const { uploadUrl, fileId, storagePath } = uploadUrlData;
-
-  // Step 2: Upload the file directly to Supabase using the signed URL
-  // Use XMLHttpRequest for progress tracking
-  await new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    // Set timeout: 10 minutes for large files
-    // This should be enough even for 50MB files on slow connections
-    xhr.timeout = 10 * 60 * 1000;
-
-    xhr.upload.addEventListener("progress", (e) => {
-      if (e.lengthComputable && onProgress) {
-        onProgress({
-          loaded: e.loaded,
-          total: e.total,
-          percentage: Math.round((e.loaded / e.total) * 100),
-        });
-      }
-    });
-
-    xhr.addEventListener("load", () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error(`Upload failed with status ${xhr.status}`));
-      }
-    });
-
-    xhr.addEventListener("error", () => {
-      reject(new Error("Network error during upload"));
-    });
-
-    xhr.addEventListener("abort", () => {
-      reject(new Error("Upload was cancelled"));
-    });
-
-    xhr.addEventListener("timeout", () => {
-      reject(
-        new Error(
-          "Upload timed out after 10 minutes. Please try a smaller file or check your connection.",
-        ),
-      );
-    });
-
-    xhr.open("PUT", uploadUrl);
-    xhr.setRequestHeader("Content-Type", file.type);
-    xhr.send(file);
-  });
-
-  // Step 3: Notify the API that the upload is complete
-  const finalizeUploadMutation = trpc.files.finalizeUpload.useMutation();
-
-  const result = await finalizeUploadMutation.mutateAsync({
-    fileId,
-    fileName: file.name,
-    fileType: file.type,
-    fileSize: file.size,
-    storagePath,
-  });
-
-  return result;
-}
-
-/**
- * Hook-based version for use in React components
+ * React hook for direct client-to-Supabase file uploads
+ * Provides progress tracking and bypasses API body size limits
  */
 export function useDirectUpload() {
   const createUploadUrl = trpc.files.createUploadUrl.useMutation();
