@@ -18,6 +18,8 @@ const ITEMS_PER_PAGE = 10;
 export default function FilesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [filesToDelete, setFilesToDelete] = useState<string[]>([]);
+  const [retryDialogOpen, setRetryDialogOpen] = useState(false);
+  const [fileToRetry, setFileToRetry] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
 
@@ -66,6 +68,32 @@ export default function FilesPage() {
     },
     onError: (error) => {
       toast.error("Failed to delete file", {
+        description: error.message,
+      });
+    },
+  });
+
+  // Retry file mutation
+  const retryFile = trpc.files.retry.useMutation({
+    onSuccess: (_, variables) => {
+      const file = files.find((f) => f.id === variables.fileId);
+      const wasProcessing =
+        file?.processingStatus === "processing" && 
+        file?.metadata?.processingProgress?.lastUpdatedAt &&
+        Date.now() - new Date(file.metadata.processingProgress.lastUpdatedAt).getTime() < 30 * 60 * 1000;
+      
+      toast.success(
+        wasProcessing ? "Processing cancelled and restarted" : "File processing restarted",
+        {
+          description: wasProcessing 
+            ? "The file will be processed again from the beginning"
+            : "The file will be processed again",
+        },
+      );
+      refetch();
+    },
+    onError: (error) => {
+      toast.error("Failed to retry file", {
         description: error.message,
       });
     },
@@ -121,6 +149,32 @@ export default function FilesPage() {
   const handleDelete = (fileId: string) => {
     setFilesToDelete([fileId]);
     setDeleteDialogOpen(true);
+  };
+
+  const handleRetry = (fileId: string) => {
+    const file = files.find((f) => f.id === fileId);
+    const isActivelyProcessing =
+      file?.processingStatus === "processing" &&
+      file?.metadata?.processingProgress?.lastUpdatedAt &&
+      Date.now() -
+        new Date(file.metadata.processingProgress.lastUpdatedAt).getTime() <
+        30 * 60 * 1000;
+
+    // Show confirmation for actively processing files
+    if (isActivelyProcessing) {
+      setFileToRetry(fileId);
+      setRetryDialogOpen(true);
+    } else {
+      retryFile.mutate({ fileId });
+    }
+  };
+
+  const confirmRetry = () => {
+    if (fileToRetry) {
+      retryFile.mutate({ fileId: fileToRetry });
+      setRetryDialogOpen(false);
+      setFileToRetry(null);
+    }
   };
 
   const handleDeleteSelected = () => {
@@ -240,6 +294,8 @@ export default function FilesPage() {
                   actionType="delete"
                   onAction={handleDelete}
                   actionDisabled={deleteFile.isPending}
+                  onRetry={handleRetry}
+                  retryDisabled={retryFile.isPending}
                   showCreatedDate
                 />
                 {totalPages > 1 && (
@@ -276,6 +332,22 @@ export default function FilesPage() {
         cancelText="Cancel"
         variant="destructive"
         loading={deleteFile.isPending}
+      />
+
+      {/* Retry Confirmation Dialog */}
+      <ConfirmationDialog
+        open={retryDialogOpen}
+        onOpenChange={(open) => {
+          setRetryDialogOpen(open);
+          if (!open) setFileToRetry(null);
+        }}
+        onConfirm={confirmRetry}
+        title="Cancel and Restart Processing?"
+        description="This file is currently being processed. Are you sure you want to cancel and restart from the beginning? All current progress will be lost."
+        confirmText="Cancel and Restart"
+        cancelText="Keep Processing"
+        variant="default"
+        loading={retryFile.isPending}
       />
     </div>
   );
