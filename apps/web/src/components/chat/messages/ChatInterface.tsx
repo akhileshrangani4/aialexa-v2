@@ -57,6 +57,10 @@ export function ChatInterface({
             variant="outline"
             size="sm"
             onClick={() => {
+              if (messages.length === 0) {
+                toast.info("No messages to export");
+                return;
+              }
               try {
                 exportChatAsText(messages, chatbotName);
                 toast.success("Chat exported successfully");

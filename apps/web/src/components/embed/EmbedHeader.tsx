@@ -22,6 +22,11 @@ export function EmbedHeader({
   messages,
 }: EmbedHeaderProps) {
   const handleExportChat = () => {
+    if (messages.length === 0) {
+      toast.info("No messages to export");
+      return;
+    }
+
     try {
       exportChatAsText(messages, chatbotName);
       toast.success("Chat exported successfully");
