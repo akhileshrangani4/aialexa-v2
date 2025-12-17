@@ -3,6 +3,9 @@ import { appRouter } from "@/server/routers/_app";
 import { createTRPCContext } from "@/server/trpc";
 import { env } from "@/lib/env";
 
+// Disable static optimization for API routes
+export const dynamic = "force-dynamic";
+
 const handler = (req: Request) =>
   fetchRequestHandler({
     endpoint: "/api/trpc",
