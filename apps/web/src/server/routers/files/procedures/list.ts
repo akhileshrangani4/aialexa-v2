@@ -41,8 +41,14 @@ export const listProcedure = protectedProcedure
       .limit(limit)
       .offset(offset);
 
+    // Convert null metadata to undefined for type consistency
+    const filesWithMetadata = files.map((file) => ({
+      ...file,
+      metadata: file.metadata ?? undefined,
+    }));
+
     return {
-      files,
+      files: filesWithMetadata,
       totalCount,
     };
   });
@@ -110,8 +116,14 @@ export const listForChatbotProcedure = protectedProcedure
       .limit(limit)
       .offset(offset);
 
+    // Convert null metadata to undefined for type consistency
+    const filesWithMetadata = associatedFiles.map((file) => ({
+      ...file,
+      metadata: file.metadata ?? undefined,
+    }));
+
     return {
-      files: associatedFiles,
+      files: filesWithMetadata,
       totalCount,
     };
   });

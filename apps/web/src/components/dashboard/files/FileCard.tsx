@@ -37,7 +37,7 @@ export function FileCard({ file, onDelete }: FileCardProps) {
               <span>•</span>
               <FileStatusBadge
                 status={file.processingStatus}
-                metadata={file.metadata || undefined}
+                metadata={file.metadata}
                 showProgress={false}
                 size="sm"
               />
