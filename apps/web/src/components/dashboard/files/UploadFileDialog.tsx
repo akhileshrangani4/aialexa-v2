@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Upload, FileText, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +20,9 @@ import {
   ALLOWED_FILE_TYPES,
   validateFileName,
   formatFileSize,
+  getFileTypeDisplayName,
 } from "./file-constants";
+import { useDirectUpload } from "@/lib/direct-upload";
 import type { RouterOutputs } from "@/lib/trpc";
 
 type FileData = RouterOutputs["files"]["list"]["files"][number];
@@ -35,6 +36,7 @@ interface FileUploadState {
   file: File;
   status: "pending" | "uploading" | "success" | "error";
   error?: string;
+  progress?: number;
 }
 
 export function UploadFileDialog({
@@ -49,15 +51,18 @@ export function UploadFileDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const uploadFile = trpc.files.upload.useMutation();
+  const { uploadFile: directUploadFile } = useDirectUpload();
 
   const updateFileStatus = (
     fileName: string,
     status: FileUploadState["status"],
     error?: string,
+    progress?: number,
   ) => {
     setSelectedFiles((prev) =>
-      prev.map((f) => (f.file.name === fileName ? { ...f, status, error } : f)),
+      prev.map((f) =>
+        f.file.name === fileName ? { ...f, status, error, progress } : f,
+      ),
     );
   };
 
@@ -86,7 +91,8 @@ export function UploadFileDialog({
           file.type as (typeof ALLOWED_FILE_TYPES)[number],
         )
       ) {
-        return `File type "${file.type}" is not supported. Please upload PDF, Word (.doc, .docx), TXT, Markdown, JSON, or CSV files.`;
+        const displayName = getFileTypeDisplayName(file.type);
+        return `File type "${displayName}" is not supported. Please upload PDF, Word (.doc, .docx), Text, Markdown, JSON, or CSV files.`;
       }
 
       // Check for duplicate file name
@@ -192,44 +198,24 @@ export function UploadFileDialog({
     fileState: FileUploadState,
   ): Promise<void> => {
     const { file } = fileState;
-    updateFileStatus(file.name, "uploading");
+    updateFileStatus(file.name, "uploading", undefined, 0);
 
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result as string;
-        const base64Data = base64.split(",")[1]; // Remove data:mime;base64, prefix
-
-        if (!base64Data) {
-          const errorMsg = "Failed to read file";
-          updateFileStatus(file.name, "error", errorMsg);
-          reject(new Error(errorMsg));
-          return;
-        }
-
-        try {
-          await uploadFile.mutateAsync({
-            fileName: file.name,
-            fileType: file.type,
-            fileData: base64Data,
-            fileSize: file.size,
-          });
-          updateFileStatus(file.name, "success");
-          resolve();
-        } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : "An error occurred";
-          updateFileStatus(file.name, "error", errorMsg);
-          reject(error);
-        }
-      };
-      reader.onerror = () => {
-        const errorMsg = "Failed to read file";
-        updateFileStatus(file.name, "error", errorMsg);
-        reject(new Error(errorMsg));
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      await directUploadFile(file, (progress) => {
+        updateFileStatus(
+          file.name,
+          "uploading",
+          undefined,
+          progress.percentage,
+        );
+      });
+      updateFileStatus(file.name, "success", undefined, 100);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "An error occurred";
+      updateFileStatus(file.name, "error", errorMsg);
+      throw error;
+    }
   };
 
   const handleUpload = async () => {
@@ -421,6 +407,20 @@ export function UploadFileDialog({
                             </span>
                           )}
                         </p>
+                        {fileState.status === "uploading" &&
+                          fileState.progress !== undefined && (
+                            <div className="mt-2">
+                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-primary transition-all duration-300"
+                                  style={{ width: `${fileState.progress}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {fileState.progress}%
+                              </p>
+                            </div>
+                          )}
                       </div>
                       {fileState.status === "pending" && !isUploading && (
                         <Button

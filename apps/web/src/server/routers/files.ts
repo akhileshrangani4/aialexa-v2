@@ -1,5 +1,6 @@
 import { router } from "../trpc";
-import { uploadProcedure } from "./files/procedures/upload";
+import { createUploadUrlProcedure } from "./files/procedures/create-upload-url";
+import { finalizeUploadProcedure } from "./files/procedures/finalize-upload";
 import {
   listProcedure,
   listForChatbotProcedure,
@@ -11,16 +12,20 @@ import {
 } from "./files/procedures/associations";
 import {
   getProcessingStatusProcedure,
-  getPreviewUrlProcedure,
   getTotalCountProcedure,
 } from "./files/procedures/status";
 import { retryProcedure } from "./files/procedures/retry";
 
 export const filesRouter = router({
   /**
-   * Upload file to user's centralized file library
+   * Create signed upload URL for direct client-to-Supabase upload
    */
-  upload: uploadProcedure,
+  createUploadUrl: createUploadUrlProcedure,
+
+  /**
+   * Finalize upload after client has uploaded directly to Supabase
+   */
+  finalizeUpload: finalizeUploadProcedure,
 
   /**
    * List all user files (centralized)
@@ -51,11 +56,6 @@ export const filesRouter = router({
    * Get file processing status
    */
   getProcessingStatus: getProcessingStatusProcedure,
-
-  /**
-   * Get file preview URL
-   */
-  getPreviewUrl: getPreviewUrlProcedure,
 
   /**
    * Get total files count for user
