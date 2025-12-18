@@ -28,6 +28,7 @@ import { validateDomainForAllowlist } from "@/lib/domain-validation";
 export function AllowedDomainsTab() {
   const [newDomain, setNewDomain] = useState("");
   const [isAddingDomain, setIsAddingDomain] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -40,10 +41,13 @@ export function AllowedDomainsTab() {
   });
 
   const {
-    data: domains,
+    data: domainsData,
     isLoading: domainsLoading,
     refetch,
-  } = trpc.admin.listDomains.useQuery();
+  } = trpc.admin.listDomains.useQuery({ page: currentPage, limit: 50 });
+
+  const domains = domainsData?.domains ?? [];
+  const pagination = domainsData?.pagination;
 
   const { data: envDomains } = trpc.admin.getEnvDomains.useQuery();
 
@@ -52,6 +56,7 @@ export function AllowedDomainsTab() {
       toast.success("Domain added successfully");
       setNewDomain("");
       setIsAddingDomain(false);
+      setCurrentPage(1); // Reset to first page to see the new domain
       refetch();
     },
     onError: (error) => {
@@ -63,6 +68,10 @@ export function AllowedDomainsTab() {
     onSuccess: () => {
       toast.success("Domain removed successfully");
       setDeleteDialog({ isOpen: false, domainId: null, domainName: null });
+      // Stay on current page unless it becomes empty, then go to previous page
+      if (domains.length === 1 && currentPage > 1) {
+        setCurrentPage((p) => p - 1);
+      }
       refetch();
     },
     onError: (error) => {
@@ -115,38 +124,67 @@ export function AllowedDomainsTab() {
                 <p>
                   Users with email addresses from these domains can register for
                   an account. They will still require manual admin approval
-                  before accessing the platform. If no domains are configured,
-                  all email domains are allowed to register.
+                  before accessing the platform. You can add your own custom
+                  domains below, which will work alongside any environment
+                  domains shown at the bottom. If no domains are configured, all
+                  email domains are allowed to register.
                 </p>
                 <div className="pt-2 text-xs">
                   <p className="font-semibold mb-1">Examples:</p>
-                  <ul className="list-disc list-inside space-y-0.5 ml-2">
+                  <ul className="list-disc list-inside space-y-0.5 ml-2 text-xs">
                     <li>
-                      <code className="bg-muted px-1 py-0.5 rounded">.edu</code>{" "}
-                      - Allows all US educational institutions
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                        .edu
+                      </code>{" "}
+                      - US educational institutions
                     </li>
                     <li>
-                      <code className="bg-muted px-1 py-0.5 rounded">
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                        .edu.tw
+                      </code>{" "}
+                      - Taiwan educational institutions
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
                         .ac.uk
                       </code>{" "}
-                      - Allows all UK academic institutions
+                      - UK academic institutions
                     </li>
                     <li>
-                      <code className="bg-muted px-1 py-0.5 rounded">
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                        .de
+                      </code>{" "}
+                      - All German domains (broad access)
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
                         stanford.edu
                       </code>{" "}
                       - Only Stanford University
                     </li>
                     <li>
-                      <code className="bg-muted px-1 py-0.5 rounded">
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
                         uni-bonn.de
                       </code>{" "}
-                      - Only University of Bonn (Germany)
+                      - Only University of Bonn
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                        gmail.com
+                      </code>{" "}
+                      - Gmail addresses only
+                    </li>
+                    <li>
+                      <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                        outlook.com
+                      </code>{" "}
+                      - Outlook/Hotmail addresses only
                     </li>
                   </ul>
-                  <p className="mt-2 text-amber-600 dark:text-amber-500 font-medium">
-                    ⚠️ Avoid broad country TLDs like .de, .fr, .uk - use
-                    specific domains instead
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Specific domains are always allowed (gmail.com,
+                    akhilesh.tech) <b>if you ever need to add them.</b> Only
+                    broad patterns (.com, .net, .org, .io) are blocked.
                   </p>
                 </div>
               </div>
@@ -160,7 +198,7 @@ export function AllowedDomainsTab() {
                 <>
                   <Input
                     type="text"
-                    placeholder="Enter domain (e.g., .edu, .ac.uk, stanford.edu, uni-bonn.de)"
+                    placeholder="Enter domain (e.g., .edu, .de, stanford.edu, gmail.com)"
                     value={newDomain}
                     onChange={(e) => setNewDomain(e.target.value)}
                     onKeyDown={(e) => {
@@ -265,6 +303,43 @@ export function AllowedDomainsTab() {
                 </Table>
               </div>
             )}
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between px-2 py-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing {domains.length} of {pagination.total} domain
+                  {pagination.total !== 1 ? "s" : ""}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1 || domainsLoading}
+                  >
+                    Previous
+                  </Button>
+                  <div className="text-sm">
+                    Page {currentPage} of {pagination.totalPages}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((p) =>
+                        Math.min(pagination.totalPages, p + 1),
+                      )
+                    }
+                    disabled={
+                      currentPage === pagination.totalPages || domainsLoading
+                    }
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Environment Domains */}
@@ -275,7 +350,12 @@ export function AllowedDomainsTab() {
                   Environment Domains
                 </h3>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Read-only domains from APPROVED_EMAIL_DOMAINS env variable
+                  Read-only domains from server configuration
+                  (APPROVED_EMAIL_DOMAINS). These are &quot;built-in
+                  defaults&quot; that require backend access to modify. You can
+                  manage your own custom domains using the &quot;Add
+                  Domain&quot; button above. All domains (both environment and
+                  database) work together to allow user registrations.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">

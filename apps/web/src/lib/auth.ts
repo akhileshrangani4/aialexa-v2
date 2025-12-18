@@ -8,6 +8,7 @@ import {
   sendAdminNotificationEmail,
   sendApprovalEmail,
   sendRejectionEmail,
+  sendPasswordResetEmail,
 } from "./email";
 import { eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
@@ -38,6 +39,22 @@ export const auth = betterAuth({
       }) => {
         return await bcrypt.compare(password, hash);
       },
+    },
+    /**
+     * Sends a password reset email to the user.
+     *
+     * Security note: The email send is intentionally not awaited to prevent
+     * timing attacks. If we awaited, an attacker could measure response times
+     * to determine whether an email address exists in our system (valid emails
+     * would take longer due to the email send). By returning immediately
+     * regardless of email validity, response times remain consistent.
+     */
+    sendResetPassword: async ({ user, url }) => {
+      void sendPasswordResetEmail({
+        email: user.email,
+        name: user.name || "User",
+        resetUrl: url,
+      });
     },
   },
   secret: env.BETTER_AUTH_SECRET,
