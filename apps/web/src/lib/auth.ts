@@ -8,6 +8,7 @@ import {
   sendAdminNotificationEmail,
   sendApprovalEmail,
   sendRejectionEmail,
+  sendPasswordResetEmail,
 } from "./email";
 import { eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
@@ -38,6 +39,14 @@ export const auth = betterAuth({
       }) => {
         return await bcrypt.compare(password, hash);
       },
+    },
+    sendResetPassword: async ({ user, url }) => {
+      // Don't await to prevent timing attacks
+      void sendPasswordResetEmail({
+        email: user.email,
+        name: user.name || "User",
+        resetUrl: url,
+      });
     },
   },
   secret: env.BETTER_AUTH_SECRET,
