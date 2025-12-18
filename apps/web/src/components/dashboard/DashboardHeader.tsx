@@ -60,7 +60,7 @@ export function DashboardHeader() {
             height={28}
             className="h-7 w-7"
           />
-          <span className="text-xl font-bold text-foreground">AI Tutor</span>
+          <span className="text-xl font-bold text-foreground">AI Alexa</span>
         </Link>
         <Link
           href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || ""}`}
