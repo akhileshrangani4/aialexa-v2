@@ -22,6 +22,7 @@ import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { ChatbotTableRow } from "../ChatbotTableRow";
 import { PaginationControls } from "../../dashboard/files/PaginationControls";
+import { Bot } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -109,13 +110,22 @@ export function AllChatbotsTab() {
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <CardTitle>All Chatbots</CardTitle>
           <CardDescription>
-            View and manage all chatbots in the system
+            Manage all chatbots across the platform
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Admin Capabilities Info */}
+          <Alert className="mb-4 border-border bg-muted/30 flex items-center">
+            <AlertDescription className="text-xs leading-relaxed flex items-center gap-1">
+              <strong>Quick Guide:</strong> Feature public chatbots for homepage
+              (max 4) • Click owner name to edit (your chatbots only) • Delete
+              to remove permanently
+            </AlertDescription>
+          </Alert>
+
           {deleteChatbot.error && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{deleteChatbot.error.message}</AlertDescription>
@@ -123,12 +133,19 @@ export function AllChatbotsTab() {
           )}
 
           {chatbotsLoading ? (
-            <p className="text-center py-8 text-muted-foreground">
-              Loading chatbots...
-            </p>
-          ) : allChatbots.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No chatbots found</p>
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-muted-foreground">Loading chatbots...</p>
+            </div>
+          ) : !allChatbots || allChatbots.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Bot className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
+              <p className="text-lg font-medium text-foreground mb-1">
+                No chatbots found
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Chatbots will appear here once users create them
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -138,30 +155,32 @@ export function AllChatbotsTab() {
                   {totalCount !== 1 ? "s" : ""}
                 </p>
               </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Model</TableHead>
-                    <TableHead>Files</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Featured</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allChatbots.map((chatbot) => (
-                    <ChatbotTableRow
-                      key={chatbot.id}
-                      chatbot={chatbot}
-                      currentUserId={currentUserId}
-                      onDelete={handleDeleteChatbot}
-                      onRefetch={refetchChatbots}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">Name</TableHead>
+                      <TableHead className="font-semibold">Owner</TableHead>
+                      <TableHead className="font-semibold">Model</TableHead>
+                      <TableHead className="font-semibold">Files</TableHead>
+                      <TableHead className="font-semibold">Created</TableHead>
+                      <TableHead className="font-semibold">Featured</TableHead>
+                      <TableHead className="font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allChatbots.map((chatbot) => (
+                      <ChatbotTableRow
+                        key={chatbot.id}
+                        chatbot={chatbot}
+                        currentUserId={currentUserId}
+                        onDelete={handleDeleteChatbot}
+                        onRefetch={refetchChatbots}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {totalPages > 1 && (
                 <PaginationControls

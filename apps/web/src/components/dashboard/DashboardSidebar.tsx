@@ -127,7 +127,10 @@ export function DashboardSidebar() {
         <p className="text-xs text-muted-foreground font-medium">
           Built by{" "}
           <a
-            href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://www.linkedin.com/in/akhileshrangani/"}
+            href={
+              process.env.NEXT_PUBLIC_LINKEDIN_URL ||
+              "https://www.linkedin.com/in/akhileshrangani/"
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline font-medium"
