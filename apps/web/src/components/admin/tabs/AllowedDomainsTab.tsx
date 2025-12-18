@@ -115,8 +115,10 @@ export function AllowedDomainsTab() {
                 <p>
                   Users with email addresses from these domains can register for
                   an account. They will still require manual admin approval
-                  before accessing the platform. If no domains are configured,
-                  all email domains are allowed to register.
+                  before accessing the platform. You can add your own custom
+                  domains below, which will work alongside any environment
+                  domains shown at the bottom. If no domains are configured, all
+                  email domains are allowed to register.
                 </p>
                 <div className="pt-2 text-xs">
                   <p className="font-semibold mb-1">Examples:</p>
@@ -145,8 +147,9 @@ export function AllowedDomainsTab() {
                     </li>
                   </ul>
                   <p className="mt-2 text-amber-600 dark:text-amber-500 font-medium">
-                    ⚠️ Avoid broad country TLDs like .de, .fr, .uk - use
-                    specific domains instead
+                    💡 You can use broad country TLDs like .de, .fr, .ie for
+                    international reach, or specific domains like uni-bonn.de
+                    for more restrictive access
                   </p>
                 </div>
               </div>
@@ -275,7 +278,12 @@ export function AllowedDomainsTab() {
                   Environment Domains
                 </h3>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Read-only domains from APPROVED_EMAIL_DOMAINS env variable
+                  Read-only domains from server configuration
+                  (APPROVED_EMAIL_DOMAINS). These are &quot;built-in
+                  defaults&quot; that require backend access to modify. You can
+                  manage your own custom domains using the &quot;Add
+                  Domain&quot; button above. All domains (both environment and
+                  database) work together to allow user registrations.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
