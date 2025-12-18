@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSession, type ExtendedUser } from "@/lib/auth-client";
 import { LayoutDashboard, Bot, FileText, Settings, Shield } from "lucide-react";
+import { env } from "@/lib/env";
 
 const navigation = [
   {
@@ -125,7 +126,15 @@ export function DashboardSidebar() {
       {/* Footer */}
       <div className="px-6 py-4 border-t border-border bg-gradient-to-r from-muted/50 to-transparent flex-shrink-0">
         <p className="text-xs text-muted-foreground font-medium">
-          Built by Akhilesh Rangani
+          Built by{" "}
+          <a
+            href={env.NEXT_PUBLIC_LINKEDIN_URL || "/"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium"
+          >
+            Akhilesh Rangani
+          </a>
         </p>
       </div>
     </aside>
