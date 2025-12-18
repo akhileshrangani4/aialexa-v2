@@ -82,16 +82,44 @@ export const adminRouter = router({
     }),
 
   /**
-   * List all allowed domains from database
+   * List all allowed domains from database with pagination
    */
-  listDomains: adminProcedure.query(async ({ ctx }) => {
-    const domains = await ctx.db
-      .select()
-      .from(approvedDomains)
-      .orderBy(approvedDomains.createdAt);
+  listDomains: adminProcedure
+    .input(
+      z
+        .object({
+          page: z.number().min(1).default(1),
+          limit: z.number().min(1).max(100).default(50),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const page = input?.page ?? 1;
+      const limit = input?.limit ?? 50;
+      const offset = (page - 1) * limit;
 
-    return domains;
-  }),
+      const [domains, countResult] = await Promise.all([
+        ctx.db
+          .select()
+          .from(approvedDomains)
+          .orderBy(approvedDomains.createdAt)
+          .limit(limit)
+          .offset(offset),
+        ctx.db.select({ count: sql<number>`count(*)` }).from(approvedDomains),
+      ]);
+
+      const total = Number(countResult[0]?.count ?? 0);
+
+      return {
+        domains,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    }),
 
   /**
    * Get allowed domains from environment variables

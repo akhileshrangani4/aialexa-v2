@@ -204,8 +204,10 @@ export default function ChatbotDetailPage() {
                 <CardHeader>
                   <CardTitle>Embed On Website</CardTitle>
                   <CardDescription>
-                    Copy and paste the code below to embed your chatbot on any
-                    website
+                    Add your chatbot to any website. Choose between a floating
+                    widget button (recommended for most sites) or an
+                    always-visible chat window. Works with HTML, WordPress,
+                    React, Next.js, and any web platform.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

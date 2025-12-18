@@ -9,6 +9,7 @@ import { DemoteFromAdmin } from "@/components/emails/DemoteFromAdmin";
 import { AccountDisabled } from "@/components/emails/AccountDisabled";
 import { AccountEnabled } from "@/components/emails/AccountEnabled";
 import { AccountDeleted } from "@/components/emails/AccountDeleted";
+import { PasswordReset } from "@/components/emails/PasswordReset";
 import { db } from "@aialexa/db";
 import { user } from "@aialexa/db/schema";
 import { eq } from "drizzle-orm";
@@ -370,5 +371,43 @@ export async function sendAccountDeletedEmail(params: {
       email: params.email,
     });
     throw error;
+  }
+}
+
+/**
+ * Send password reset email to user
+ */
+export async function sendPasswordResetEmail(params: {
+  email: string;
+  name: string;
+  resetUrl: string;
+}) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      to: params.email,
+      subject: "Reset Your Password",
+      react: PasswordReset({
+        userName: params.name,
+        resetUrl: params.resetUrl,
+      }),
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    logInfo("Password reset email sent", {
+      email: params.email,
+      messageId: data?.id,
+    });
+
+    return data;
+  } catch (error) {
+    // Log the error but don't re-throw - this function is called with void (not awaited)
+    // in auth.ts to prevent timing attacks, so thrown errors would be unhandled rejections
+    logError(error, "Failed to send password reset email", {
+      email: params.email,
+    });
   }
 }
