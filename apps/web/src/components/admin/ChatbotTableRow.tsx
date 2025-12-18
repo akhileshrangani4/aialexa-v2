@@ -203,39 +203,43 @@ export function ChatbotTableRow({
         </div>
       </TableCell>
       <TableCell>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <Switch
-                  checked={chatbot.featured ?? false}
-                  onCheckedChange={(checked) => {
-                    toggleFeatured.mutate({
-                      chatbotId: chatbot.id,
-                      featured: checked,
-                    });
-                  }}
-                  disabled={
-                    toggleFeatured.isPending ||
-                    !chatbot.sharingEnabled ||
-                    chatbot.userRole !== "admin"
-                  }
-                />
-              </div>
-            </TooltipTrigger>
-            {(!chatbot.sharingEnabled || chatbot.userRole !== "admin") && (
-              <TooltipContent>
-                <p>
-                  {!chatbot.sharingEnabled && chatbot.userRole !== "admin"
-                    ? "Only public chatbots created by admin accounts can be featured"
-                    : !chatbot.sharingEnabled
-                      ? "Only public chatbots (with sharing enabled) can be featured"
-                      : "Only chatbots created by admin accounts can be featured"}
-                </p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex flex-col gap-1.5">
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="w-fit">
+                  <Switch
+                    checked={chatbot.featured ?? false}
+                    onCheckedChange={(checked) => {
+                      toggleFeatured.mutate({
+                        chatbotId: chatbot.id,
+                        featured: checked,
+                      });
+                    }}
+                    disabled={
+                      toggleFeatured.isPending || !chatbot.sharingEnabled
+                    }
+                  />
+                </div>
+              </TooltipTrigger>
+              {!chatbot.sharingEnabled && (
+                <TooltipContent>
+                  <p>
+                    Only public chatbots (with sharing enabled) can be featured
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          {!chatbot.sharingEnabled && (
+            <Badge
+              variant="outline"
+              className="text-[10px] py-0 px-1.5 h-4 w-fit text-muted-foreground"
+            >
+              Private
+            </Badge>
+          )}
+        </div>
       </TableCell>
       <TableCell>
         <Button

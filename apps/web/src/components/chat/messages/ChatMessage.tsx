@@ -9,7 +9,7 @@ import {
 import { CopyButton } from "@/components/ui/copy-button";
 import { TypingLoader } from "@/components/ui/loader";
 import { Badge } from "@/components/ui/badge";
-import { FileText } from "lucide-react";
+import { FileText, StopCircle } from "lucide-react";
 import { useMemo } from "react";
 
 interface ChatMessageProps {
@@ -66,6 +66,31 @@ export function ChatMessage({
     );
   }
 
+  const hasContent = message.content && message.content.trim().length > 0;
+
+  // Handle cancelled message with no content
+  if (message.cancelled && !hasContent) {
+    return (
+      <div className="flex flex-col gap-2 max-w-[85%] min-w-0 group">
+        <Message className="items-start gap-3">
+          <MessageAvatar
+            src="/logo.svg"
+            alt="AIAlexa"
+            imageClassName="grayscale"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="bg-secondary rounded-lg px-3 py-2 shadow-sm border border-border/50 w-fit">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground italic">
+                <StopCircle className="h-3 w-3" />
+                <span>Cancelled</span>
+              </div>
+            </div>
+          </div>
+        </Message>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2 max-w-[85%] min-w-0 group">
       <Message className="items-start gap-3">
@@ -78,6 +103,13 @@ export function ChatMessage({
           <MessageContent markdown={true} className="bg-secondary">
             {message.content}
           </MessageContent>
+          {/* Display cancelled indicator */}
+          {message.cancelled && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground italic">
+              <StopCircle className="h-3 w-3" />
+              <span>Cancelled</span>
+            </div>
+          )}
           {/* Display sources if available and enabled */}
           {showSources && uniqueSources.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -99,17 +131,19 @@ export function ChatMessage({
           )}
         </div>
       </Message>
-      <div className="pl-12">
-        <MessageActions className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <MessageAction tooltip="Copy message">
-            <CopyButton
-              text={message.content}
-              successMessage="Message copied to clipboard"
-              errorMessage="Failed to copy message"
-            />
-          </MessageAction>
-        </MessageActions>
-      </div>
+      {hasContent && (
+        <div className="pl-12">
+          <MessageActions className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <MessageAction tooltip="Copy message">
+              <CopyButton
+                text={message.content}
+                successMessage="Message copied to clipboard"
+                errorMessage="Failed to copy message"
+              />
+            </MessageAction>
+          </MessageActions>
+        </div>
+      )}
     </div>
   );
 }
