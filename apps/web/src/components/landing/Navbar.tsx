@@ -4,9 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,20 +102,31 @@ export default function Navbar() {
               </a>
             </div>
 
-            {/* Sign In and Sign Up - Upper Right */}
+            {/* Sign In and Sign Up / Dashboard - Upper Right */}
             <div className="flex items-center gap-4">
-              <Link
-                href="/login"
-                className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors duration-200"
-              >
-                Sign In
-              </Link>
-              <Button
-                asChild
-                className="bg-white hover:bg-white/90 text-foreground px-5 py-2 text-sm rounded-lg font-medium border border-foreground/20 transition-all duration-200"
-              >
-                <Link href="/register">Sign Up</Link>
-              </Button>
+              {session ? (
+                <Button
+                  asChild
+                  className="bg-white hover:bg-white/90 text-foreground px-5 py-2 text-sm rounded-lg font-medium border border-foreground/20 transition-all duration-200"
+                >
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors duration-200"
+                  >
+                    Sign In
+                  </Link>
+                  <Button
+                    asChild
+                    className="bg-white hover:bg-white/90 text-foreground px-5 py-2 text-sm rounded-lg font-medium border border-foreground/20 transition-all duration-200"
+                  >
+                    <Link href="/register">Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
