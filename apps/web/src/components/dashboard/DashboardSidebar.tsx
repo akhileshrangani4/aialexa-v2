@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSession, type ExtendedUser } from "@/lib/auth-client";
 import { LayoutDashboard, Bot, FileText, Settings, Shield } from "lucide-react";
-import { env } from "@/lib/env";
 
 const navigation = [
   {
@@ -128,7 +127,7 @@ export function DashboardSidebar() {
         <p className="text-xs text-muted-foreground font-medium">
           Built by{" "}
           <a
-            href={env.NEXT_PUBLIC_LINKEDIN_URL || "/"}
+            href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://www.linkedin.com/in/akhileshrangani/"}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline font-medium"

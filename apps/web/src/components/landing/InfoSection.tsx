@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { env } from "@/lib/env";
 
 export default function InfoSection() {
   return (
@@ -21,7 +20,7 @@ export default function InfoSection() {
           <p className="text-sm text-muted-foreground">
             Built by{" "}
             <a
-              href={env.NEXT_PUBLIC_LINKEDIN_URL || "/"}
+              href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://www.linkedin.com/in/akhileshrangani/"}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline font-medium"
