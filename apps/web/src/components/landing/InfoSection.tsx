@@ -20,7 +20,10 @@ export default function InfoSection() {
           <p className="text-sm text-muted-foreground">
             Built by{" "}
             <a
-              href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://www.linkedin.com/in/akhileshrangani/"}
+              href={
+                process.env.NEXT_PUBLIC_LINKEDIN_URL ||
+                "https://www.linkedin.com/in/akhileshrangani/"
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline font-medium"

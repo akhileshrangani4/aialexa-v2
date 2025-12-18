@@ -155,7 +155,7 @@ function FileTableRow<T extends BaseFile>({
 
   const renderAction = () => {
     return (
-      <div className="flex items-center justify-end gap-1">
+      <div className="flex items-center justify-end gap-5">
         {/* View/Download buttons - only for completed files */}
         {canView && (
           <>
@@ -230,7 +230,7 @@ function FileTableRow<T extends BaseFile>({
 
         {actionType === "remove" && onAction && (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
