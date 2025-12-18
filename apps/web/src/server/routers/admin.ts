@@ -241,22 +241,19 @@ export const adminRouter = router({
 
   /**
    * Toggle featured status for a chatbot (admin only)
-   * Only public chatbots (sharingEnabled=true) created by admin accounts can be featured
+   * Only public chatbots (sharingEnabled=true) can be featured
    * Enforces maximum of 4 featured chatbots
    */
   toggleFeatured: adminProcedure
     .input(z.object({ chatbotId: z.string().uuid(), featured: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      // Get the chatbot with creator info to check if it's public and created by admin
+      // Get the chatbot to check if it's public
       const [currentChatbot] = await ctx.db
         .select({
           featured: chatbots.featured,
           sharingEnabled: chatbots.sharingEnabled,
-          userId: chatbots.userId,
-          userRole: user.role,
         })
         .from(chatbots)
-        .leftJoin(user, eq(chatbots.userId, user.id))
         .where(eq(chatbots.id, input.chatbotId))
         .limit(1);
 
@@ -264,14 +261,6 @@ export const adminRouter = router({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Chatbot not found",
-        });
-      }
-
-      // If trying to set as featured, check if it's created by an admin
-      if (input.featured && currentChatbot.userRole !== "admin") {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Only chatbots created by admin accounts can be featured",
         });
       }
 

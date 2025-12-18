@@ -21,6 +21,7 @@ interface ChatInterfaceProps {
   messagesEndRef: React.RefObject<HTMLDivElement>;
   chatbotName: string;
   resetChat: () => void;
+  stopStreaming?: () => void;
   height?: string;
   hideHeader?: boolean;
   embedMode?: boolean;
@@ -37,6 +38,7 @@ export function ChatInterface({
   messagesEndRef,
   chatbotName,
   resetChat,
+  stopStreaming,
   height = "h-[600px]",
   hideHeader = false,
   embedMode = false,
@@ -92,8 +94,10 @@ export function ChatInterface({
 
       {/* Messages Container */}
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-        <ChatContainerRoot className="flex-1 p-4 min-h-0 overflow-y-auto">
-          <ChatContainerContent>
+        <ChatContainerRoot
+          className={`flex-1 min-h-0 overflow-y-auto ${embedMode ? "scrollbar-embed" : ""}`}
+        >
+          <ChatContainerContent className="p-2">
             {messages.length === 0 && !isStreaming ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
                 <p className="text-muted-foreground mb-2 text-lg">
@@ -127,6 +131,7 @@ export function ChatInterface({
           setCurrentMessage={setCurrentMessage}
           isStreaming={isStreaming}
           onSendMessage={handleSendMessage}
+          onStopStreaming={stopStreaming}
         />
       </div>
     </div>
