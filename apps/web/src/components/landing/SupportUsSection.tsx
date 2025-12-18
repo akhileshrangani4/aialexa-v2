@@ -13,47 +13,55 @@ const FEATURED_IN = [
     name: "JSTOR",
     url: "https://about.jstor.org/blog/fostering-trust-in-ai/",
     logo: "/assets/logos/jstor-logo.svg",
+    alt: "JSTOR logo - Link to article about fostering trust in AI",
   },
   {
     name: "EdTech",
     url: "https://edtechmagazine.com/higher/article/2025/03/ai-powered-teaching-assistants-perfcon",
     logo: "/assets/logos/edtech-logo.png",
+    alt: "EdTech Magazine logo - Link to article about AI-powered teaching assistants",
   },
   {
     name: "Phys.Org",
     url: "https://phys.org/news/2025-02-rethinking-ai-higher-professor-foster.html",
     logo: "/assets/logos/physorg-logo.png",
+    alt: "Phys.Org logo - Link to article about rethinking AI in higher education",
   },
   {
     name: "SAIL",
     url: "https://youtu.be/9hxBziNuf0k?si=YgLbqSfUn01_AS4a",
     logo: "/assets/logos/sail-logo.png",
+    alt: "SAIL (Stanford AI Lab) logo - Link to video about AI in education",
   },
   {
     name: "Springer",
     url: "https://link.springer.com/chapter/10.1007/978-3-031-65691-0_11",
     logo: "/assets/logos/springer-logo.png",
+    alt: "Springer logo - Link to published research chapter",
   },
   {
     name: "QS",
     url: "https://www.youtube.com/watch?v=By6UlskJ30Y",
     logo: "/assets/logos/qs-logo.png",
+    alt: "QS Higher Ed Summit logo - Link to presentation video",
   },
   {
     name: "GW Media Relations",
     url: "https://youtu.be/hj3boR5-cr8?si=OrQ2ACfve5QbZezC",
     logo: "/assets/logos/gw-media-logo.png",
+    alt: "George Washington University Media Relations logo - Link to feature video",
   },
   {
     name: "Fulbright",
     url: "https://youtu.be/Sl2wkXK9llk?si=mZfGAEO-eYMx9wvR",
     logo: "/assets/logos/fulbright-logo.png",
+    alt: "Fulbright logo - Link to presentation about open-access AI",
   },
 ];
 
 export default function SupportUsSection() {
   return (
-    <section id="github" className="py-32 px-6 md:px-12 bg-white">
+    <section id="support-us" className="py-32 px-6 md:px-12 bg-white">
       <div className="max-w-4xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -100,7 +108,10 @@ export default function SupportUsSection() {
                 className="border-2 px-10 py-6 text-base rounded-full font-medium border-red-500/20 text-red-600 hover:border-red-500/40 hover:bg-red-50 hover:text-red-700"
               >
                 <Link
-                  href="https://www.gofundme.com/f/empower-educators-with-openaccess-ai"
+                  href={
+                    env.NEXT_PUBLIC_DONATION_URL ||
+                    "https://www.gofundme.com/f/empower-educators-with-openaccess-ai"
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -166,7 +177,7 @@ export default function SupportUsSection() {
                 >
                   <Image
                     src={feature.logo}
-                    alt={feature.name}
+                    alt={feature.alt}
                     width={120}
                     height={60}
                     className="w-auto h-12 object-contain"
