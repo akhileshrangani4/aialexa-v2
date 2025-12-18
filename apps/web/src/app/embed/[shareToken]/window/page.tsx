@@ -25,6 +25,7 @@ export default function EmbedWindowPage() {
     chatbotLoading,
     handleSendMessage,
     resetChat,
+    stopStreaming,
     error,
   } = useChat(shareToken);
 
@@ -72,6 +73,7 @@ export default function EmbedWindowPage() {
           messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
           chatbotName={chatbot.name || "Chatbot"}
           resetChat={resetChat}
+          stopStreaming={stopStreaming}
           height="h-full"
           hideHeader={withExitX}
           embedMode={true}

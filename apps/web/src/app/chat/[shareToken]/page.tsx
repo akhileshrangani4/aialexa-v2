@@ -27,6 +27,7 @@ export default function SharedChatPage() {
     chatbotLoading,
     handleSendMessage,
     resetChat,
+    stopStreaming,
     error,
   } = useChat(shareToken);
 
@@ -99,6 +100,7 @@ export default function SharedChatPage() {
           messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
           chatbotName={chatbot.name || "Chatbot"}
           resetChat={resetChat}
+          stopStreaming={stopStreaming}
           height="h-[600px] md:h-[700px] lg:h-[800px]"
           showSources={chatbot.showSources ?? false}
         />

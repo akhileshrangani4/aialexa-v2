@@ -39,6 +39,7 @@ export default function ChatbotDetailPage() {
     chatbotLoading,
     handleSendMessage,
     resetChat,
+    stopStreaming,
   } = useChatbot(chatbotId, session);
 
   // Fetch files associated with this chatbot (will be paginated in ChatbotFilesTab)
@@ -159,6 +160,7 @@ export default function ChatbotDetailPage() {
               messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
               chatbotName={chatbot.name || "Chatbot"}
               resetChat={resetChat}
+              stopStreaming={stopStreaming}
               showSources={chatbot.showSources ?? false}
             />
           </TabsContent>
