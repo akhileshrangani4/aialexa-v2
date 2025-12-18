@@ -404,9 +404,10 @@ export async function sendPasswordResetEmail(params: {
 
     return data;
   } catch (error) {
+    // Log the error but don't re-throw - this function is called with void (not awaited)
+    // in auth.ts to prevent timing attacks, so thrown errors would be unhandled rejections
     logError(error, "Failed to send password reset email", {
       email: params.email,
     });
-    throw error;
   }
 }

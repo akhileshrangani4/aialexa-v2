@@ -79,7 +79,8 @@ export function PasswordReset({ userName, resetUrl }: PasswordResetProps) {
 export default PasswordReset;
 
 const body = {
-  fontFamily: 'Georgia, "Times New Roman", serif',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   fontSize: "16px",
   lineHeight: "1.6",
   color: "#333333",

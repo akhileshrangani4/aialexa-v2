@@ -28,6 +28,19 @@ import { validatePasswordStrength } from "@/lib/password/password-strength";
 import { PasswordStrengthIndicator } from "@/components/dashboard/settings/PasswordStrengthIndicator";
 import { PasswordRequirementsList } from "@/components/dashboard/settings/PasswordRequirementsList";
 
+/**
+ * Checks if an error message indicates a token-related issue (invalid, expired, etc.)
+ */
+function isTokenRelatedError(errorMessage: string): boolean {
+  const lowerMessage = errorMessage.toLowerCase();
+  return (
+    errorMessage.includes("INVALID_TOKEN") ||
+    lowerMessage.includes("invalid") ||
+    lowerMessage.includes("expired") ||
+    lowerMessage.includes("token")
+  );
+}
+
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -97,17 +110,12 @@ function ResetPasswordContent() {
       if (resetError) {
         // Check for invalid/expired token errors
         const errorMsg = resetError.message || "";
-        const isTokenError =
-          errorMsg.includes("INVALID_TOKEN") ||
-          errorMsg.includes("invalid") ||
-          errorMsg.includes("expired") ||
-          errorMsg.includes("Token");
 
-        if (isTokenError) {
+        if (isTokenRelatedError(errorMsg)) {
           setTokenError(true);
           toast.error("Link expired", {
             description:
-              "This password reset link has already been used or has expired",
+              "This password reset link has already been used or has expired. Please request a new one.",
           });
         } else {
           setError(resetError.message || "Failed to reset password");
@@ -127,18 +135,11 @@ function ResetPasswordContent() {
           ? err.message
           : "An error occurred. Please try again.";
 
-      // Check if the error is token-related
-      const isTokenError =
-        errorMessage.includes("INVALID_TOKEN") ||
-        errorMessage.includes("invalid") ||
-        errorMessage.includes("expired") ||
-        errorMessage.includes("Token");
-
-      if (isTokenError) {
+      if (isTokenRelatedError(errorMessage)) {
         setTokenError(true);
         toast.error("Link expired", {
           description:
-            "This password reset link has already been used or has expired",
+            "This password reset link has already been used or has expired. Please request a new one.",
         });
       } else {
         setError(errorMessage);
@@ -267,8 +268,6 @@ function ResetPasswordContent() {
                   required
                   disabled={loading}
                   className="pr-10"
-                  minLength={8}
-                  maxLength={128}
                 />
                 <button
                   type="button"
