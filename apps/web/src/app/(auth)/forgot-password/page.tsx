@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -28,23 +29,22 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/request-password-reset", {
+      // Use Better Auth's forgetPassword method for consistency with other auth operations
+      // Note: TypeScript types may not expose this method, but it maps to POST /request-password-reset
+      const { error: resetError } = await authClient.$fetch<{
+        status: boolean;
+      }>("/request-password-reset", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           email,
           redirectTo: "/reset-password",
-        }),
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Failed to send reset email");
+      if (resetError) {
+        setError(resetError.message || "Failed to send reset email");
         toast.error("Error", {
-          description: data.message || "Failed to send reset email",
+          description: resetError.message || "Failed to send reset email",
         });
       } else {
         // Always show success to prevent email enumeration attacks
