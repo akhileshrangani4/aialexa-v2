@@ -26,7 +26,7 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="bg-white border border-border">
+          <TabsList className="bg-muted-foreground/10 border border-border">
             <TabsTrigger value="users">Pending Users</TabsTrigger>
             <TabsTrigger value="all-users">All Users</TabsTrigger>
             <TabsTrigger value="chatbots">All Chatbots</TabsTrigger>

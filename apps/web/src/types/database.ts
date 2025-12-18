@@ -55,6 +55,7 @@ export interface ChatMessage {
     chunkIndex: number;
     similarity: number;
   }>;
+  cancelled?: boolean;
 }
 
 // Message source type
