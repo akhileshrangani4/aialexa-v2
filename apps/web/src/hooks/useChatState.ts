@@ -63,6 +63,30 @@ export function useChatState() {
     sourcesRef.current = [];
   };
 
+  const stopStreaming = () => {
+    if (!isStreaming) return;
+
+    // Finalize the current streaming content as a message
+    const finalContent = streamingContent;
+    const finalSources = [...sourcesRef.current];
+
+    // Clear streaming state
+    setStreamingContent("");
+    setIsStreaming(false);
+    sourcesRef.current = [];
+
+    // Add the cancelled message (even if empty content)
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: finalContent,
+        sources: finalSources.length > 0 ? finalSources : undefined,
+        cancelled: true,
+      },
+    ]);
+  };
+
   return {
     messages,
     setMessages,
@@ -77,5 +101,6 @@ export function useChatState() {
     messagesEndRef,
     sourcesRef,
     resetChat,
+    stopStreaming,
   };
 }

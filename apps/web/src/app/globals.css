@@ -116,7 +116,7 @@
 }
 
 @layer utilities {
-  /* Always visible scrollbar - prevents layout shifts */
+  /* Default scrollbar styling */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) hsl(var(--muted));
@@ -125,7 +125,6 @@
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
     height: 8px;
-    -webkit-appearance: none;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -136,51 +135,34 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
     border-radius: 4px;
-    border: 1px solid hsl(var(--muted));
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.4);
   }
 
-  /* Apply to all scrollable elements by default - always visible */
-  .overflow-y-auto,
-  .overflow-x-auto,
-  .overflow-auto {
+  /* Embed-specific minimal scrollbar */
+  .scrollbar-embed {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--border)) hsl(var(--muted));
-    /* Always show scrollbar to prevent layout shifts */
-    scrollbar-gutter: stable;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
   }
 
-  .overflow-y-auto::-webkit-scrollbar,
-  .overflow-x-auto::-webkit-scrollbar,
-  .overflow-auto::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-    -webkit-appearance: none;
-    display: block; /* Always show scrollbar */
+  .scrollbar-embed::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
   }
 
-  .overflow-y-auto::-webkit-scrollbar-track,
-  .overflow-x-auto::-webkit-scrollbar-track,
-  .overflow-auto::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
-    border-radius: 4px;
+  .scrollbar-embed::-webkit-scrollbar-track {
+    background: transparent;
   }
 
-  .overflow-y-auto::-webkit-scrollbar-thumb,
-  .overflow-x-auto::-webkit-scrollbar-thumb,
-  .overflow-auto::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border-radius: 4px;
-    border: 1px solid hsl(var(--muted));
+  .scrollbar-embed::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 2px;
   }
 
-  .overflow-y-auto::-webkit-scrollbar-thumb:hover,
-  .overflow-x-auto::-webkit-scrollbar-thumb:hover,
-  .overflow-auto::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.4);
+  .scrollbar-embed::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 }
 

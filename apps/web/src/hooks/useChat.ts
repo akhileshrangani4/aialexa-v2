@@ -33,6 +33,7 @@ export function useChat(shareToken: string) {
     messagesEndRef,
     sourcesRef,
     resetChat: resetChatState,
+    stopStreaming: stopStreamingState,
   } = useChatState();
 
   // State for triggering subscription
@@ -141,6 +142,11 @@ export function useChat(shareToken: string) {
     setMessageToSend(null);
   };
 
+  const stopStreaming = () => {
+    setMessageToSend(null);
+    stopStreamingState();
+  };
+
   return {
     messages,
     currentMessage,
@@ -152,6 +158,7 @@ export function useChat(shareToken: string) {
     chatbotLoading,
     handleSendMessage,
     resetChat,
+    stopStreaming,
     error: chatbotError,
   };
 }
