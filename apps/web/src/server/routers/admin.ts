@@ -8,7 +8,7 @@ import {
   chatbotFileAssociations,
   userFiles,
 } from "@aialexa/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, asc, ilike, or, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import {
   approveUser as approveUserHelper,
@@ -28,30 +28,56 @@ import { validateDomainForAllowlist } from "@/lib/domain-validation";
 
 export const adminRouter = router({
   /**
-   * Get all pending users with pagination
+   * Get all pending users with pagination, search, and sorting
    */
   getPendingUsers: adminProcedure
     .input(
       z.object({
-        limit: z.number().default(10),
-        offset: z.number().default(0),
+        limit: z.number().min(1).max(100).default(10),
+        offset: z.number().min(0).default(0),
+        search: z.string().max(200).optional(),
+        sortBy: z.enum(["name", "email", "createdAt"]).default("createdAt"),
+        sortDir: z.enum(["asc", "desc"]).default("desc"),
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Get total count
+      // Build search condition
+      const searchCondition = input.search
+        ? or(
+            ilike(user.name, `%${input.search}%`),
+            ilike(user.email, `%${input.search}%`),
+          )
+        : undefined;
+
+      // Combine with status filter
+      const whereCondition = searchCondition
+        ? and(eq(user.status, "pending"), searchCondition)
+        : eq(user.status, "pending");
+
+      // Get total count with search filter
       const [totalCountResult] = await ctx.db
         .select({ count: sql<number>`count(*)` })
         .from(user)
-        .where(eq(user.status, "pending"));
+        .where(whereCondition);
 
       const totalCount = Number(totalCountResult?.count || 0);
+
+      // Build sort order
+      const sortColumn =
+        input.sortBy === "name"
+          ? user.name
+          : input.sortBy === "email"
+            ? user.email
+            : user.createdAt;
+      const orderBy =
+        input.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
       // Get paginated pending users
       const pendingUsers = await ctx.db
         .select()
         .from(user)
-        .where(eq(user.status, "pending"))
-        .orderBy(desc(user.createdAt))
+        .where(whereCondition)
+        .orderBy(orderBy)
         .limit(input.limit)
         .offset(input.offset);
 
@@ -90,6 +116,9 @@ export const adminRouter = router({
         .object({
           page: z.number().min(1).default(1),
           limit: z.number().min(1).max(100).default(50),
+          search: z.string().max(200).optional(),
+          sortBy: z.enum(["domain", "createdAt"]).default("createdAt"),
+          sortDir: z.enum(["asc", "desc"]).default("desc"),
         })
         .optional(),
     )
@@ -98,14 +127,41 @@ export const adminRouter = router({
       const limit = input?.limit ?? 50;
       const offset = (page - 1) * limit;
 
+      // Build search condition
+      const searchCondition = input?.search
+        ? ilike(approvedDomains.domain, `%${input.search}%`)
+        : undefined;
+
+      // Build sort order
+      const sortColumn =
+        input?.sortBy === "domain"
+          ? approvedDomains.domain
+          : approvedDomains.createdAt;
+      const orderBy =
+        input?.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
+
+      const domainsQuery = ctx.db
+        .select()
+        .from(approvedDomains)
+        .orderBy(orderBy)
+        .limit(limit)
+        .offset(offset);
+
+      if (searchCondition) {
+        domainsQuery.where(searchCondition);
+      }
+
+      const countQuery = ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(approvedDomains);
+
+      if (searchCondition) {
+        countQuery.where(searchCondition);
+      }
+
       const [domains, countResult] = await Promise.all([
-        ctx.db
-          .select()
-          .from(approvedDomains)
-          .orderBy(approvedDomains.createdAt)
-          .limit(limit)
-          .offset(offset),
-        ctx.db.select({ count: sql<number>`count(*)` }).from(approvedDomains),
+        domainsQuery,
+        countQuery,
       ]);
 
       const total = Number(countResult[0]?.count ?? 0);
@@ -192,20 +248,72 @@ export const adminRouter = router({
   getAllChatbots: adminProcedure
     .input(
       z.object({
-        limit: z.number().default(10),
-        offset: z.number().default(0),
+        limit: z.number().min(1).max(100).default(10),
+        offset: z.number().min(0).default(0),
+        search: z.string().max(200).optional(),
+        sortBy: z
+          .enum([
+            "name",
+            "owner",
+            "model",
+            "createdAt",
+            "featured",
+            "fileCount",
+          ])
+          .default("createdAt"),
+        sortDir: z.enum(["asc", "desc"]).default("desc"),
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Get total count
-      const [totalCountResult] = await ctx.db
-        .select({ count: sql<number>`count(*)` })
-        .from(chatbots);
+      // Build search condition (search chatbot name, description, or owner name/email)
+      const searchCondition = input.search
+        ? or(
+            ilike(chatbots.name, `%${input.search}%`),
+            ilike(chatbots.description, `%${input.search}%`),
+            ilike(user.name, `%${input.search}%`),
+            ilike(user.email, `%${input.search}%`),
+          )
+        : undefined;
 
+      // Get total count with search filter
+      const countQuery = ctx.db
+        .select({ count: sql<number>`count(distinct ${chatbots.id})` })
+        .from(chatbots)
+        .leftJoin(user, eq(chatbots.userId, user.id));
+
+      if (searchCondition) {
+        countQuery.where(searchCondition);
+      }
+
+      const [totalCountResult] = await countQuery;
       const totalCount = Number(totalCountResult?.count || 0);
 
+      // Get featured count
+      const [featuredCountResult] = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(chatbots)
+        .where(eq(chatbots.featured, true));
+      const featuredCount = Number(featuredCountResult?.count || 0);
+
+      // Build sort order - fileCount requires special handling as it's an aggregate
+      const fileCountExpr = sql<number>`count(distinct ${chatbotFileAssociations.id})`;
+      const sortColumn =
+        input.sortBy === "name"
+          ? chatbots.name
+          : input.sortBy === "owner"
+            ? user.name
+            : input.sortBy === "model"
+              ? chatbots.model
+              : input.sortBy === "featured"
+                ? chatbots.featured
+                : input.sortBy === "fileCount"
+                  ? fileCountExpr
+                  : chatbots.createdAt;
+      const orderBy =
+        input.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
+
       // Get paginated chatbots
-      const allChatbots = await ctx.db
+      const query = ctx.db
         .select({
           id: chatbots.id,
           name: chatbots.name,
@@ -227,15 +335,22 @@ export const adminRouter = router({
         .leftJoin(
           chatbotFileAssociations,
           eq(chatbots.id, chatbotFileAssociations.chatbotId),
-        )
+        );
+
+      if (searchCondition) {
+        query.where(searchCondition);
+      }
+
+      const allChatbots = await query
         .groupBy(chatbots.id, user.id)
-        .orderBy(desc(chatbots.createdAt))
+        .orderBy(orderBy)
         .limit(input.limit)
         .offset(input.offset);
 
       return {
         chatbots: allChatbots,
         totalCount,
+        featuredCount,
       };
     }),
 
@@ -396,8 +511,8 @@ export const adminRouter = router({
   getAllConversations: adminProcedure
     .input(
       z.object({
-        limit: z.number().default(50),
-        offset: z.number().default(0),
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -417,23 +532,52 @@ export const adminRouter = router({
   getAllUsers: adminProcedure
     .input(
       z.object({
-        limit: z.number().default(10),
-        offset: z.number().default(0),
+        limit: z.number().min(1).max(100).default(10),
+        offset: z.number().min(0).default(0),
+        search: z.string().max(200).optional(),
+        sortBy: z
+          .enum(["name", "email", "role", "status", "createdAt"])
+          .default("createdAt"),
+        sortDir: z.enum(["asc", "desc"]).default("desc"),
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Get total count
+      // Build search condition
+      const searchCondition = input.search
+        ? or(
+            ilike(user.name, `%${input.search}%`),
+            ilike(user.email, `%${input.search}%`),
+          )
+        : undefined;
+
+      // Get total count with search filter
       const [totalCountResult] = await ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(user);
+        .from(user)
+        .where(searchCondition);
 
       const totalCount = Number(totalCountResult?.count || 0);
+
+      // Build sort order
+      const sortColumn =
+        input.sortBy === "name"
+          ? user.name
+          : input.sortBy === "email"
+            ? user.email
+            : input.sortBy === "role"
+              ? user.role
+              : input.sortBy === "status"
+                ? user.status
+                : user.createdAt;
+      const orderBy =
+        input.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
       // Get paginated users
       const allUsers = await ctx.db
         .select()
         .from(user)
-        .orderBy(desc(user.createdAt))
+        .where(searchCondition)
+        .orderBy(orderBy)
         .limit(input.limit)
         .offset(input.offset);
 

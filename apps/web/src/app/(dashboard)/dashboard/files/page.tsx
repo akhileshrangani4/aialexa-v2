@@ -10,8 +10,11 @@ import { UploadFileDialog } from "@/components/dashboard/files/UploadFileDialog"
 import { FileTable } from "@/components/dashboard/files/FileTable";
 import { EmptyFilesState } from "@/components/dashboard/files/EmptyFilesState";
 import { PaginationControls } from "@/components/dashboard/files/PaginationControls";
+import { TableToolbar, type FileSortBy } from "@/components/data-table";
+import { useServerTable } from "@/hooks/useServerTable";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { keepPreviousData } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -20,22 +23,29 @@ export default function FilesPage() {
   const [filesToDelete, setFilesToDelete] = useState<string[]>([]);
   const [retryDialogOpen, setRetryDialogOpen] = useState(false);
   const [fileToRetry, setFileToRetry] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+
+  const { state, searchInput, actions, queryParams } =
+    useServerTable<FileSortBy>(
+      { defaultSortBy: "createdAt", defaultSortDir: "desc" },
+      ITEMS_PER_PAGE,
+    );
 
   // Get all user files (centralized)
   // Automatically polls for status updates when files are processing
   const {
     data: filesData,
     isLoading: filesLoading,
+    isFetching,
     refetch,
   } = trpc.files.list.useQuery(
     {
       limit: ITEMS_PER_PAGE,
-      offset: currentPage * ITEMS_PER_PAGE,
+      ...queryParams,
     },
     {
       refetchInterval: useFilePolling(),
+      placeholderData: keepPreviousData,
     },
   );
 
@@ -59,8 +69,8 @@ export default function FilesPage() {
       const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
 
       // If we're on a page that no longer exists, go back to the last valid page
-      if (currentPage >= newTotalPages && newTotalPages > 0) {
-        setCurrentPage(newTotalPages - 1);
+      if (state.page >= newTotalPages && newTotalPages > 0) {
+        actions.setPage(newTotalPages - 1);
       }
 
       // Clear selection after deletion
@@ -217,6 +227,11 @@ export default function FilesPage() {
     }
   };
 
+  // Show full loading only on initial load (no data yet)
+  const showFullLoading = filesLoading && !filesData;
+  // Show inline loading indicator when fetching but have data
+  const showInlineLoading = isFetching && !filesLoading;
+
   return (
     <div className="flex-1 p-8 bg-gradient-to-b from-background to-muted/20">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -254,27 +269,26 @@ export default function FilesPage() {
         </Card>
 
         {/* Display all files */}
-        {filesLoading ? (
+        {showFullLoading ? (
           <div className="text-center py-16">
             <div className="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-muted-foreground">Loading files...</p>
           </div>
-        ) : !files || files.length === 0 ? (
+        ) : files.length === 0 && !state.search && !searchInput ? (
           <EmptyFilesState />
         ) : (
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
-                <div className="flex justify-between items-center min-h-[40px]">
-                  {totalCount > ITEMS_PER_PAGE ? (
-                    <p className="text-sm text-muted-foreground">
-                      Showing {files.length} of {totalCount} file
-                      {totalCount !== 1 ? "s" : ""}
-                    </p>
-                  ) : (
-                    <div />
-                  )}
-                  <div className="min-w-[180px] flex justify-end">
+                <div className="flex items-center gap-4 mb-4">
+                  <TableToolbar
+                    searchValue={searchInput}
+                    onSearchChange={actions.setSearch}
+                    placeholder="Search files by name or type..."
+                    isLoading={showInlineLoading}
+                    className="mb-0 flex-1"
+                  />
+                  <div className="flex items-center gap-4 ml-auto">
                     {selectedFiles.size > 0 && (
                       <Button
                         size="sm"
@@ -286,30 +300,45 @@ export default function FilesPage() {
                         Delete Selected ({selectedFiles.size})
                       </Button>
                     )}
+                    <p className="text-sm text-muted-foreground whitespace-nowrap">
+                      Showing {files.length} of {totalCount} file
+                      {totalCount !== 1 ? "s" : ""}
+                    </p>
                   </div>
                 </div>
-                <FileTable
-                  files={files}
-                  showCheckbox
-                  selectedFiles={selectedFiles}
-                  onToggleSelect={handleToggleFile}
-                  onSelectAll={handleSelectAll}
-                  allSelected={allSelected}
-                  actionType="delete"
-                  onAction={handleDelete}
-                  actionDisabled={deleteFile.isPending}
-                  onRetry={handleRetry}
-                  retryDisabled={retryFile.isPending}
-                  showCreatedDate
-                />
-                {totalPages > 1 && (
-                  <div className="mt-4">
-                    <PaginationControls
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={setCurrentPage}
-                    />
+                {files.length === 0 && state.search ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No files match your search
                   </div>
+                ) : (
+                  <>
+                    <FileTable
+                      files={files}
+                      showCheckbox
+                      selectedFiles={selectedFiles}
+                      onToggleSelect={handleToggleFile}
+                      onSelectAll={handleSelectAll}
+                      allSelected={allSelected}
+                      actionType="delete"
+                      onAction={handleDelete}
+                      actionDisabled={deleteFile.isPending}
+                      onRetry={handleRetry}
+                      retryDisabled={retryFile.isPending}
+                      showCreatedDate
+                      sortBy={state.sortBy}
+                      sortDir={state.sortDir}
+                      onSort={actions.toggleSort}
+                    />
+                    {totalPages > 1 && (
+                      <div className="mt-4">
+                        <PaginationControls
+                          currentPage={state.page}
+                          totalPages={totalPages}
+                          onPageChange={actions.setPage}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </CardContent>
