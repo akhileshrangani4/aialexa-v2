@@ -1,11 +1,12 @@
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { chatbots, user, chatbotFileAssociations } from "@aialexa/db/schema";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, asc, ilike, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { SUPPORTED_MODELS } from "@aialexa/ai";
 import { checkRateLimit, chatbotCreationRateLimit } from "@/lib/rate-limit";
+import { escapeLikePattern } from "@/server/utils";
 
 const createChatbotSchema = z.object({
   name: z.string().min(1).max(100),
@@ -21,7 +22,7 @@ const createChatbotSchema = z.object({
 
 export const chatbotRouter = router({
   /**
-   * List user's chatbots
+   * List user's chatbots with search and sort
    */
   list: protectedProcedure
     .input(
@@ -29,6 +30,9 @@ export const chatbotRouter = router({
         .object({
           limit: z.number().min(1).max(100).default(10),
           offset: z.number().min(0).default(0),
+          search: z.string().max(200).optional(),
+          sortBy: z.enum(["name", "model", "createdAt"]).default("createdAt"),
+          sortDir: z.enum(["asc", "desc"]).default("desc"),
         })
         .optional(),
     )
@@ -36,20 +40,43 @@ export const chatbotRouter = router({
       const limit = input?.limit ?? 10;
       const offset = input?.offset ?? 0;
 
-      // Get total count
+      // Build search condition (escape LIKE wildcards for literal matching)
+      const searchCondition = input?.search
+        ? or(
+            ilike(chatbots.name, `%${escapeLikePattern(input.search)}%`),
+            ilike(chatbots.description, `%${escapeLikePattern(input.search)}%`),
+          )
+        : undefined;
+
+      // Combine with user filter
+      const whereCondition = searchCondition
+        ? and(eq(chatbots.userId, ctx.session.user.id), searchCondition)
+        : eq(chatbots.userId, ctx.session.user.id);
+
+      // Get total count with search filter
       const [totalCountResult] = await ctx.db
         .select({ count: sql<number>`count(*)` })
         .from(chatbots)
-        .where(eq(chatbots.userId, ctx.session.user.id));
+        .where(whereCondition);
 
       const totalCount = Number(totalCountResult?.count || 0);
+
+      // Build sort order
+      const sortColumn =
+        input?.sortBy === "name"
+          ? chatbots.name
+          : input?.sortBy === "model"
+            ? chatbots.model
+            : chatbots.createdAt;
+      const orderBy =
+        input?.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
       // Get paginated chatbots
       const userChatbots = await ctx.db
         .select()
         .from(chatbots)
-        .where(eq(chatbots.userId, ctx.session.user.id))
-        .orderBy(desc(chatbots.createdAt))
+        .where(whereCondition)
+        .orderBy(orderBy)
         .limit(limit)
         .offset(offset);
 

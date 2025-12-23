@@ -1,15 +1,16 @@
 import { protectedProcedure } from "@/server/trpc";
 import { z } from "zod";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, asc, ilike, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import {
   chatbots,
   userFiles,
   chatbotFileAssociations,
 } from "@aialexa/db/schema";
+import { escapeLikePattern } from "@/server/utils";
 
 /**
- * List all user files (centralized)
+ * List all user files (centralized) with search and sort
  */
 export const listProcedure = protectedProcedure
   .input(
@@ -17,6 +18,17 @@ export const listProcedure = protectedProcedure
       .object({
         limit: z.number().min(1).max(100).default(10),
         offset: z.number().min(0).default(0),
+        search: z.string().max(200).optional(),
+        sortBy: z
+          .enum([
+            "fileName",
+            "fileType",
+            "fileSize",
+            "processingStatus",
+            "createdAt",
+          ])
+          .default("createdAt"),
+        sortDir: z.enum(["asc", "desc"]).default("desc"),
       })
       .optional(),
   )
@@ -24,20 +36,47 @@ export const listProcedure = protectedProcedure
     const limit = input?.limit ?? 10;
     const offset = input?.offset ?? 0;
 
-    // Get total count
+    // Build search condition (escape LIKE wildcards for literal matching)
+    const searchCondition = input?.search
+      ? or(
+          ilike(userFiles.fileName, `%${escapeLikePattern(input.search)}%`),
+          ilike(userFiles.fileType, `%${escapeLikePattern(input.search)}%`),
+        )
+      : undefined;
+
+    // Combine with user filter
+    const whereCondition = searchCondition
+      ? and(eq(userFiles.userId, ctx.session.user.id), searchCondition)
+      : eq(userFiles.userId, ctx.session.user.id);
+
+    // Get total count with search filter
     const [totalCountResult] = await ctx.db
       .select({ count: sql<number>`count(*)` })
       .from(userFiles)
-      .where(eq(userFiles.userId, ctx.session.user.id));
+      .where(whereCondition);
 
     const totalCount = Number(totalCountResult?.count || 0);
+
+    // Build sort order
+    const sortColumn =
+      input?.sortBy === "fileName"
+        ? userFiles.fileName
+        : input?.sortBy === "fileType"
+          ? userFiles.fileType
+          : input?.sortBy === "fileSize"
+            ? userFiles.fileSize
+            : input?.sortBy === "processingStatus"
+              ? userFiles.processingStatus
+              : userFiles.createdAt;
+    const orderBy =
+      input?.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
     // Get paginated files
     const files = await ctx.db
       .select()
       .from(userFiles)
-      .where(eq(userFiles.userId, ctx.session.user.id))
-      .orderBy(desc(userFiles.createdAt))
+      .where(whereCondition)
+      .orderBy(orderBy)
       .limit(limit)
       .offset(offset);
 
@@ -54,7 +93,7 @@ export const listProcedure = protectedProcedure
   });
 
 /**
- * List files associated with a specific chatbot
+ * List files associated with a specific chatbot with search and sort
  */
 export const listForChatbotProcedure = protectedProcedure
   .input(
@@ -62,6 +101,17 @@ export const listForChatbotProcedure = protectedProcedure
       chatbotId: z.string().uuid(),
       limit: z.number().min(1).max(100).default(10).optional(),
       offset: z.number().min(0).default(0).optional(),
+      search: z.string().max(200).optional(),
+      sortBy: z
+        .enum([
+          "fileName",
+          "fileType",
+          "fileSize",
+          "processingStatus",
+          "createdAt",
+        ])
+        .default("createdAt"),
+      sortDir: z.enum(["asc", "desc"]).default("desc"),
     }),
   )
   .query(async ({ ctx, input }) => {
@@ -87,13 +137,45 @@ export const listForChatbotProcedure = protectedProcedure
     const limit = input.limit ?? 10;
     const offset = input.offset ?? 0;
 
-    // Get total count of associated files
+    // Build search condition
+    // Escape LIKE wildcards for literal matching
+    const searchCondition = input.search
+      ? or(
+          ilike(userFiles.fileName, `%${escapeLikePattern(input.search)}%`),
+          ilike(userFiles.fileType, `%${escapeLikePattern(input.search)}%`),
+        )
+      : undefined;
+
+    // Combine with chatbot filter
+    const whereCondition = searchCondition
+      ? and(
+          eq(chatbotFileAssociations.chatbotId, input.chatbotId),
+          searchCondition,
+        )
+      : eq(chatbotFileAssociations.chatbotId, input.chatbotId);
+
+    // Get total count with search filter
     const [totalCountResult] = await ctx.db
       .select({ count: sql<number>`count(*)` })
       .from(chatbotFileAssociations)
-      .where(eq(chatbotFileAssociations.chatbotId, input.chatbotId));
+      .innerJoin(userFiles, eq(chatbotFileAssociations.fileId, userFiles.id))
+      .where(whereCondition);
 
     const totalCount = Number(totalCountResult?.count || 0);
+
+    // Build sort order
+    const sortColumn =
+      input.sortBy === "fileName"
+        ? userFiles.fileName
+        : input.sortBy === "fileType"
+          ? userFiles.fileType
+          : input.sortBy === "fileSize"
+            ? userFiles.fileSize
+            : input.sortBy === "processingStatus"
+              ? userFiles.processingStatus
+              : userFiles.createdAt;
+    const orderBy =
+      input.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
     // Get paginated files associated with this chatbot through junction table
     const associatedFiles = await ctx.db
@@ -111,8 +193,8 @@ export const listForChatbotProcedure = protectedProcedure
       })
       .from(chatbotFileAssociations)
       .innerJoin(userFiles, eq(chatbotFileAssociations.fileId, userFiles.id))
-      .where(eq(chatbotFileAssociations.chatbotId, input.chatbotId))
-      .orderBy(desc(userFiles.createdAt))
+      .where(whereCondition)
+      .orderBy(orderBy)
       .limit(limit)
       .offset(offset);
 
