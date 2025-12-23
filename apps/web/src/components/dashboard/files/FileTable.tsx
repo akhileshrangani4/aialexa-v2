@@ -9,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SortableTableHead, type FileSortBy } from "@/components/data-table";
+import type { SortDirection } from "@/hooks/useServerTable";
 import {
   FileText,
   Trash2,
@@ -350,6 +352,10 @@ interface FileTableProps<T extends BaseFile> {
   showCreatedDate?: boolean;
   // Empty state
   emptyMessage?: string;
+  // Sorting props
+  sortBy?: FileSortBy;
+  sortDir?: SortDirection;
+  onSort?: (column: FileSortBy) => void;
 }
 
 export function FileTable<T extends BaseFile>({
@@ -366,7 +372,35 @@ export function FileTable<T extends BaseFile>({
   retryDisabled = false,
   showCreatedDate = false,
   emptyMessage = "No files found",
+  sortBy,
+  sortDir,
+  onSort,
 }: FileTableProps<T>) {
+  const isSortable =
+    sortBy !== undefined && sortDir !== undefined && onSort !== undefined;
+
+  // Helper to render sortable or regular column header
+  const renderColumnHeader = (
+    column: FileSortBy,
+    label: string,
+    className?: string,
+  ) => {
+    if (isSortable) {
+      return (
+        <SortableTableHead
+          column={column}
+          currentSortBy={sortBy}
+          currentSortDir={sortDir}
+          onSort={onSort}
+          className={className}
+        >
+          {label}
+        </SortableTableHead>
+      );
+    }
+    return <TableHead className={className}>{label}</TableHead>;
+  };
+
   if (files.length === 0) {
     return (
       <div className="text-center py-8">
@@ -409,13 +443,16 @@ export function FileTable<T extends BaseFile>({
               />
             </TableHead>
           )}
-          <TableHead>File Name</TableHead>
-          <TableHead className="whitespace-nowrap">Type</TableHead>
-          <TableHead className="whitespace-nowrap">Size</TableHead>
-          <TableHead className="whitespace-nowrap">Status</TableHead>
-          {showCreatedDate && (
-            <TableHead className="whitespace-nowrap">Created</TableHead>
+          {renderColumnHeader("fileName", "File Name")}
+          {renderColumnHeader("fileType", "Type", "whitespace-nowrap")}
+          {renderColumnHeader("fileSize", "Size", "whitespace-nowrap")}
+          {renderColumnHeader(
+            "processingStatus",
+            "Status",
+            "whitespace-nowrap",
           )}
+          {showCreatedDate &&
+            renderColumnHeader("createdAt", "Created", "whitespace-nowrap")}
           <TableHead className="whitespace-nowrap text-right">
             Actions
           </TableHead>
