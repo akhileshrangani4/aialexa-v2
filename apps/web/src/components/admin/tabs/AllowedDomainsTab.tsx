@@ -1,13 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { keepPreviousData } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -24,11 +19,26 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { validateDomainForAllowlist } from "@/lib/domain-validation";
+import {
+  TableToolbar,
+  SortableTableHead,
+  type DomainSortBy,
+} from "@/components/data-table";
+import { useServerTable } from "@/hooks/useServerTable";
+import { PaginationControls } from "../../dashboard/files/PaginationControls";
+import { StatsHeader } from "../components/StatsHeader";
+
+const ITEMS_PER_PAGE = 50;
 
 export function AllowedDomainsTab() {
   const [newDomain, setNewDomain] = useState("");
   const [isAddingDomain, setIsAddingDomain] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+
+  const { state, searchInput, actions, queryParams } =
+    useServerTable<DomainSortBy>(
+      { defaultSortBy: "createdAt", defaultSortDir: "desc" },
+      ITEMS_PER_PAGE,
+    );
 
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -43,11 +53,25 @@ export function AllowedDomainsTab() {
   const {
     data: domainsData,
     isLoading: domainsLoading,
+    isFetching,
     refetch,
-  } = trpc.admin.listDomains.useQuery({ page: currentPage, limit: 50 });
+  } = trpc.admin.listDomains.useQuery(
+    {
+      page: state.page + 1, // listDomains uses 1-based pages
+      limit: ITEMS_PER_PAGE,
+      search: queryParams.search,
+      sortBy: queryParams.sortBy,
+      sortDir: queryParams.sortDir,
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  );
 
   const domains = domainsData?.domains ?? [];
   const pagination = domainsData?.pagination;
+  const totalCount = pagination?.total ?? 0;
+  const totalPages = pagination?.totalPages ?? 1;
 
   const { data: envDomains } = trpc.admin.getEnvDomains.useQuery();
 
@@ -56,7 +80,7 @@ export function AllowedDomainsTab() {
       toast.success("Domain added successfully");
       setNewDomain("");
       setIsAddingDomain(false);
-      setCurrentPage(1); // Reset to first page to see the new domain
+      actions.reset(); // Reset to first page to see the new domain
       refetch();
     },
     onError: (error) => {
@@ -69,8 +93,8 @@ export function AllowedDomainsTab() {
       toast.success("Domain removed successfully");
       setDeleteDialog({ isOpen: false, domainId: null, domainName: null });
       // Stay on current page unless it becomes empty, then go to previous page
-      if (domains.length === 1 && currentPage > 1) {
-        setCurrentPage((p) => p - 1);
+      if (domains.length === 1 && state.page > 0) {
+        actions.setPage(state.page - 1);
       }
       refetch();
     },
@@ -85,12 +109,12 @@ export function AllowedDomainsTab() {
       return;
     }
 
-    const trimmedDomain = newDomain.trim().toLowerCase();
+    const trimmedDomain = newDomain.trim();
 
     // Use shared validation utility (same logic as backend)
     const validation = validateDomainForAllowlist(trimmedDomain);
     if (!validation.valid) {
-      toast.error("⚠️ Invalid domain", {
+      toast.error("Invalid domain", {
         description: validation.reason,
         duration: 8000,
       });
@@ -111,11 +135,12 @@ export function AllowedDomainsTab() {
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle>Allowed Email Domains</CardTitle>
-          <CardDescription>
-            Manage email domains that are allowed to register
-          </CardDescription>
+        <CardHeader className="pb-4">
+          <StatsHeader
+            title="Allowed Email Domains"
+            description="Manage email domains that are allowed to register"
+            stats={[{ value: totalCount, label: "Total", highlight: true }]}
+          />
         </CardHeader>
         <CardContent>
           <Alert className="mb-6">
@@ -245,22 +270,48 @@ export function AllowedDomainsTab() {
                 Domains added through the admin panel (can be added/removed)
               </p>
             </div>
-            {domainsLoading ? (
+
+            <TableToolbar
+              searchValue={searchInput}
+              onSearchChange={actions.setSearch}
+              placeholder="Search domains..."
+              totalCount={totalCount}
+              visibleCount={domains.length}
+              itemLabel="domain"
+              isLoading={isFetching && !domainsLoading}
+            />
+
+            {domainsLoading && !domainsData ? (
               <div className="text-center py-8 text-muted-foreground">
                 Loading domains...
               </div>
-            ) : !domains || domains.length === 0 ? (
+            ) : domains.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No database domains configured. Use the &quot;Add Domain&quot;
-                button above to add domains.
+                {state.search || searchInput
+                  ? "No domains match your search"
+                  : 'No database domains configured. Use the "Add Domain" button above to add domains.'}
               </div>
             ) : (
               <div className="border rounded-lg">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Domain</TableHead>
-                      <TableHead>Added On</TableHead>
+                      <SortableTableHead
+                        column="domain"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Domain
+                      </SortableTableHead>
+                      <SortableTableHead
+                        column="createdAt"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Added On
+                      </SortableTableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -305,40 +356,12 @@ export function AllowedDomainsTab() {
             )}
 
             {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between px-2 py-4">
-                <div className="text-sm text-muted-foreground">
-                  Showing {domains.length} of {pagination.total} domain
-                  {pagination.total !== 1 ? "s" : ""}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1 || domainsLoading}
-                  >
-                    Previous
-                  </Button>
-                  <div className="text-sm">
-                    Page {currentPage} of {pagination.totalPages}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((p) =>
-                        Math.min(pagination.totalPages, p + 1),
-                      )
-                    }
-                    disabled={
-                      currentPage === pagination.totalPages || domainsLoading
-                    }
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
+            {totalPages > 1 && (
+              <PaginationControls
+                currentPage={state.page}
+                totalPages={totalPages}
+                onPageChange={actions.setPage}
+              />
             )}
           </div>
 

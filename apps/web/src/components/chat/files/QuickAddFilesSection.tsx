@@ -6,7 +6,10 @@ import { Plus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { FileTable } from "@/components/dashboard/files/FileTable";
 import { PaginationControls } from "@/components/dashboard/files/PaginationControls";
+import { TableToolbar, type FileSortBy } from "@/components/data-table";
+import { useServerTable } from "@/hooks/useServerTable";
 import { useFilePolling } from "@/hooks/useFilePolling";
+import { keepPreviousData } from "@tanstack/react-query";
 import type { RouterOutputs } from "@/lib/trpc";
 
 type FileData = RouterOutputs["files"]["list"]["files"][number];
@@ -29,20 +32,27 @@ export function QuickAddFilesSection({
   onRefetch,
 }: QuickAddFilesSectionProps) {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const [currentPage, setCurrentPage] = useState(0);
+
+  const { state, searchInput, actions, queryParams } =
+    useServerTable<FileSortBy>(
+      { defaultSortBy: "createdAt", defaultSortDir: "desc" },
+      ITEMS_PER_PAGE,
+    );
 
   // Fetch paginated files
   const {
     data: filesData,
     isLoading: filesLoading,
+    isFetching,
     refetch: refetchFiles,
   } = trpc.files.list.useQuery(
     {
       limit: ITEMS_PER_PAGE,
-      offset: currentPage * ITEMS_PER_PAGE,
+      ...queryParams,
     },
     {
       refetchInterval: useFilePolling(),
+      placeholderData: keepPreviousData,
     },
   );
 
@@ -120,35 +130,56 @@ export function QuickAddFilesSection({
   const allSelected =
     selectedFiles.size === availableFiles.length && availableFiles.length > 0;
 
-  // Don't show if no files available at all
+  // Don't show if no files available at all (only when not searching)
+  const isSearching = state.search || searchInput;
   if (
-    totalCount === 0 ||
-    (allFiles.length > 0 && availableFiles.length === 0 && currentPage === 0)
+    (totalCount === 0 && !isSearching) ||
+    (allFiles.length > 0 &&
+      availableFiles.length === 0 &&
+      state.page === 0 &&
+      !isSearching)
   ) {
     return null;
   }
 
   return (
     <div className="mt-6">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-medium">
-          Quick add files from your library:
-        </p>
-        {selectedFiles.size > 0 && (
-          <Button size="sm" onClick={handleAddSelected} disabled={isAdding}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Selected ({selectedFiles.size})
-          </Button>
-        )}
+      <p className="text-sm font-medium mb-4">
+        Quick add files from your library:
+      </p>
+
+      <div className="flex items-center gap-4 mb-4">
+        <TableToolbar
+          searchValue={searchInput}
+          onSearchChange={actions.setSearch}
+          placeholder="Search files to add..."
+          isLoading={isFetching && !filesLoading}
+          className="mb-0 flex-1"
+        />
+        <div className="flex items-center gap-4 ml-auto">
+          {selectedFiles.size > 0 && (
+            <Button size="sm" onClick={handleAddSelected} disabled={isAdding}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Selected ({selectedFiles.size})
+            </Button>
+          )}
+          <p className="text-sm text-muted-foreground whitespace-nowrap">
+            Showing {availableFiles.length} available file
+            {availableFiles.length !== 1 ? "s" : ""}
+          </p>
+        </div>
       </div>
-      {filesLoading ? (
+
+      {filesLoading && !filesData ? (
         <div className="text-center py-4">
           <div className="inline-block w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mb-2" />
           <p className="text-sm text-muted-foreground">Loading files...</p>
         </div>
       ) : availableFiles.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">
-          No more files available to add.
+          {state.search || searchInput
+            ? "No files match your search"
+            : "No more files available to add."}
         </p>
       ) : (
         <>
@@ -162,13 +193,16 @@ export function QuickAddFilesSection({
             actionType="add"
             onAction={onAddFile}
             actionDisabled={isAdding}
+            sortBy={state.sortBy}
+            sortDir={state.sortDir}
+            onSort={actions.toggleSort}
           />
           {totalPages > 1 && (
             <div className="mt-4">
               <PaginationControls
-                currentPage={currentPage}
+                currentPage={state.page}
                 totalPages={totalPages}
-                onPageChange={setCurrentPage}
+                onPageChange={actions.setPage}
               />
             </div>
           )}
