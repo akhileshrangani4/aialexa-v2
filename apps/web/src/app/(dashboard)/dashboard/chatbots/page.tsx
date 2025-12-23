@@ -8,8 +8,11 @@ import { CreateChatbotDialog } from "@/components/dashboard/chatbots/CreateChatb
 import { ChatbotCard } from "@/components/dashboard/chatbots/ChatbotCard";
 import { EmptyChatbotsState } from "@/components/dashboard/chatbots/EmptyChatbotsState";
 import { PaginationControls } from "@/components/dashboard/files/PaginationControls";
+import { TableToolbar, type ChatbotSortBy } from "@/components/data-table";
+import { useServerTable } from "@/hooks/useServerTable";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { keepPreviousData } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -17,17 +20,28 @@ export default function ChatbotsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [chatbotToDelete, setChatbotToDelete] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+
+  const { state, searchInput, actions, queryParams } =
+    useServerTable<ChatbotSortBy>(
+      { defaultSortBy: "createdAt", defaultSortDir: "desc" },
+      ITEMS_PER_PAGE,
+    );
 
   // Fetch chatbots
   const {
     data: chatbotsData,
     isLoading: chatbotsLoading,
+    isFetching,
     refetch,
-  } = trpc.chatbot.list.useQuery({
-    limit: ITEMS_PER_PAGE,
-    offset: currentPage * ITEMS_PER_PAGE,
-  });
+  } = trpc.chatbot.list.useQuery(
+    {
+      limit: ITEMS_PER_PAGE,
+      ...queryParams,
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  );
 
   const chatbots = chatbotsData?.chatbots || [];
   const totalCount = chatbotsData?.totalCount || 0;
@@ -45,8 +59,8 @@ export default function ChatbotsPage() {
       const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
 
       // If we're on a page that no longer exists, go back to the last valid page
-      if (currentPage >= newTotalPages && newTotalPages > 0) {
-        setCurrentPage(newTotalPages - 1);
+      if (state.page >= newTotalPages && newTotalPages > 0) {
+        actions.setPage(newTotalPages - 1);
       }
 
       toast.success("Chatbot deleted successfully");
@@ -68,6 +82,11 @@ export default function ChatbotsPage() {
     setChatbotToDelete(chatbotId);
     setDeleteDialogOpen(true);
   };
+
+  // Show full loading only on initial load (no data yet)
+  const showFullLoading = chatbotsLoading && !chatbotsData;
+  // Show inline loading indicator when fetching but have data
+  const showInlineLoading = isFetching && !chatbotsLoading;
 
   return (
     <div className="flex-1 p-8 bg-gradient-to-b from-background to-muted/20">
@@ -102,38 +121,47 @@ export default function ChatbotsPage() {
         </div>
 
         {/* Chatbots List */}
-        {chatbotsLoading ? (
+        {showFullLoading ? (
           <div className="text-center py-16">
             <div className="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-muted-foreground">Loading chatbots...</p>
           </div>
-        ) : !chatbots || chatbots.length === 0 ? (
+        ) : chatbots.length === 0 && !state.search && !searchInput ? (
           <EmptyChatbotsState onCreateClick={() => setCreateDialogOpen(true)} />
         ) : (
           <div className="space-y-6">
-            {totalCount > ITEMS_PER_PAGE && (
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-muted-foreground">
-                  Showing {chatbots.length} of {totalCount} chatbot
-                  {totalCount !== 1 ? "s" : ""}
-                </p>
+            <TableToolbar
+              searchValue={searchInput}
+              onSearchChange={actions.setSearch}
+              placeholder="Search chatbots by name or description..."
+              totalCount={totalCount}
+              visibleCount={chatbots.length}
+              itemLabel="chatbot"
+              isLoading={showInlineLoading}
+            />
+            {chatbots.length === 0 && state.search ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No chatbots match your search
               </div>
-            )}
-            <div className="grid gap-4">
-              {chatbots.map((chatbot) => (
-                <ChatbotCard
-                  key={chatbot.id}
-                  chatbot={chatbot}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </div>
-            {totalPages > 1 && (
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+            ) : (
+              <>
+                <div className="grid gap-4">
+                  {chatbots.map((chatbot) => (
+                    <ChatbotCard
+                      key={chatbot.id}
+                      chatbot={chatbot}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <PaginationControls
+                    currentPage={state.page}
+                    totalPages={totalPages}
+                    onPageChange={actions.setPage}
+                  />
+                )}
+              </>
             )}
           </div>
         )}

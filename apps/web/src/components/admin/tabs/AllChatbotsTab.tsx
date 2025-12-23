@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -22,7 +16,15 @@ import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { ChatbotTableRow } from "../ChatbotTableRow";
 import { PaginationControls } from "../../dashboard/files/PaginationControls";
+import {
+  TableToolbar,
+  SortableTableHead,
+  type AdminChatbotSortBy,
+} from "@/components/data-table";
+import { useServerTable } from "@/hooks/useServerTable";
+import { StatsHeader } from "../components/StatsHeader";
 import { Bot } from "lucide-react";
+import { keepPreviousData } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -36,7 +38,13 @@ type DeleteDialogState = {
 export function AllChatbotsTab() {
   const { data: session } = useSession();
   const currentUserId = session?.user?.id;
-  const [currentPage, setCurrentPage] = useState(0);
+
+  const { state, searchInput, actions, queryParams } =
+    useServerTable<AdminChatbotSortBy>(
+      { defaultSortBy: "createdAt", defaultSortDir: "desc" },
+      ITEMS_PER_PAGE,
+    );
+
   const [deleteChatbotDialog, setDeleteChatbotDialog] =
     useState<DeleteDialogState>({
       isOpen: false,
@@ -48,14 +56,21 @@ export function AllChatbotsTab() {
   const {
     data: chatbotsData,
     isLoading: chatbotsLoading,
+    isFetching,
     refetch: refetchChatbots,
-  } = trpc.admin.getAllChatbots.useQuery({
-    limit: ITEMS_PER_PAGE,
-    offset: currentPage * ITEMS_PER_PAGE,
-  });
+  } = trpc.admin.getAllChatbots.useQuery(
+    {
+      limit: ITEMS_PER_PAGE,
+      ...queryParams,
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  );
 
   const allChatbots = chatbotsData?.chatbots || [];
   const totalCount = chatbotsData?.totalCount || 0;
+  const featuredCount = chatbotsData?.featuredCount || 0;
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const deleteChatbot = trpc.admin.deleteChatbot.useMutation({
@@ -111,10 +126,14 @@ export function AllChatbotsTab() {
     <>
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle>All Chatbots</CardTitle>
-          <CardDescription>
-            Manage all chatbots across the platform
-          </CardDescription>
+          <StatsHeader
+            title="All Chatbots"
+            description="Manage all chatbots across the platform"
+            stats={[
+              { value: totalCount, label: "All" },
+              { value: featuredCount, label: "Featured", highlight: true },
+            ]}
+          />
         </CardHeader>
         <CardContent>
           {/* Admin Capabilities Info */}
@@ -132,39 +151,88 @@ export function AllChatbotsTab() {
             </Alert>
           )}
 
-          {chatbotsLoading ? (
+          <TableToolbar
+            searchValue={searchInput}
+            onSearchChange={actions.setSearch}
+            placeholder="Search chatbots by name, description, or owner..."
+            totalCount={totalCount}
+            visibleCount={allChatbots.length}
+            itemLabel="chatbot"
+            isLoading={isFetching && !chatbotsLoading}
+            className="w-full"
+          />
+
+          {chatbotsLoading && !chatbotsData ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
               <p className="text-muted-foreground">Loading chatbots...</p>
             </div>
-          ) : !allChatbots || allChatbots.length === 0 ? (
+          ) : allChatbots.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Bot className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
               <p className="text-lg font-medium text-foreground mb-1">
                 No chatbots found
               </p>
               <p className="text-sm text-muted-foreground">
-                Chatbots will appear here once users create them
+                {state.search || searchInput
+                  ? "Try adjusting your search terms"
+                  : "Chatbots will appear here once users create them"}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-muted-foreground">
-                  Showing {allChatbots.length} of {totalCount} chatbot
-                  {totalCount !== 1 ? "s" : ""}
-                </p>
-              </div>
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="font-semibold">Name</TableHead>
-                      <TableHead className="font-semibold">Owner</TableHead>
-                      <TableHead className="font-semibold">Model</TableHead>
-                      <TableHead className="font-semibold">Files</TableHead>
-                      <TableHead className="font-semibold">Created</TableHead>
-                      <TableHead className="font-semibold">Featured</TableHead>
+                      <SortableTableHead
+                        column="name"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Name
+                      </SortableTableHead>
+                      <SortableTableHead
+                        column="owner"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Owner
+                      </SortableTableHead>
+                      <SortableTableHead
+                        column="model"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Model
+                      </SortableTableHead>
+                      <SortableTableHead
+                        column="fileCount"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Files
+                      </SortableTableHead>
+                      <SortableTableHead
+                        column="createdAt"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Created
+                      </SortableTableHead>
+                      <SortableTableHead
+                        column="featured"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Featured
+                      </SortableTableHead>
                       <TableHead className="font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -184,9 +252,9 @@ export function AllChatbotsTab() {
 
               {totalPages > 1 && (
                 <PaginationControls
-                  currentPage={currentPage}
+                  currentPage={state.page}
                   totalPages={totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={actions.setPage}
                 />
               )}
             </div>

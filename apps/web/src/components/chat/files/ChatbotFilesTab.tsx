@@ -16,8 +16,11 @@ import { FileTable } from "@/components/dashboard/files/FileTable";
 import { EmptyChatbotFilesState } from "./EmptyChatbotFilesState";
 import { QuickAddFilesSection } from "./QuickAddFilesSection";
 import { PaginationControls } from "@/components/dashboard/files/PaginationControls";
+import { TableToolbar, type FileSortBy } from "@/components/data-table";
+import { useServerTable } from "@/hooks/useServerTable";
 import { X } from "lucide-react";
 import { useFilePolling } from "@/hooks/useFilePolling";
+import { keepPreviousData } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -33,22 +36,29 @@ export function ChatbotFilesTab({
   onRefetch,
 }: ChatbotFilesTabProps) {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const [associatedFilesPage, setAssociatedFilesPage] = useState(0);
+
+  const { state, searchInput, actions, queryParams } =
+    useServerTable<FileSortBy>(
+      { defaultSortBy: "createdAt", defaultSortDir: "desc" },
+      ITEMS_PER_PAGE,
+    );
 
   // Fetch paginated associated files
   const {
     data: associatedFilesData,
     isLoading: associatedFilesLoading,
+    isFetching,
     refetch: refetchAssociatedFiles,
   } = trpc.files.listForChatbot.useQuery(
     {
       chatbotId,
       limit: ITEMS_PER_PAGE,
-      offset: associatedFilesPage * ITEMS_PER_PAGE,
+      ...queryParams,
     },
     {
       enabled: !!chatbotId,
       refetchInterval: useFilePolling(),
+      placeholderData: keepPreviousData,
     },
   );
 
@@ -107,8 +117,8 @@ export function ChatbotFilesTab({
       const result = await refetchAssociatedFiles();
       const newTotalCount = result.data?.totalCount || 0;
       const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
-      if (associatedFilesPage >= newTotalPages && newTotalPages > 0) {
-        setAssociatedFilesPage(newTotalPages - 1);
+      if (state.page >= newTotalPages && newTotalPages > 0) {
+        actions.setPage(newTotalPages - 1);
       }
 
       toast.success("File removed from chatbot");
@@ -261,12 +271,13 @@ export function ChatbotFilesTab({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {filesLoading || associatedFilesLoading ? (
+        {(filesLoading || associatedFilesLoading) && !associatedFilesData ? (
           <div className="text-center py-8">
             <div className="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-muted-foreground">Loading files...</p>
           </div>
-        ) : !associatedFiles || associatedFiles.length === 0 ? (
+        ) : associatedFiles.length === 0 && !state.search && !searchInput ? (
+          // Truly empty state - no files and not searching
           <EmptyChatbotFilesState
             associatedFileIds={associatedFileIds}
             onAddFile={handleAddFile}
@@ -275,58 +286,72 @@ export function ChatbotFilesTab({
             onRefetch={refetchAssociatedFiles}
           />
         ) : (
+          // Has files OR is searching - show toolbar and table structure
           <div className="space-y-6">
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-muted-foreground">
-                  {associatedFilesTotalCount > 0 && (
-                    <>
-                      {associatedFilesTotalCount} file
-                      {associatedFilesTotalCount !== 1 ? "s" : ""} associated
-                      {associatedFilesTotalCount > ITEMS_PER_PAGE && (
-                        <span className="ml-2">
-                          (Showing {associatedFiles.length} of{" "}
-                          {associatedFilesTotalCount})
-                        </span>
-                      )}
-                    </>
+              <div className="flex items-center gap-4 mb-4">
+                <TableToolbar
+                  searchValue={searchInput}
+                  onSearchChange={actions.setSearch}
+                  placeholder="Search associated files..."
+                  isLoading={isFetching && !associatedFilesLoading}
+                  className="mb-0 flex-1"
+                />
+                <div className="flex items-center gap-4 ml-auto">
+                  {selectedFiles.size > 0 && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() =>
+                        handleRemoveFiles(Array.from(selectedFiles))
+                      }
+                      disabled={disassociateFile.isPending}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Remove Selected ({selectedFiles.size})
+                    </Button>
                   )}
-                </p>
-                {selectedFiles.size > 0 && (
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleRemoveFiles(Array.from(selectedFiles))}
-                    disabled={disassociateFile.isPending}
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Remove Selected ({selectedFiles.size})
-                  </Button>
-                )}
-              </div>
-              <FileTable
-                files={associatedFiles}
-                showCheckbox
-                selectedFiles={selectedFiles}
-                onToggleSelect={handleToggleFile}
-                onSelectAll={handleSelectAll}
-                allSelected={allSelected}
-                actionType="remove"
-                onAction={handleRemoveFile}
-                actionDisabled={disassociateFile.isPending}
-              />
-              {associatedFilesTotalPages > 1 && (
-                <div className="mt-4">
-                  <PaginationControls
-                    currentPage={associatedFilesPage}
-                    totalPages={associatedFilesTotalPages}
-                    onPageChange={setAssociatedFilesPage}
-                  />
+                  <p className="text-sm text-muted-foreground whitespace-nowrap">
+                    Showing {associatedFiles.length} of{" "}
+                    {associatedFilesTotalCount} file
+                    {associatedFilesTotalCount !== 1 ? "s" : ""}
+                  </p>
                 </div>
+              </div>
+              {associatedFiles.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No files match your search
+                </div>
+              ) : (
+                <>
+                  <FileTable
+                    files={associatedFiles}
+                    showCheckbox
+                    selectedFiles={selectedFiles}
+                    onToggleSelect={handleToggleFile}
+                    onSelectAll={handleSelectAll}
+                    allSelected={allSelected}
+                    actionType="remove"
+                    onAction={handleRemoveFile}
+                    actionDisabled={disassociateFile.isPending}
+                    sortBy={state.sortBy}
+                    sortDir={state.sortDir}
+                    onSort={actions.toggleSort}
+                  />
+                  {associatedFilesTotalPages > 1 && (
+                    <div className="mt-4">
+                      <PaginationControls
+                        currentPage={state.page}
+                        totalPages={associatedFilesTotalPages}
+                        onPageChange={actions.setPage}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
-            {/* Show QuickAddFilesSection even when files are already associated */}
+            {/* Show QuickAddFilesSection when we have files or are searching */}
             <QuickAddFilesSection
               associatedFileIds={associatedFileIds}
               onAddFile={handleAddFile}

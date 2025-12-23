@@ -139,7 +139,7 @@ export default function ChatbotDetailPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="chat" className="space-y-6">
-          <TabsList className="bg-white border border-border">
+          <TabsList className="bg-muted-foreground/10 border border-border">
             <TabsTrigger value="chat">Chat</TabsTrigger>
             <TabsTrigger value="files">Files</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>

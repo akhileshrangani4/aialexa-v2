@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -24,14 +17,27 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Clock, Calendar, CheckCircle, XCircle } from "lucide-react";
 import { PaginationControls } from "../../dashboard/files/PaginationControls";
+import {
+  TableToolbar,
+  SortableTableHead,
+  type PendingUserSortBy,
+} from "@/components/data-table";
+import { useServerTable } from "@/hooks/useServerTable";
 import { formatUserDate } from "../utils/user-helpers";
 import { UserAvatarCell, UserEmailCell } from "../components/UserCells";
+import { StatsHeader } from "../components/StatsHeader";
 import { useUserStats } from "../hooks/useUserStats";
+import { useState } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 10;
 
 export function PendingUsersTab() {
-  const [currentPage, setCurrentPage] = useState(0);
+  const { state, searchInput, actions, queryParams } =
+    useServerTable<PendingUserSortBy>(
+      { defaultSortBy: "createdAt", defaultSortDir: "desc" },
+      ITEMS_PER_PAGE,
+    );
 
   const [approveDialog, setApproveDialog] = useState<{
     isOpen: boolean;
@@ -60,11 +66,17 @@ export function PendingUsersTab() {
   const {
     data: pendingUsersData,
     isLoading: usersLoading,
+    isFetching,
     refetch,
-  } = trpc.admin.getPendingUsers.useQuery({
-    limit: ITEMS_PER_PAGE,
-    offset: currentPage * ITEMS_PER_PAGE,
-  });
+  } = trpc.admin.getPendingUsers.useQuery(
+    {
+      limit: ITEMS_PER_PAGE,
+      ...queryParams,
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  );
 
   const { data: stats, refetch: refetchStats } = useUserStats();
 
@@ -77,8 +89,8 @@ export function PendingUsersTab() {
       // If we're on the last page and it becomes empty after approval, go to previous page
       const newTotalCount = totalCount - 1;
       const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
-      if (currentPage >= newTotalPages && currentPage > 0) {
-        setCurrentPage(newTotalPages - 1);
+      if (state.page >= newTotalPages && state.page > 0) {
+        actions.setPage(newTotalPages - 1);
       }
       refetch();
       refetchStats();
@@ -98,8 +110,8 @@ export function PendingUsersTab() {
       // If we're on the last page and it becomes empty after rejection, go to previous page
       const newTotalCount = totalCount - 1;
       const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
-      if (currentPage >= newTotalPages && currentPage > 0) {
-        setCurrentPage(newTotalPages - 1);
+      if (state.page >= newTotalPages && state.page > 0) {
+        actions.setPage(newTotalPages - 1);
       }
       refetch();
       refetchStats();
@@ -166,36 +178,22 @@ export function PendingUsersTab() {
     <>
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                <Clock className="h-6 w-6 text-primary" />
-                Pending User Approvals
-              </CardTitle>
-              <CardDescription className="mt-2">
-                Review and approve user registrations
-              </CardDescription>
-            </div>
-            {stats && (
-              <div className="flex items-center gap-4 text-sm">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    {stats.pending}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Pending</div>
-                </div>
-                <div className="h-8 w-px bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {stats.total}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Total Users
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <StatsHeader
+            title="Pending User Approvals"
+            description="Review and approve user registrations"
+            stats={
+              stats
+                ? [
+                    { value: stats.pending, label: "Pending" },
+                    {
+                      value: stats.total,
+                      label: "Total Users",
+                      highlight: true,
+                    },
+                  ]
+                : undefined
+            }
+          />
         </CardHeader>
         <CardContent>
           {approveUser.error && (
@@ -209,39 +207,64 @@ export function PendingUsersTab() {
             </Alert>
           )}
 
-          {usersLoading ? (
+          <TableToolbar
+            searchValue={searchInput}
+            onSearchChange={actions.setSearch}
+            placeholder="Search pending users by name or email..."
+            totalCount={totalCount}
+            visibleCount={pendingUsers.length}
+            itemLabel="pending user"
+            isLoading={isFetching && !usersLoading}
+          />
+
+          {usersLoading && !pendingUsersData ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
               <p className="text-muted-foreground">Loading pending users...</p>
             </div>
-          ) : !pendingUsers || pendingUsers.length === 0 ? (
+          ) : pendingUsers.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Clock className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
               <p className="text-lg font-medium text-foreground mb-1">
                 No pending users
               </p>
               <p className="text-sm text-muted-foreground">
-                All user registrations have been reviewed
+                {state.search || searchInput
+                  ? "Try adjusting your search terms"
+                  : "All user registrations have been reviewed"}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-muted-foreground">
-                  Showing {pendingUsers.length} of {totalCount} pending user
-                  {totalCount !== 1 ? "s" : ""}
-                </p>
-              </div>
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="font-semibold">User</TableHead>
-                      <TableHead className="font-semibold">Email</TableHead>
+                      <SortableTableHead
+                        column="name"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        User
+                      </SortableTableHead>
+                      <SortableTableHead
+                        column="email"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
+                        Email
+                      </SortableTableHead>
                       <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold">
+                      <SortableTableHead
+                        column="createdAt"
+                        currentSortBy={state.sortBy}
+                        currentSortDir={state.sortDir}
+                        onSort={actions.toggleSort}
+                      >
                         Registered
-                      </TableHead>
+                      </SortableTableHead>
                       <TableHead className="font-semibold text-right">
                         Actions
                       </TableHead>
@@ -325,9 +348,9 @@ export function PendingUsersTab() {
               {totalPages > 1 && (
                 <div className="flex justify-center pt-4">
                   <PaginationControls
-                    currentPage={currentPage}
+                    currentPage={state.page}
                     totalPages={totalPages}
-                    onPageChange={setCurrentPage}
+                    onPageChange={actions.setPage}
                   />
                 </div>
               )}
