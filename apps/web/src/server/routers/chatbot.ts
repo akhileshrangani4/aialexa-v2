@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { SUPPORTED_MODELS } from "@aialexa/ai";
 import { checkRateLimit, chatbotCreationRateLimit } from "@/lib/rate-limit";
+import { escapeLikePattern } from "@/server/utils";
 
 const createChatbotSchema = z.object({
   name: z.string().min(1).max(100),
@@ -39,11 +40,11 @@ export const chatbotRouter = router({
       const limit = input?.limit ?? 10;
       const offset = input?.offset ?? 0;
 
-      // Build search condition
+      // Build search condition (escape LIKE wildcards for literal matching)
       const searchCondition = input?.search
         ? or(
-            ilike(chatbots.name, `%${input.search}%`),
-            ilike(chatbots.description, `%${input.search}%`),
+            ilike(chatbots.name, `%${escapeLikePattern(input.search)}%`),
+            ilike(chatbots.description, `%${escapeLikePattern(input.search)}%`),
           )
         : undefined;
 

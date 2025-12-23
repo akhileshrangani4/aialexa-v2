@@ -56,6 +56,7 @@ export function useServerTable<TSortBy extends string>(
 
   // Debounce search
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const prevDebouncedSearch = useRef(debouncedSearch);
 
   useEffect(() => {
     if (debounceTimer.current) {
@@ -63,10 +64,6 @@ export function useServerTable<TSortBy extends string>(
     }
     debounceTimer.current = setTimeout(() => {
       setDebouncedSearch(searchInput);
-      // Reset to first page on new search
-      if (searchInput !== debouncedSearch) {
-        setPageState(0);
-      }
     }, debounceMs);
 
     return () => {
@@ -74,7 +71,15 @@ export function useServerTable<TSortBy extends string>(
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [searchInput, debounceMs, debouncedSearch]);
+  }, [searchInput, debounceMs]);
+
+  // Reset page when debounced search actually changes
+  useEffect(() => {
+    if (debouncedSearch !== prevDebouncedSearch.current) {
+      setPageState(0);
+      prevDebouncedSearch.current = debouncedSearch;
+    }
+  }, [debouncedSearch]);
 
   // Actions
   const setPage = useCallback((newPage: number) => {
