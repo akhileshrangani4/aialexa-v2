@@ -10,6 +10,7 @@ import {
 } from "@aialexa/db/schema";
 import { eq, sql, desc, asc, ilike, or, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { escapeLikePattern } from "@/server/utils";
 import {
   approveUser as approveUserHelper,
   rejectUser as rejectUserHelper,
@@ -41,11 +42,11 @@ export const adminRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Build search condition
+      // Build search condition (escape LIKE wildcards for literal matching)
       const searchCondition = input.search
         ? or(
-            ilike(user.name, `%${input.search}%`),
-            ilike(user.email, `%${input.search}%`),
+            ilike(user.name, `%${escapeLikePattern(input.search)}%`),
+            ilike(user.email, `%${escapeLikePattern(input.search)}%`),
           )
         : undefined;
 
@@ -127,9 +128,9 @@ export const adminRouter = router({
       const limit = input?.limit ?? 50;
       const offset = (page - 1) * limit;
 
-      // Build search condition
+      // Build search condition (escape LIKE wildcards for literal matching)
       const searchCondition = input?.search
-        ? ilike(approvedDomains.domain, `%${input.search}%`)
+        ? ilike(approvedDomains.domain, `%${escapeLikePattern(input.search)}%`)
         : undefined;
 
       // Build sort order
@@ -140,28 +141,16 @@ export const adminRouter = router({
       const orderBy =
         input?.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
-      const domainsQuery = ctx.db
-        .select()
-        .from(approvedDomains)
-        .orderBy(orderBy)
-        .limit(limit)
-        .offset(offset);
-
-      if (searchCondition) {
-        domainsQuery.where(searchCondition);
-      }
-
-      const countQuery = ctx.db
-        .select({ count: sql<number>`count(*)` })
-        .from(approvedDomains);
-
-      if (searchCondition) {
-        countQuery.where(searchCondition);
-      }
+      const baseQuery = searchCondition
+        ? ctx.db.select().from(approvedDomains).where(searchCondition)
+        : ctx.db.select().from(approvedDomains);
 
       const [domains, countResult] = await Promise.all([
-        domainsQuery,
-        countQuery,
+        baseQuery.orderBy(orderBy).limit(limit).offset(offset),
+        ctx.db
+          .select({ count: sql<number>`count(*)` })
+          .from(approvedDomains)
+          .where(searchCondition ?? undefined),
       ]);
 
       const total = Number(countResult[0]?.count ?? 0);
@@ -265,27 +254,28 @@ export const adminRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Build search condition (search chatbot name, description, or owner name/email)
+      // Build search condition (escape LIKE wildcards for literal matching)
       const searchCondition = input.search
-        ? or(
-            ilike(chatbots.name, `%${input.search}%`),
-            ilike(chatbots.description, `%${input.search}%`),
-            ilike(user.name, `%${input.search}%`),
-            ilike(user.email, `%${input.search}%`),
-          )
+        ? (() => {
+            const escaped = escapeLikePattern(input.search);
+            return or(
+              ilike(chatbots.name, `%${escaped}%`),
+              ilike(chatbots.description, `%${escaped}%`),
+              ilike(user.name, `%${escaped}%`),
+              ilike(user.email, `%${escaped}%`),
+            );
+          })()
         : undefined;
 
       // Get total count with search filter
-      const countQuery = ctx.db
+      const baseCountQuery = ctx.db
         .select({ count: sql<number>`count(distinct ${chatbots.id})` })
         .from(chatbots)
         .leftJoin(user, eq(chatbots.userId, user.id));
 
-      if (searchCondition) {
-        countQuery.where(searchCondition);
-      }
-
-      const [totalCountResult] = await countQuery;
+      const [totalCountResult] = searchCondition
+        ? await baseCountQuery.where(searchCondition)
+        : await baseCountQuery;
       const totalCount = Number(totalCountResult?.count || 0);
 
       // Get featured count
@@ -313,7 +303,7 @@ export const adminRouter = router({
         input.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
       // Get paginated chatbots
-      const query = ctx.db
+      const baseQuery = ctx.db
         .select({
           id: chatbots.id,
           name: chatbots.name,
@@ -337,11 +327,11 @@ export const adminRouter = router({
           eq(chatbots.id, chatbotFileAssociations.chatbotId),
         );
 
-      if (searchCondition) {
-        query.where(searchCondition);
-      }
+      const queryWithFilter = searchCondition
+        ? baseQuery.where(searchCondition)
+        : baseQuery;
 
-      const allChatbots = await query
+      const allChatbots = await queryWithFilter
         .groupBy(chatbots.id, user.id)
         .orderBy(orderBy)
         .limit(input.limit)
@@ -542,19 +532,21 @@ export const adminRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Build search condition
+      // Build search condition (escape LIKE wildcards for literal matching)
       const searchCondition = input.search
         ? or(
-            ilike(user.name, `%${input.search}%`),
-            ilike(user.email, `%${input.search}%`),
+            ilike(user.name, `%${escapeLikePattern(input.search)}%`),
+            ilike(user.email, `%${escapeLikePattern(input.search)}%`),
           )
         : undefined;
 
       // Get total count with search filter
-      const [totalCountResult] = await ctx.db
+      const baseCountQuery = ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(user)
-        .where(searchCondition);
+        .from(user);
+      const [totalCountResult] = searchCondition
+        ? await baseCountQuery.where(searchCondition)
+        : await baseCountQuery;
 
       const totalCount = Number(totalCountResult?.count || 0);
 
@@ -573,13 +565,17 @@ export const adminRouter = router({
         input.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
       // Get paginated users
-      const allUsers = await ctx.db
-        .select()
-        .from(user)
-        .where(searchCondition)
-        .orderBy(orderBy)
-        .limit(input.limit)
-        .offset(input.offset);
+      const baseUsersQuery = ctx.db.select().from(user);
+      const allUsers = searchCondition
+        ? await baseUsersQuery
+            .where(searchCondition)
+            .orderBy(orderBy)
+            .limit(input.limit)
+            .offset(input.offset)
+        : await baseUsersQuery
+            .orderBy(orderBy)
+            .limit(input.limit)
+            .offset(input.offset);
 
       return {
         users: allUsers,

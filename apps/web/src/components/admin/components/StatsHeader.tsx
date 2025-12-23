@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 
 interface StatItem {
@@ -26,7 +27,7 @@ export function StatsHeader({ title, description, stats }: StatsHeaderProps) {
       {stats && stats.length > 0 && (
         <div className="flex items-center gap-4 text-sm">
           {stats.map((stat, index) => (
-            <div key={stat.label} className="flex items-center gap-4">
+            <Fragment key={stat.label}>
               {index > 0 && <div className="h-8 w-px bg-border" />}
               <div className="text-center">
                 <div
@@ -38,7 +39,7 @@ export function StatsHeader({ title, description, stats }: StatsHeaderProps) {
                   {stat.label}
                 </div>
               </div>
-            </div>
+            </Fragment>
           ))}
         </div>
       )}

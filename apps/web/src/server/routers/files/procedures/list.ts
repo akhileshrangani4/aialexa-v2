@@ -7,6 +7,7 @@ import {
   userFiles,
   chatbotFileAssociations,
 } from "@aialexa/db/schema";
+import { escapeLikePattern } from "@/server/utils";
 
 /**
  * List all user files (centralized) with search and sort
@@ -35,11 +36,11 @@ export const listProcedure = protectedProcedure
     const limit = input?.limit ?? 10;
     const offset = input?.offset ?? 0;
 
-    // Build search condition
+    // Build search condition (escape LIKE wildcards for literal matching)
     const searchCondition = input?.search
       ? or(
-          ilike(userFiles.fileName, `%${input.search}%`),
-          ilike(userFiles.fileType, `%${input.search}%`),
+          ilike(userFiles.fileName, `%${escapeLikePattern(input.search)}%`),
+          ilike(userFiles.fileType, `%${escapeLikePattern(input.search)}%`),
         )
       : undefined;
 
@@ -137,10 +138,11 @@ export const listForChatbotProcedure = protectedProcedure
     const offset = input.offset ?? 0;
 
     // Build search condition
+    // Escape LIKE wildcards for literal matching
     const searchCondition = input.search
       ? or(
-          ilike(userFiles.fileName, `%${input.search}%`),
-          ilike(userFiles.fileType, `%${input.search}%`),
+          ilike(userFiles.fileName, `%${escapeLikePattern(input.search)}%`),
+          ilike(userFiles.fileType, `%${escapeLikePattern(input.search)}%`),
         )
       : undefined;
 
