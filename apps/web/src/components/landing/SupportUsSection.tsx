@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { SiGithub } from "react-icons/si";
 import { FaHeart } from "react-icons/fa";
-import { env } from "@/lib/env";
 import Image from "next/image";
 
 const FEATURED_IN = [
@@ -91,7 +90,10 @@ export default function SupportUsSection() {
                 className="border-2 px-10 py-6 text-base rounded-full font-medium"
               >
                 <Link
-                  href={env.NEXT_PUBLIC_GITHUB_URL || "/"}
+                  href={
+                    process.env.NEXT_PUBLIC_GITHUB_URL ||
+                    "https://github.com/akhileshrangani4/teachanything"
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -109,7 +111,7 @@ export default function SupportUsSection() {
               >
                 <Link
                   href={
-                    env.NEXT_PUBLIC_DONATION_URL ||
+                    process.env.NEXT_PUBLIC_DONATION_URL ||
                     "https://www.gofundme.com/f/empower-educators-with-openaccess-ai"
                   }
                   target="_blank"

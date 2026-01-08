@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { env } from "@/lib/env";
 
 export default function Footer() {
   return (
@@ -20,13 +19,16 @@ export default function Footer() {
               Features
             </Link>
             <Link
-              href={`mailto:${env.NEXT_PUBLIC_CONTACT_EMAIL || ""}`}
+              href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || ""}`}
               className="hover:text-foreground transition-colors"
             >
               Contact Us
             </Link>
             <Link
-              href={`${env.NEXT_PUBLIC_GITHUB_URL || ""}`}
+              href={
+                process.env.NEXT_PUBLIC_GITHUB_URL ||
+                "https://github.com/akhileshrangani4/teachanything"
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
