@@ -1,4 +1,4 @@
-# AIAlexa
+# Teach anything.
 
 Production-ready AI chatbot platform for education.
 
@@ -61,7 +61,7 @@ Create intelligent, context-aware chatbots powered by your course materials usin
 ## Project Structure
 
 ```
-aialexa/
+teachanything/
 ├── apps/web/              # Next.js application
 │   ├── src/app/          # Pages & API routes
 │   ├── src/components/   # UI components

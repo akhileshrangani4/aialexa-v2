@@ -1,5 +1,5 @@
 {
-  "name": "@aialexa/web",
+  "name": "@teachanything/web",
   "version": "0.1.0",
   "type": "module",
   "private": true,
@@ -11,8 +11,8 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@aialexa/ai": "*",
-    "@aialexa/db": "*",
+    "@teachanything/ai": "*",
+    "@teachanything/db": "*",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",

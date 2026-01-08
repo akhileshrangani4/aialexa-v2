@@ -19,7 +19,10 @@ import { CharacterCounter } from "@/components/ui/character-counter";
 import { trpc } from "@/lib/trpc";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { SUPPORTED_MODELS, type SupportedModel } from "@aialexa/ai/openrouter";
+import {
+  SUPPORTED_MODELS,
+  type SupportedModel,
+} from "@teachanything/ai/openrouter";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import {

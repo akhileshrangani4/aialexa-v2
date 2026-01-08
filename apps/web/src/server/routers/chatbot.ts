@@ -1,10 +1,14 @@
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { chatbots, user, chatbotFileAssociations } from "@aialexa/db/schema";
+import {
+  chatbots,
+  user,
+  chatbotFileAssociations,
+} from "@teachanything/db/schema";
 import { eq, and, sql, desc, asc, ilike, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
-import { SUPPORTED_MODELS } from "@aialexa/ai";
+import { SUPPORTED_MODELS } from "@teachanything/ai";
 import { checkRateLimit, chatbotCreationRateLimit } from "@/lib/rate-limit";
 import { escapeLikePattern } from "@/server/utils";
 

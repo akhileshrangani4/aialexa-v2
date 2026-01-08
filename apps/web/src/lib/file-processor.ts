@@ -1,8 +1,8 @@
-import { db } from "@aialexa/db";
-import { userFiles, fileChunks } from "@aialexa/db/schema";
+import { db } from "@teachanything/db";
+import { userFiles, fileChunks } from "@teachanything/db/schema";
 import { eq } from "drizzle-orm";
 import { createSupabaseClient } from "./supabase";
-import { createOpenRouterClient, createRAGService } from "@aialexa/ai";
+import { createOpenRouterClient, createRAGService } from "@teachanything/ai";
 import { env } from "./env";
 import { logInfo, logError } from "./logger";
 

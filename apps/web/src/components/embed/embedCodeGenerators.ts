@@ -1,6 +1,6 @@
 const IFRAME_IDS = {
-  window: "aialexa-chatbot-iframe",
-  button: "aialexa-chatbot-button-iframe",
+  window: "teachanything-chatbot-iframe",
+  button: "teachanything-chatbot-button-iframe",
 } as const;
 
 const WIDGET_SCRIPT = `window.addEventListener("message",function(e){var t=document.getElementById("${IFRAME_IDS.window}"),n=document.getElementById("${IFRAME_IDS.button}");"openChat"===e.data&&t&&n&&(t.contentWindow.postMessage("openChat","*"),n.contentWindow.postMessage("openChat","*"),t.style.pointerEvents="auto",t.style.display="block",window.innerWidth<640?(t.style.position="fixed",t.style.width="100%",t.style.height="100%",t.style.top="0",t.style.left="0",t.style.zIndex="9999"):(t.style.position="fixed",t.style.width="55rem",t.style.height="75vh",t.style.bottom="0",t.style.right="0"));"closeChat"===e.data&&t&&n&&(t.style.display="none",t.style.pointerEvents="none",t.contentWindow.postMessage("closeChat","*"),n.contentWindow.postMessage("closeChat","*"))});`;

@@ -1,6 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { auth } from "@/lib/auth";
-import { db } from "@aialexa/db";
+import { db } from "@teachanything/db";
 import { logError, logWarn } from "@/lib/logger";
 import type { User } from "@/types/better-auth";
 import superjson from "superjson";

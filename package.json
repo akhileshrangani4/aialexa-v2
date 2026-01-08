@@ -1,5 +1,5 @@
 {
-  "name": "aialexa",
+  "name": "teachanything",
   "private": true,
   "scripts": {
     "build": "turbo run build",

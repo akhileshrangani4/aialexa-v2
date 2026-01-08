@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     description:
       "Create intelligent, context-aware AI chatbots powered by your course materials using advanced RAG technology.",
     images: ["/logo.png"],
-    creator: "@aialexa",
+    creator: "@teachanything",
   },
   robots: {
     index: true,

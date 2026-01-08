@@ -103,7 +103,7 @@ export default function Navbar() {
               <a
                 href={
                   process.env.NEXT_PUBLIC_GITHUB_URL ||
-                  "https://github.com/akhileshrangani4/aialexa-v2"
+                  "https://github.com/akhileshrangani4/teachanything"
                 }
                 target="_blank"
                 rel="noopener noreferrer"

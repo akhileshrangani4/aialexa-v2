@@ -6,7 +6,7 @@ import {
   chatbots,
   userFiles,
   chatbotFileAssociations,
-} from "@aialexa/db/schema";
+} from "@teachanything/db/schema";
 import { logInfo } from "@/lib/logger";
 
 /**
