@@ -10,8 +10,8 @@ import { AccountDisabled } from "@/components/emails/AccountDisabled";
 import { AccountEnabled } from "@/components/emails/AccountEnabled";
 import { AccountDeleted } from "@/components/emails/AccountDeleted";
 import { PasswordReset } from "@/components/emails/PasswordReset";
-import { db } from "@aialexa/db";
-import { user } from "@aialexa/db/schema";
+import { db } from "@teachanything/db";
+import { user } from "@teachanything/db/schema";
 import { eq } from "drizzle-orm";
 
 // Helper to get support email

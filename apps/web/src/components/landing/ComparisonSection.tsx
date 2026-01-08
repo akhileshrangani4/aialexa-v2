@@ -6,60 +6,62 @@ export default function ComparisonSection() {
   const comparisonData = [
     {
       feature: "Audience",
-      aiAlexa: "For educators",
+      teachAnything: "For educators",
       commercial: "General purpose",
     },
     {
       feature: "Access to custom chatbot",
-      aiAlexa:
+      teachAnything:
         "Shareable open-access link to custom chatbot, no login required",
       commercial: "User account required to see shared chatbots",
     },
     {
       feature: "Student login requirement",
-      aiAlexa: "Students do not need to login",
+      teachAnything: "Students do not need to login",
       commercial: "Students must create accounts",
     },
     {
       feature: "Privacy and data protection",
-      aiAlexa: "Full privacy protection; files & chats not used to train LLMs",
+      teachAnything:
+        "Full privacy protection; files & chats not used to train LLMs",
       commercial: "User data used for AI training",
     },
     {
       feature: "Openness of platform",
-      aiAlexa: "Open source, open access",
+      teachAnything: "Open source, open access",
       commercial:
         "Free tier product is not open access; training data not transparent",
     },
     {
       feature: "Model choice",
-      aiAlexa: "Choice among open-source LLMs",
+      teachAnything: "Choice among open-source LLMs",
       commercial: "Locked in to one company's LLM",
     },
     {
       feature: "Control of system prompts",
-      aiAlexa: "Professors write system prompts",
+      teachAnything: "Professors write system prompts",
       commercial: "Prompts controlled by provider",
     },
     {
       feature: "Role of faculty and students",
-      aiAlexa: "Faculty & students as designers, not just consumers",
+      teachAnything: "Faculty & students as designers, not just consumers",
       commercial: "Merely consumers of a predefined product",
     },
     {
       feature: "Building custom chatbots from files",
-      aiAlexa: "File uploads to create custom chatbots; files remain private",
+      teachAnything:
+        "File uploads to create custom chatbots; files remain private",
       commercial:
         "File uploads available but files are used by AI companies for LLM training",
     },
     {
       feature: "Data usage for model training",
-      aiAlexa: "Files & chats not used to train LLMs",
+      teachAnything: "Files & chats not used to train LLMs",
       commercial: "Content is used to train LLM",
     },
     {
       feature: "Language support",
-      aiAlexa: "Multilingual",
+      teachAnything: "Multilingual",
       commercial: "Multilingual",
     },
   ];
@@ -118,7 +120,7 @@ export default function ComparisonSection() {
                     {row.feature}
                   </td>
                   <td className="py-4 px-6 text-sm text-muted-foreground leading-relaxed align-top bg-gray-100">
-                    {row.aiAlexa}
+                    {row.teachAnything}
                   </td>
                   <td className="py-4 px-6 text-sm text-muted-foreground leading-relaxed align-top">
                     {row.commercial}

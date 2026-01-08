@@ -2,7 +2,7 @@ import { protectedProcedure } from "@/server/trpc";
 import { z } from "zod";
 import { eq, and, count } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { userFiles } from "@aialexa/db/schema";
+import { userFiles } from "@teachanything/db/schema";
 
 /**
  * Get file processing status

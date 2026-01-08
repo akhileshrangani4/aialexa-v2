@@ -43,7 +43,7 @@ export function ProfileInformationCard() {
   };
 
   const supportEmail =
-    process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@aialexa.com";
+    process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@teachanything.ai";
 
   return (
     <Card className="border-2 shadow-sm">
