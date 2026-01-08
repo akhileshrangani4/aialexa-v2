@@ -4,7 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { checkRateLimit, fileUploadRateLimit } from "@/lib/rate-limit";
-import { userFiles } from "@aialexa/db/schema";
+import { userFiles } from "@teachanything/db/schema";
 import {
   validateFileName,
   validateFileSize,

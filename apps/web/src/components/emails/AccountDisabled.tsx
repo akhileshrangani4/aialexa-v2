@@ -29,9 +29,9 @@ export function AccountDisabled({
               <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                I&apos;m writing to inform you that your AIAlexa account has
-                been temporarily disabled by an administrator. You will not be
-                able to log in until your account is re-enabled.
+                I&apos;m writing to inform you that your Teach anything account
+                has been temporarily disabled by an administrator. You will not
+                be able to log in until your account is re-enabled.
               </p>
 
               <p style={text}>What this means:</p>
@@ -53,13 +53,13 @@ export function AccountDisabled({
 
               <p style={text}>
                 We&apos;re here to help resolve any issues and get you back to
-                using AIAlexa as soon as possible.
+                using Teach anything as soon as possible.
               </p>
 
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa Support Team
+                Teach anything Support Team
               </p>
             </td>
           </tr>

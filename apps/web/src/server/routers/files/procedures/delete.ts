@@ -6,7 +6,7 @@ import {
   userFiles,
   chatbotFileAssociations,
   fileChunks,
-} from "@aialexa/db/schema";
+} from "@teachanything/db/schema";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logInfo, logError } from "@/lib/logger";
 

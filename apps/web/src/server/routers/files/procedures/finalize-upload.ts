@@ -2,7 +2,7 @@ import { protectedProcedure } from "@/server/trpc";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { userFiles } from "@aialexa/db/schema";
+import { userFiles } from "@teachanything/db/schema";
 import { createSupabaseClient } from "@/lib/supabase";
 import { publishQStashJob } from "@/lib/qstash";
 import { env } from "@/lib/env";

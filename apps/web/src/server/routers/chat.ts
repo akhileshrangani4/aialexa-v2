@@ -8,11 +8,11 @@ import {
   analytics,
   chatbotFileAssociations,
   userFiles,
-} from "@aialexa/db/schema";
+} from "@teachanything/db/schema";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
-import { createOpenRouterClient } from "@aialexa/ai";
+import { createOpenRouterClient } from "@teachanything/ai";
 import { logInfo, logError } from "@/lib/logger";
 import { env } from "@/lib/env";
 
