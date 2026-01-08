@@ -8,7 +8,7 @@ import {
   messages,
   analytics,
   approvedDomains,
-} from "@aialexa/db";
+} from "@teachanything/db";
 
 // User types
 export type User = InferSelectModel<typeof user>;

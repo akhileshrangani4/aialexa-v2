@@ -29,7 +29,7 @@ export function AccountDeleted({
               <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                This email confirms that your AIAlexa account has been
+                This email confirms that your Teach anything account has been
                 permanently deleted as requested by an administrator.
               </p>
 
@@ -53,19 +53,19 @@ export function AccountDeleted({
               </p>
 
               <p style={text}>
-                If you wish to use AIAlexa again in the future, you will need to
-                register a new account.
+                If you wish to use Teach anything again in the future, you will
+                need to register a new account.
               </p>
 
               <p style={text}>
                 We&apos;re sorry to see you go. Thank you for being part of the
-                AIAlexa community.
+                Teach anything community.
               </p>
 
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa Team
+                Teach anything Team
               </p>
             </td>
           </tr>

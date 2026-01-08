@@ -15,8 +15,8 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   ),
   title: {
-    default: "AIAlexa - AI Chatbots for Education",
-    template: "%s | AIAlexa",
+    default: "Teach anything. - AI Chatbots for Education",
+    template: "%s | Teach anything.",
   },
   description:
     "Create intelligent, context-aware AI chatbots powered by your course materials using advanced RAG (Retrieval-Augmented Generation). Support for multiple AI models including Llama 3.3, Mistral Large, and more.",
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     "Qwen 2.5",
     "GPT-OSS",
   ],
-  authors: [{ name: "AIAlexa Team" }],
-  creator: "AIAlexa",
-  publisher: "AIAlexa",
+  authors: [{ name: "Teach anything. Team" }],
+  creator: "Teach anything.",
+  publisher: "Teach anything.",
   formatDetection: {
     email: false,
     address: false,
@@ -47,8 +47,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "AIAlexa",
-    title: "AIAlexa - AI Chatbots for Education",
+    siteName: "Teach anything.",
+    title: "Teach anything. - AI Chatbots for Education",
     description:
       "Create intelligent, context-aware AI chatbots powered by your course materials using advanced RAG technology.",
     images: [
@@ -56,17 +56,17 @@ export const metadata: Metadata = {
         url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "AIAlexa - AI Chatbots for Education",
+        alt: "Teach anything. - AI Chatbots for Education",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AIAlexa - AI Chatbots for Education",
+    title: "Teach anything. - AI Chatbots for Education",
     description:
       "Create intelligent, context-aware AI chatbots powered by your course materials using advanced RAG technology.",
     images: ["/logo.png"],
-    creator: "@aialexa",
+    creator: "@teachanything",
   },
   robots: {
     index: true,

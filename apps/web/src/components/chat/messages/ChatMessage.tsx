@@ -75,7 +75,7 @@ export function ChatMessage({
         <Message className="items-start gap-3">
           <MessageAvatar
             src="/logo.svg"
-            alt="AIAlexa"
+            alt="Teach anything"
             imageClassName="grayscale"
           />
           <div className="flex-1 min-w-0">
@@ -96,7 +96,7 @@ export function ChatMessage({
       <Message className="items-start gap-3">
         <MessageAvatar
           src="/logo.svg"
-          alt="AIAlexa"
+          alt="Teach anything"
           imageClassName="grayscale"
         />
         <div className="flex-1 min-w-0">
@@ -162,7 +162,7 @@ export function StreamingMessage({ content }: StreamingMessageProps) {
           <Message className="items-start gap-3">
             <MessageAvatar
               src="/logo.svg"
-              alt="AIAlexa"
+              alt="Teach anything"
               imageClassName="grayscale"
             />
             <div className="flex-1 min-w-0">
@@ -191,7 +191,7 @@ export function StreamingMessage({ content }: StreamingMessageProps) {
         <div className="flex gap-3 items-start">
           <MessageAvatar
             src="/logo.svg"
-            alt="AIAlexa"
+            alt="Teach anything"
             imageClassName="grayscale"
           />
           <div className="bg-secondary rounded-lg px-4 py-3 w-fit shadow-sm border border-border/50">

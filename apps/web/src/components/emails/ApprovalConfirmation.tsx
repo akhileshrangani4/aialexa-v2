@@ -29,7 +29,7 @@ export function ApprovalConfirmation({
               <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                Great news! Your AIAlexa account has been approved by an
+                Great news! Your Teach anything account has been approved by an
                 administrator. You can now log in and start creating AI-powered
                 chatbots for your courses.
               </p>
@@ -57,13 +57,14 @@ export function ApprovalConfirmation({
               </p>
 
               <p style={text}>
-                Welcome to AIAlexa! We&apos;re excited to have you on board.
+                Welcome to Teach anything! We&apos;re excited to have you on
+                board.
               </p>
 
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa Team
+                Teach anything Team
               </p>
             </td>
           </tr>

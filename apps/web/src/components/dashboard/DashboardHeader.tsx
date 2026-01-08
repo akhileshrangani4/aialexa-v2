@@ -55,12 +55,22 @@ export function DashboardHeader() {
         >
           <Image
             src="/logo.svg"
-            alt="AI Alexa"
+            alt="Teach anything"
             width={28}
             height={28}
             className="h-7 w-7"
           />
-          <span className="text-xl font-bold text-foreground">AI Alexa</span>
+          <span className="text-xl font-bold text-foreground">
+            Teach{" "}
+            <i
+              style={{
+                fontFamily: "var(--font-instrument-serif), serif",
+                fontWeight: 400,
+              }}
+            >
+              anything.
+            </i>
+          </span>
         </Link>
         <Link
           href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || ""}`}

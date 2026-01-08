@@ -10,8 +10,8 @@ import { AccountDisabled } from "@/components/emails/AccountDisabled";
 import { AccountEnabled } from "@/components/emails/AccountEnabled";
 import { AccountDeleted } from "@/components/emails/AccountDeleted";
 import { PasswordReset } from "@/components/emails/PasswordReset";
-import { db } from "@aialexa/db";
-import { user } from "@aialexa/db/schema";
+import { db } from "@teachanything/db";
+import { user } from "@teachanything/db/schema";
 import { eq } from "drizzle-orm";
 
 // Helper to get support email
@@ -73,7 +73,7 @@ export async function sendAdminNotificationEmail(params: {
     const adminUrl = `${env.NEXT_PUBLIC_APP_URL}/admin`;
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: adminEmails,
       subject: "New User Registration - Approval Required",
       react: UserRegistrationNotification({
@@ -117,7 +117,7 @@ export async function sendApprovalEmail(params: {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/login`;
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Your Account Has Been Approved",
       react: ApprovalConfirmation({
@@ -155,7 +155,7 @@ export async function sendRejectionEmail(params: {
     const supportEmail = getSupportEmail();
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Account Registration Update",
       react: RejectionNotification({
@@ -193,7 +193,7 @@ export async function sendPromoteToAdminEmail(params: {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/admin`;
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Admin Privileges Granted!",
       react: PromoteToAdmin({
@@ -232,7 +232,7 @@ export async function sendDemoteFromAdminEmail(params: {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/login`;
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Account Role Update",
       react: DemoteFromAdmin({
@@ -271,7 +271,7 @@ export async function sendAccountDisabledEmail(params: {
     const supportEmail = getSupportEmail();
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Account Access Suspended",
       react: AccountDisabled({
@@ -309,7 +309,7 @@ export async function sendAccountEnabledEmail(params: {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/login`;
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Account Re-enabled!",
       react: AccountEnabled({
@@ -347,7 +347,7 @@ export async function sendAccountDeletedEmail(params: {
     const supportEmail = getSupportEmail();
 
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Account Deletion Confirmation",
       react: AccountDeleted({
@@ -384,7 +384,7 @@ export async function sendPasswordResetEmail(params: {
 }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: `AIAlexa <${env.RESEND_FROM_EMAIL}>`,
+      from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
       subject: "Reset Your Password",
       react: PasswordReset({
