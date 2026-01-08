@@ -1,7 +1,7 @@
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import type { User } from "@/types/better-auth";
 import { z } from "zod";
-import { user, account } from "@aialexa/db/schema";
+import { user, account } from "@teachanything/db/schema";
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as bcrypt from "bcryptjs";

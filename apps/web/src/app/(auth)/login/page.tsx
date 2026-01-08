@@ -146,7 +146,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>Login to your AIAlexa account</CardDescription>
+          <CardDescription>
+            Login to your Teach anything account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (

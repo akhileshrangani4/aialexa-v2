@@ -26,9 +26,9 @@ export function PasswordReset({ userName, resetUrl }: PasswordResetProps) {
               <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                We received a request to reset the password for your AIAlexa
-                account. If you made this request, click the button below to set
-                a new password:
+                We received a request to reset the password for your Teach
+                anything account. If you made this request, click the button
+                below to set a new password:
               </p>
 
               <table
@@ -66,7 +66,7 @@ export function PasswordReset({ userName, resetUrl }: PasswordResetProps) {
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa Team
+                Teach anything Team
               </p>
             </td>
           </tr>

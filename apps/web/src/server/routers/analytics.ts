@@ -6,7 +6,7 @@ import {
   messages,
   analytics,
   user,
-} from "@aialexa/db/schema";
+} from "@teachanything/db/schema";
 import { eq, and, sql, gte, lte, desc, count, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 

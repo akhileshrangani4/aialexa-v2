@@ -7,7 +7,7 @@ import {
   conversations,
   chatbotFileAssociations,
   userFiles,
-} from "@aialexa/db/schema";
+} from "@teachanything/db/schema";
 import { eq, sql, desc, asc, ilike, or, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { escapeLikePattern } from "@/server/utils";
