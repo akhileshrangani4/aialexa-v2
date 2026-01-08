@@ -57,14 +57,22 @@ export default function Navbar() {
               >
                 <Image
                   src="/logo.svg"
-                  alt="AIAlexa"
+                  alt="Teach anything"
                   width={32}
                   height={32}
                   className="h-8 w-8"
                   priority
                 />
                 <span className="text-xl font-base font-bold text-foreground">
-                  AI Alexa
+                  Teach{" "}
+                  <i
+                    style={{
+                      fontFamily: "var(--font-instrument-serif), serif",
+                      fontWeight: 400,
+                    }}
+                  >
+                    anything.
+                  </i>
                 </span>
               </Link>
             </div>

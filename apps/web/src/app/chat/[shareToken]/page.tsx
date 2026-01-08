@@ -107,7 +107,7 @@ export default function SharedChatPage() {
 
         {/* Footer */}
         <div className="mt-6 text-center text-sm text-muted-foreground">
-          <p>Powered by AIAlexa • AI Teaching Assistant Platform</p>
+          <p>Powered by Teach anything • AI Teaching Assistant Platform</p>
         </div>
       </div>
     </div>

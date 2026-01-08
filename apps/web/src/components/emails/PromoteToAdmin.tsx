@@ -27,8 +27,8 @@ export function PromoteToAdmin({ userName, loginUrl }: PromoteToAdminProps) {
 
               <p style={text}>
                 I wanted to let you know that you&apos;ve been promoted to an
-                administrator role on AIAlexa. You now have full access to
-                manage users, chatbots, and system settings.
+                administrator role on Teach anything. You now have full access
+                to manage users, chatbots, and system settings.
               </p>
 
               <p style={text}>Your new admin capabilities include:</p>
@@ -53,14 +53,14 @@ export function PromoteToAdmin({ userName, loginUrl }: PromoteToAdminProps) {
               </p>
 
               <p style={text}>
-                Welcome to the AIAlexa admin team! We trust you&apos;ll help us
-                maintain a secure and efficient platform.
+                Welcome to the Teach anything admin team! We trust you&apos;ll
+                help us maintain a secure and efficient platform.
               </p>
 
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa Admin Team
+                Teach anything Admin Team
               </p>
             </td>
           </tr>

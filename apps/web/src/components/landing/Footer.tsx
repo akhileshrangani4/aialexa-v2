@@ -35,7 +35,7 @@ export default function Footer() {
             </Link>
           </div>
           <p className="text-muted-foreground text-sm">
-            © 2025 AIAlexa. All rights reserved.
+            © 2025 Teach anything. All rights reserved.
           </p>
         </div>
       </div>

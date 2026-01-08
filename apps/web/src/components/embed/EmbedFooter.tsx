@@ -19,12 +19,22 @@ export function EmbedFooter() {
         <span>Powered by</span>
         <Image
           src="/logo.svg"
-          alt="AIAlexa"
+          alt="Teach anything"
           width={14}
           height={14}
           className="h-3.5 w-3.5"
         />
-        <span className="font-medium">AIAlexa</span>
+        <span className="font-medium">
+          Teach{" "}
+          <i
+            style={{
+              fontFamily: "var(--font-instrument-serif), serif",
+              fontWeight: 400,
+            }}
+          >
+            anything.
+          </i>
+        </span>
       </Link>
     </div>
   );
