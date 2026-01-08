@@ -75,7 +75,7 @@ export default function ComparisonSection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-5xl font-serif font-light text-foreground mb-4">
-            Why Choose AI Alexa?
+            Why Choose Teach anything?
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             See how we compare to commercial AI solutions. Built with privacy,
@@ -97,7 +97,7 @@ export default function ComparisonSection() {
                   Feature
                 </th>
                 <th className="text-left py-4 px-6 font-semibold text-foreground bg-gray-100">
-                  AI Alexa (open access)
+                  Teach anything (open access)
                 </th>
                 <th className="text-left py-4 px-6 font-semibold text-foreground">
                   Commercial AI

@@ -58,7 +58,7 @@ export function UserRegistrationNotification({
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa
+                Teach anything
               </p>
             </td>
           </tr>

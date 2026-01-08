@@ -26,9 +26,9 @@ export function AccountEnabled({ userName, loginUrl }: AccountEnabledProps) {
               <p style={text}>Hi {userName},</p>
 
               <p style={text}>
-                Great news! Your AIAlexa account has been re-enabled and you can
-                now log in again. All your chatbots and data are ready for you
-                to access.
+                Great news! Your Teach anything account has been re-enabled and
+                you can now log in again. All your chatbots and data are ready
+                for you to access.
               </p>
 
               <p style={text}>You can now:</p>
@@ -54,7 +54,7 @@ export function AccountEnabled({ userName, loginUrl }: AccountEnabledProps) {
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa Team
+                Teach anything Team
               </p>
             </td>
           </tr>

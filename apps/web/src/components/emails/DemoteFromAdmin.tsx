@@ -32,8 +32,8 @@ export function DemoteFromAdmin({
 
               <p style={text}>
                 I&apos;m writing to inform you that your administrator
-                privileges have been removed from your AIAlexa account. Your
-                account has been converted to a regular user account.
+                privileges have been removed from your Teach anything account.
+                Your account has been converted to a regular user account.
               </p>
 
               <p style={text}>What this means:</p>
@@ -65,7 +65,7 @@ export function DemoteFromAdmin({
               <p style={signature}>
                 Best regards,
                 <br />
-                AIAlexa Team
+                Teach anything Team
               </p>
             </td>
           </tr>
