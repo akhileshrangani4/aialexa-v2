@@ -1,6 +1,6 @@
 import { protectedProcedure } from "@/server/trpc";
 import { z } from "zod";
-import { eq, and, sql, desc, asc, ilike, or } from "drizzle-orm";
+import { eq, and, sql, desc, asc, ilike, or, isNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import {
   chatbots,
@@ -29,12 +29,14 @@ export const listProcedure = protectedProcedure
           ])
           .default("createdAt"),
         sortDir: z.enum(["asc", "desc"]).default("desc"),
+        currentChatbotId: z.string().uuid().optional(),
       })
       .optional(),
   )
   .query(async ({ ctx, input }) => {
     const limit = input?.limit ?? 10;
     const offset = input?.offset ?? 0;
+    const currentChatbotId = input?.currentChatbotId;
 
     // Build search condition (escape LIKE wildcards for literal matching)
     const searchCondition = input?.search
@@ -43,19 +45,6 @@ export const listProcedure = protectedProcedure
           ilike(userFiles.fileType, `%${escapeLikePattern(input.search)}%`),
         )
       : undefined;
-
-    // Combine with user filter
-    const whereCondition = searchCondition
-      ? and(eq(userFiles.userId, ctx.session.user.id), searchCondition)
-      : eq(userFiles.userId, ctx.session.user.id);
-
-    // Get total count with search filter
-    const [totalCountResult] = await ctx.db
-      .select({ count: sql<number>`count(*)` })
-      .from(userFiles)
-      .where(whereCondition);
-
-    const totalCount = Number(totalCountResult?.count || 0);
 
     // Build sort order
     const sortColumn =
@@ -71,7 +60,78 @@ export const listProcedure = protectedProcedure
     const orderBy =
       input?.sortDir === "asc" ? asc(sortColumn) : desc(sortColumn);
 
-    // Get paginated files
+    // Build WHERE conditions - base + search + optional exclusion
+    const baseConditions = [eq(userFiles.userId, ctx.session.user.id)];
+    if (searchCondition) baseConditions.push(searchCondition);
+
+    // Validate chatbot ownership before using it for exclusion
+    let validatedChatbotId: string | undefined;
+    if (currentChatbotId) {
+      const [chatbot] = await ctx.db
+        .select({ id: chatbots.id })
+        .from(chatbots)
+        .where(
+          and(
+            eq(chatbots.id, currentChatbotId),
+            eq(chatbots.userId, ctx.session.user.id),
+          ),
+        )
+        .limit(1);
+      if (chatbot) validatedChatbotId = chatbot.id;
+    }
+
+    // When excluding files from a chatbot, use LEFT JOIN anti-pattern
+    if (validatedChatbotId) {
+      const joinCondition = and(
+        eq(chatbotFileAssociations.fileId, userFiles.id),
+        eq(chatbotFileAssociations.chatbotId, validatedChatbotId),
+      );
+      const whereCondition = and(
+        ...baseConditions,
+        isNull(chatbotFileAssociations.id),
+      );
+
+      const [countResult] = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(userFiles)
+        .leftJoin(chatbotFileAssociations, joinCondition)
+        .where(whereCondition);
+      const totalCount = Number(countResult?.count || 0);
+
+      const files = await ctx.db
+        .select({
+          id: userFiles.id,
+          userId: userFiles.userId,
+          fileName: userFiles.fileName,
+          fileType: userFiles.fileType,
+          fileSize: userFiles.fileSize,
+          storagePath: userFiles.storagePath,
+          processingStatus: userFiles.processingStatus,
+          metadata: userFiles.metadata,
+          createdAt: userFiles.createdAt,
+        })
+        .from(userFiles)
+        .leftJoin(chatbotFileAssociations, joinCondition)
+        .where(whereCondition)
+        .orderBy(orderBy)
+        .limit(limit)
+        .offset(offset);
+
+      return {
+        files: files.map((f) => ({ ...f, metadata: f.metadata ?? undefined })),
+        totalCount,
+      };
+    }
+
+    // Standard query without exclusion
+    const whereCondition = and(...baseConditions);
+
+    const [countResult] = await ctx.db
+      .select({ count: sql<number>`count(*)` })
+      .from(userFiles)
+      .where(whereCondition);
+    const totalCount = Number(countResult?.count || 0);
+
     const files = await ctx.db
       .select()
       .from(userFiles)
@@ -80,14 +140,8 @@ export const listProcedure = protectedProcedure
       .limit(limit)
       .offset(offset);
 
-    // Convert null metadata to undefined for type consistency
-    const filesWithMetadata = files.map((file) => ({
-      ...file,
-      metadata: file.metadata ?? undefined,
-    }));
-
     return {
-      files: filesWithMetadata,
+      files: files.map((f) => ({ ...f, metadata: f.metadata ?? undefined })),
       totalCount,
     };
   });
