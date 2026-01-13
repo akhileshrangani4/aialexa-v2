@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -17,7 +17,7 @@ type FileData = RouterOutputs["files"]["list"]["files"][number];
 const ITEMS_PER_PAGE = 10;
 
 interface QuickAddFilesSectionProps {
-  associatedFileIds: string[];
+  chatbotId: string;
   onAddFile: (fileId: string) => void;
   onAddFiles?: (fileIds: string[]) => void;
   isAdding?: boolean;
@@ -25,7 +25,7 @@ interface QuickAddFilesSectionProps {
 }
 
 export function QuickAddFilesSection({
-  associatedFileIds,
+  chatbotId,
   onAddFile,
   onAddFiles,
   isAdding = false,
@@ -39,7 +39,7 @@ export function QuickAddFilesSection({
       ITEMS_PER_PAGE,
     );
 
-  // Fetch paginated files
+  // Fetch paginated files, excluding files already associated with this chatbot
   const {
     data: filesData,
     isLoading: filesLoading,
@@ -48,6 +48,7 @@ export function QuickAddFilesSection({
   } = trpc.files.list.useQuery(
     {
       limit: ITEMS_PER_PAGE,
+      currentChatbotId: chatbotId,
       ...queryParams,
     },
     {
@@ -56,14 +57,12 @@ export function QuickAddFilesSection({
     },
   );
 
-  const allFiles = filesData?.files || [];
+  const availableFiles = useMemo(
+    () => filesData?.files || [],
+    [filesData?.files],
+  );
   const totalCount = filesData?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
-
-  // Filter out already associated files
-  const availableFiles = allFiles.filter(
-    (file: FileData) => !associatedFileIds.includes(file.id),
-  );
 
   // Automatically remove files from selection that are no longer available
   // (i.e., they were successfully added)
@@ -132,13 +131,7 @@ export function QuickAddFilesSection({
 
   // Don't show if no files available at all (only when not searching)
   const isSearching = state.search || searchInput;
-  if (
-    (totalCount === 0 && !isSearching) ||
-    (allFiles.length > 0 &&
-      availableFiles.length === 0 &&
-      state.page === 0 &&
-      !isSearching)
-  ) {
+  if (totalCount === 0 && !isSearching) {
     return null;
   }
 

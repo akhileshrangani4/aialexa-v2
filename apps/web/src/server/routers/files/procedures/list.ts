@@ -1,6 +1,6 @@
 import { protectedProcedure } from "@/server/trpc";
 import { z } from "zod";
-import { eq, and, sql, desc, asc, ilike, or } from "drizzle-orm";
+import { eq, and, sql, desc, asc, ilike, or, notInArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import {
   chatbots,
@@ -29,6 +29,7 @@ export const listProcedure = protectedProcedure
           ])
           .default("createdAt"),
         sortDir: z.enum(["asc", "desc"]).default("desc"),
+        currentChatbotId: z.string().uuid().optional(),
       })
       .optional(),
   )
@@ -44,10 +45,29 @@ export const listProcedure = protectedProcedure
         )
       : undefined;
 
-    // Combine with user filter
-    const whereCondition = searchCondition
-      ? and(eq(userFiles.userId, ctx.session.user.id), searchCondition)
-      : eq(userFiles.userId, ctx.session.user.id);
+    // Build exclusion condition for files already associated with the current chatbot
+    let excludeCondition: ReturnType<typeof notInArray> | undefined;
+    if (input?.currentChatbotId) {
+      // Get file IDs already associated with this chatbot
+      const associatedFileIds = await ctx.db
+        .select({ fileId: chatbotFileAssociations.fileId })
+        .from(chatbotFileAssociations)
+        .where(eq(chatbotFileAssociations.chatbotId, input.currentChatbotId));
+
+      if (associatedFileIds.length > 0) {
+        excludeCondition = notInArray(
+          userFiles.id,
+          associatedFileIds.map((r) => r.fileId),
+        );
+      }
+    }
+
+    // Combine all conditions
+    const conditions = [eq(userFiles.userId, ctx.session.user.id)];
+    if (searchCondition) conditions.push(searchCondition);
+    if (excludeCondition) conditions.push(excludeCondition);
+
+    const whereCondition = and(...conditions);
 
     // Get total count with search filter
     const [totalCountResult] = await ctx.db

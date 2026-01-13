@@ -251,10 +251,6 @@ export function ChatbotFilesTab({
     }
   };
 
-  const associatedFileIds = useMemo(
-    () => associatedFiles.map((f: { id: string }) => f.id),
-    [associatedFiles],
-  );
   const allSelected =
     selectedFiles.size === associatedFiles.length && associatedFiles.length > 0;
 
@@ -279,7 +275,7 @@ export function ChatbotFilesTab({
         ) : associatedFiles.length === 0 && !state.search && !searchInput ? (
           // Truly empty state - no files and not searching
           <EmptyChatbotFilesState
-            associatedFileIds={associatedFileIds}
+            chatbotId={chatbotId}
             onAddFile={handleAddFile}
             onAddFiles={handleAddFiles}
             isAdding={associateFile.isPending}
@@ -353,7 +349,7 @@ export function ChatbotFilesTab({
 
             {/* Show QuickAddFilesSection when we have files or are searching */}
             <QuickAddFilesSection
-              associatedFileIds={associatedFileIds}
+              chatbotId={chatbotId}
               onAddFile={handleAddFile}
               onAddFiles={handleAddFiles}
               isAdding={associateFile.isPending}

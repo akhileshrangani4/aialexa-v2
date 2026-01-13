@@ -5,7 +5,7 @@ import Link from "next/link";
 import { QuickAddFilesSection } from "./QuickAddFilesSection";
 
 interface EmptyChatbotFilesStateProps {
-  associatedFileIds: string[];
+  chatbotId: string;
   onAddFile: (fileId: string) => void;
   onAddFiles?: (fileIds: string[]) => void;
   isAdding?: boolean;
@@ -13,7 +13,7 @@ interface EmptyChatbotFilesStateProps {
 }
 
 export function EmptyChatbotFilesState({
-  associatedFileIds,
+  chatbotId,
   onAddFile,
   onAddFiles,
   isAdding = false,
@@ -33,7 +33,7 @@ export function EmptyChatbotFilesState({
         and then associate them with this chatbot.
       </p>
       <QuickAddFilesSection
-        associatedFileIds={associatedFileIds}
+        chatbotId={chatbotId}
         onAddFile={onAddFile}
         onAddFiles={onAddFiles}
         isAdding={isAdding}
