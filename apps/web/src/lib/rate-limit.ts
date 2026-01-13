@@ -19,10 +19,10 @@ export const publicChatRateLimit = new Ratelimit({
 });
 
 // Rate limiter for file uploads
-// 5 uploads per minute per user
+// 20 uploads per minute per user
 export const fileUploadRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(5, "1 m"),
+  limiter: Ratelimit.slidingWindow(20, "1 m"),
   analytics: true,
   prefix: "@ratelimit/file-upload",
 });
