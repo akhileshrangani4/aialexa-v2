@@ -36,6 +36,7 @@ export function ChatbotFilesTab({
   onRefetch,
 }: ChatbotFilesTabProps) {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const utils = trpc.useUtils();
 
   const { state, searchInput, actions, queryParams } =
     useServerTable<FileSortBy>(
@@ -91,7 +92,11 @@ export function ChatbotFilesTab({
   // Associate/disassociate file mutations
   const associateFile = trpc.files.associateWithChatbot.useMutation({
     onSuccess: async () => {
-      await refetchAssociatedFiles();
+      // Refetch associated files and invalidate library list so added file disappears from there
+      await Promise.all([
+        refetchAssociatedFiles(),
+        utils.files.list.invalidate(),
+      ]);
       onRefetch();
       toast.success("File added to chatbot");
     },
@@ -110,11 +115,14 @@ export function ChatbotFilesTab({
 
   const disassociateFile = trpc.files.disassociateFromChatbot.useMutation({
     onSuccess: async () => {
-      await refetchAssociatedFiles();
+      // Refetch associated files and invalidate library list so removed file appears there
+      const [result] = await Promise.all([
+        refetchAssociatedFiles(),
+        utils.files.list.invalidate(),
+      ]);
       onRefetch();
 
       // Adjust page if current page no longer exists
-      const result = await refetchAssociatedFiles();
       const newTotalCount = result.data?.totalCount || 0;
       const newTotalPages = Math.ceil(newTotalCount / ITEMS_PER_PAGE);
       if (state.page >= newTotalPages && newTotalPages > 0) {
