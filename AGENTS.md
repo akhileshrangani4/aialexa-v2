@@ -212,6 +212,7 @@ if (!success) {
 ## 12. Git Workflow
 
 **Commit format** (conventional commits):
+
 ```
 <type>(scope): <description>
 ```
@@ -219,6 +220,7 @@ if (!success) {
 Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
 Examples:
+
 - `feat(chat): add message streaming support`
 - `fix(auth): prevent duplicate session creation`
 - `refactor(files): extract chunking logic to separate function`
@@ -240,11 +242,13 @@ npm run lint           # Must pass
 ## 14. Agent Behavior
 
 **Do not** (unless explicitly asked):
+
 - Add/upgrade/remove dependencies
 - Modify eslint, tsconfig, or tool configs
 - Change database schema without migration plan
 
 **Do**:
+
 - Keep functions short and single-purpose (<20 statements ideal)
 - Keep files focused (<300 lines ideal)
 - Run lint and type-check before considering work complete
@@ -253,14 +257,14 @@ npm run lint           # Must pass
 
 ## Key Files Reference
 
-| File | Purpose |
-|------|---------|
-| `apps/web/src/server/trpc.ts` | tRPC initialization, procedures, auth middleware |
-| `apps/web/src/server/routers/_app.ts` | Root router combining all sub-routers |
-| `apps/web/src/lib/env.ts` | Environment validation (Zod schema) |
-| `apps/web/src/lib/auth.ts` | Better Auth configuration |
-| `apps/web/src/lib/rate-limit.ts` | Upstash rate limiters |
-| `apps/web/src/lib/qstash.ts` | QStash job publishing & verification |
-| `packages/db/src/schema.ts` | Complete database schema |
-| `packages/ai/src/openrouter-client.ts` | LLM client with streaming |
-| `packages/ai/src/rag-service.ts` | Text extraction, chunking, embeddings |
+| File                                   | Purpose                                          |
+| -------------------------------------- | ------------------------------------------------ |
+| `apps/web/src/server/trpc.ts`          | tRPC initialization, procedures, auth middleware |
+| `apps/web/src/server/routers/_app.ts`  | Root router combining all sub-routers            |
+| `apps/web/src/lib/env.ts`              | Environment validation (Zod schema)              |
+| `apps/web/src/lib/auth.ts`             | Better Auth configuration                        |
+| `apps/web/src/lib/rate-limit.ts`       | Upstash rate limiters                            |
+| `apps/web/src/lib/qstash.ts`           | QStash job publishing & verification             |
+| `packages/db/src/schema.ts`            | Complete database schema                         |
+| `packages/ai/src/openrouter-client.ts` | LLM client with streaming                        |
+| `packages/ai/src/rag-service.ts`       | Text extraction, chunking, embeddings            |
