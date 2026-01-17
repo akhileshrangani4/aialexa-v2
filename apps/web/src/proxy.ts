@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 import { publicChatRateLimit, checkRateLimit } from "./lib/rate-limit";
 import { logWarn } from "./lib/logger";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get("host") || "";
 
@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
 
   // Note: Authentication checks are handled by tRPC procedures
   // Protected routes will check session in the API layer
-  // This keeps middleware lightweight and Edge Runtime compatible
+  // This keeps proxy lightweight and Node.js runtime compatible
 
   return NextResponse.next();
 }
