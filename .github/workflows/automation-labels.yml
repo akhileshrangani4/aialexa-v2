@@ -1,0 +1,146 @@
+name: Automation / Labels
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+  issues:
+    types: [opened]
+
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/labels.yml"
+      - ".github/workflows/automation-labels.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  meta:
+    name: "Meta"
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      areas: ${{ steps.files_changed.outputs.changed_keys || '[]' }}
+      change_type: ${{ steps.change_type.outputs.change_type }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Determine Change Type
+        id: change_type
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: "${{ github.event.pull_request.title }}"
+        run: |
+          # Extract conventional commit type from PR title
+          CHANGE_TYPE=""
+          if [[ "${PR_TITLE}" =~ ^(feat|fix|chore|docs|refactor|test|ci|perf|build|style|revert|deps)(\(.+\))?!?:.*$ ]]; then
+            CHANGE_TYPE="${BASH_REMATCH[1]}"
+          fi
+          echo "change_type=${CHANGE_TYPE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Determine Areas
+        id: files_changed
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        uses: tj-actions/changed-files@v47
+        with:
+          json: true
+          escape_json: false
+          files_yaml: |
+            web:
+              - "apps/web/**"
+            db:
+              - "packages/db/**"
+            ai:
+              - "packages/ai/**"
+            config:
+              - "turbo.json"
+              - ".prettierrc"
+              - "*.config.{js,cjs,mjs,ts,cts,mts,json}"
+            documentation:
+              - "**/*.md"
+              - "**/README.*"
+            github_actions:
+              - ".github/workflows/**"
+              - ".github/labels.yml"
+
+  repo-labels:
+    name: "Repository Labels"
+    runs-on: ubuntu-latest
+    needs: [meta]
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update Labels
+        uses: crazy-max/ghaction-github-labeler@v5.3.0
+        if: contains(fromJson(needs.meta.outputs.areas || '[]'), 'github_actions')
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-delete: true
+          yaml-file: .github/labels.yml
+
+  do-not-merge:
+    name: "Do Not Merge"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    steps:
+      - name: Check
+        env:
+          DO_NOT_MERGE: "${{ contains(github.event.pull_request.labels.*.name, 'status: do not merge') }}"
+        run: |
+          if [[ "${DO_NOT_MERGE}" == "true" ]]; then
+            echo "##[error]Cannot merge when 'status: do not merge' label is present."
+            exit 1
+          fi
+
+  sync-labels:
+    name: "Sync Labels"
+    needs: [meta]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'issues'
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine and Apply Labels
+        env:
+          EXISTING_LABELS: "${{ toJson(github.event.issue.labels || github.event.pull_request.labels || '[]') }}"
+          DATA_AREAS: "${{ needs.meta.outputs.areas }}"
+          DATA_CHANGE: "${{ needs.meta.outputs.change_type }}"
+          PR_OR_ISSUE_NUMBER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.event.issue.number }}
+          GH_SUBCOMMAND: ${{ github.event_name == 'pull_request' && 'pr' || 'issue' }}
+        run: |
+          set +e
+
+          # Area labels
+          for AREA in $(echo "${DATA_AREAS}" | jq -r '.[]' 2>/dev/null); do
+            LABEL_NAME="area: ${AREA//_/ }"
+            echo "Adding label: ${LABEL_NAME}"
+            gh $GH_SUBCOMMAND edit "$PR_OR_ISSUE_NUMBER" --add-label "$LABEL_NAME" 2>/dev/null || true
+          done
+
+          # Change type label
+          if [[ -n "${DATA_CHANGE}" ]]; then
+            LABEL_NAME="change: ${DATA_CHANGE}"
+            echo "Adding label: ${LABEL_NAME}"
+            gh $GH_SUBCOMMAND edit "$PR_OR_ISSUE_NUMBER" --add-label "$LABEL_NAME" 2>/dev/null || true
+          fi

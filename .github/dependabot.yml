@@ -1,0 +1,116 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Let package releases bake for a bit before updating,
+    # in case there is a bad release
+    cooldown:
+      default-days: 5
+      semver-major-days: 7
+      semver-minor-days: 4
+      semver-patch-days: 2
+      include:
+        - "*"
+      exclude:
+        - "@teachanything/*"
+        - "ai"
+        - "@ai-sdk/*"
+    groups:
+      trpc:
+        patterns:
+          - "@trpc/*"
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+      drizzle:
+        patterns:
+          - "drizzle-kit"
+          - "drizzle-orm"
+      ai-sdk:
+        patterns:
+          - "ai"
+          - "@ai-sdk/*"
+      langchain:
+        patterns:
+          - "langchain"
+          - "@langchain/*"
+      next:
+        patterns:
+          - "next"
+          - "@next/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      tanstack:
+        patterns:
+          - "@tanstack/*"
+      upstash:
+        patterns:
+          - "@upstash/*"
+      supabase:
+        patterns:
+          - "@supabase/*"
+      eslint:
+        patterns:
+          - "@eslint/*"
+          - "eslint"
+          - "typescript-eslint"
+          - "eslint-plugin-*"
+          - "eslint-config-*"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "tailwind-*"
+          - "@tailwindcss/*"
+          - "postcss"
+          - "autoprefixer"
+      small-safe-packages:
+        # These are generally safe to update unconditionally
+        patterns:
+          - "lucide-react"
+          - "prettier"
+          - "clsx"
+          - "class-variance-authority"
+          - "tailwind-merge"
+          - "zod"
+          - "superjson"
+          - "nanoid"
+          - "pino"
+          - "pino-pretty"
+          - "sonner"
+          - "framer-motion"
+      markdown:
+        patterns:
+          - "marked"
+          - "react-markdown"
+          - "remark-*"
+      turbo:
+        patterns:
+          - "turbo"
+          - "@turbo/*"

@@ -1,0 +1,119 @@
+# GitHub labels configuration (see .github/workflows/automation-labels.yml)
+
+# Area labels - which part of the codebase
+- name: "area: web"
+  color: "26b5ce"
+  description: "Changes to the web app (apps/web)"
+
+- name: "area: db"
+  color: "26b5ce"
+  description: "Changes to the database package (packages/db)"
+
+- name: "area: ai"
+  color: "26b5ce"
+  description: "Changes to the AI package (packages/ai)"
+
+- name: "area: documentation"
+  color: "26b5ce"
+  description: "Improvements or additions to documentation"
+
+- name: "area: github actions"
+  color: "26b5ce"
+  description: "Changes to GitHub Actions workflows"
+
+- name: "area: config"
+  color: "26b5ce"
+  description: "Changes to repository configuration files"
+
+# Change labels - conventional commit type
+- name: "change: feat"
+  color: "32e52f"
+  description: "New feature"
+
+- name: "change: fix"
+  color: "158c01"
+  description: "Bug fix"
+
+- name: "change: chore"
+  color: "ededed"
+  description: "Maintenance and chores"
+
+- name: "change: docs"
+  color: "0075ca"
+  description: "Documentation changes"
+
+- name: "change: refactor"
+  color: "fbca04"
+  description: "Code refactoring"
+
+- name: "change: test"
+  color: "bfd4f2"
+  description: "Test changes"
+
+- name: "change: ci"
+  color: "000000"
+  description: "CI/CD changes"
+
+- name: "change: perf"
+  color: "f9d0c4"
+  description: "Performance improvements"
+
+- name: "change: deps"
+  color: "0366d6"
+  description: "Dependency updates"
+
+# Status labels
+- name: "status: do not merge"
+  color: "e11d21"
+  description: "PR should not be merged"
+
+- name: "status: blocked"
+  color: "e11d21"
+  description: "This issue or pull request is blocked"
+
+- name: "status: in progress"
+  color: "cccccc"
+  description: "Work is currently being done"
+
+- name: "status: triage"
+  color: "fef2c0"
+  description: "Needs to be triaged by a maintainer"
+
+- name: "status: help wanted"
+  color: "008672"
+  description: "Needs assistance and is ready for work"
+
+# Type labels
+- name: "type: bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: "type: enhancement"
+  color: "a2eeef"
+  description: "New feature or request"
+
+- name: "type: question"
+  color: "d876e3"
+  description: "Further information is requested"
+
+# Priority labels
+- name: "priority: critical"
+  color: "b60205"
+  description: "Critical priority"
+
+- name: "priority: high"
+  color: "d93f0b"
+  description: "High priority"
+
+- name: "priority: medium"
+  color: "eab308"
+  description: "Medium priority"
+
+- name: "priority: low"
+  color: "0e8a16"
+  description: "Low priority"
+
+# Community labels
+- name: "good first issue"
+  color: "7057ff"
+  description: "Good for newcomers"
