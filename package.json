@@ -14,6 +14,7 @@
     "db:studio": "turbo run db:studio"
   },
   "devDependencies": {
+    "baseline-browser-mapping": "^2.9.15",
     "prettier": "^3.6.2",
     "turbo": "^2.7.5",
     "typescript": "5.9.2"
