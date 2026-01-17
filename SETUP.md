@@ -1,8 +1,8 @@
-# AIAlexa - Complete Setup Guide
+# Teach Anything - Complete Setup Guide
 
 ## Overview
 
-Production-ready AI chatbot platform built with Next.js 15, tRPC, Better Auth, and OpenRouter. This guide covers complete setup from installation to deployment.
+Production-ready AI chatbot platform built with Next.js 16, tRPC, Better Auth, and OpenRouter. This guide covers complete setup from installation to deployment.
 
 ---
 
@@ -163,7 +163,7 @@ Visit: http://localhost:3000
 
 ### Tech Stack
 
-**Core**: Next.js 15 · TypeScript · Turborepo · tRPC  
+**Core**: Next.js 16 · TypeScript · Turborepo · tRPC  
 **Database**: PostgreSQL (Supabase) · Drizzle ORM · pgvector  
 **Auth**: Better Auth with approval workflow  
 **AI**: OpenRouter (4 models) · Vercel AI SDK · LangChain  
@@ -173,7 +173,7 @@ Visit: http://localhost:3000
 ### Project Structure
 
 ```
-aialexa/
+teachanything/
 ├── apps/web/              # Next.js application
 │   ├── src/app/          # Pages & API routes
 │   ├── src/components/   # UI components
@@ -369,7 +369,7 @@ If no domains configured → all emails allowed.
 
 ```bash
 git add .
-git commit -m "Deploy AIAlexa"
+git commit -m "Deploy Teach Anything"
 git push origin main
 ```
 
