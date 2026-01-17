@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.10",
-    "ai": "^4.0.38",
-    "langchain": "^1.0.0",
+    "ai": "^5.0.52",
+    "langchain": "^1.2.10",
     "@langchain/community": "^1.0.0",
-    "@langchain/core": "^0.3.0",
+    "@langchain/core": "^0.3.80",
     "@langchain/textsplitters": "^1.0.0",
     "mammoth": "^1.8.0",
     "nanoid": "^5.0.9",
