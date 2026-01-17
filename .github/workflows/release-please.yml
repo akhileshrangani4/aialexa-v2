@@ -36,7 +36,7 @@ jobs:
       - name: Summary
         if: steps.release.outputs['apps/web--release_created'] == 'true'
         run: |
-          echo "## Release Created! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "## Release Created!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ steps.release.outputs['apps/web--version'] }}" >> $GITHUB_STEP_SUMMARY
           echo "**Tag:** ${{ steps.release.outputs['apps/web--tag_name'] }}" >> $GITHUB_STEP_SUMMARY
