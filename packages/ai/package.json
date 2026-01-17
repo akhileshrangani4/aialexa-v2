@@ -11,7 +11,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^1.0.10",
     "ai": "^4.0.38",
-    "langchain": "^1.0.0",
+    "langchain": "^1.2.7",
     "@langchain/community": "^1.0.0",
     "@langchain/core": "^0.3.0",
     "@langchain/textsplitters": "^1.0.0",
