@@ -1,0 +1,78 @@
+# Changelog
+
+## 1.0.0 (2026-01-17)
+
+
+### Features
+
+* add a lot of things ([#2](https://github.com/akhileshrangani4/teachanything/issues/2)) ([6b739a9](https://github.com/akhileshrangani4/teachanything/commit/6b739a9ffe0a3026d52c0d9226b5e7bc2a1e13a6))
+* add a lot of things ([#7](https://github.com/akhileshrangani4/teachanything/issues/7)) ([96275b1](https://github.com/akhileshrangani4/teachanything/commit/96275b135ad0570ecb000fb480f5ebcb145ee32d))
+* add diagrams ([#4](https://github.com/akhileshrangani4/teachanything/issues/4)) ([a22064d](https://github.com/akhileshrangani4/teachanything/commit/a22064dda14b6773a99bd60d60a7b6b10bb6ce12))
+* add file retry functionality and enhance processing progress tracking ([#13](https://github.com/akhileshrangani4/teachanything/issues/13)) ([55b34a3](https://github.com/akhileshrangani4/teachanything/commit/55b34a370b70145d9a2ad8cf3cf343f8b06bcbfc))
+* add MIT License and update README and SETUP documentation ([#3](https://github.com/akhileshrangani4/teachanything/issues/3)) ([5883baa](https://github.com/akhileshrangani4/teachanything/commit/5883baa5e24a16260aa314a4a6440133bb97cecb))
+* Add server-side search and sorting to all tables ([#21](https://github.com/akhileshrangani4/teachanything/issues/21)) ([9a942f5](https://github.com/akhileshrangani4/teachanything/commit/9a942f53fb6259e36c7d05abedfb91da82707930))
+* add showSources feature to chatbot and chat components ([98512af](https://github.com/akhileshrangani4/teachanything/commit/98512af89c4d1fa1aaf0e90e8183f50ceb8ee7c6))
+* Add stop streaming button with cancelled message indicator ([#20](https://github.com/akhileshrangani4/teachanything/issues/20)) ([181d9f2](https://github.com/akhileshrangani4/teachanything/commit/181d9f2f993217aebdca8142f269852cdf2cbd84))
+* add text sanitization for file content extraction ([#12](https://github.com/akhileshrangani4/teachanything/issues/12)) ([f4e6c8f](https://github.com/akhileshrangani4/teachanything/commit/f4e6c8fe559206f878e4b6969493c2b87ad3139f))
+* **create-turbo:** apply official-starter transform ([d5a646e](https://github.com/akhileshrangani4/teachanything/commit/d5a646ec8b8eecb75f0d345f5058cb6a1f62ee19))
+* **create-turbo:** apply package-manager transform ([69744ef](https://github.com/akhileshrangani4/teachanything/commit/69744ef5f12309a712ad8a2a8de832cff3040085))
+* **create-turbo:** create basic ([cd32fbc](https://github.com/akhileshrangani4/teachanything/commit/cd32fbc8c27fb0e561b642bd43af3c05c47d2a3d))
+* Direct client-to-Supabase uploads & authenticated file downloads ([#14](https://github.com/akhileshrangani4/teachanything/issues/14)) ([6dd305d](https://github.com/akhileshrangani4/teachanything/commit/6dd305d65413229447ddb03b63789f46b34f774d))
+* enhance admin user management features ([98071ba](https://github.com/akhileshrangani4/teachanything/commit/98071ba0603a2b652ba4c1202d23f9d3222954bf))
+* enhance domain validation in AllowedDomainsTab ([#15](https://github.com/akhileshrangani4/teachanything/issues/15)) ([42e318d](https://github.com/akhileshrangani4/teachanything/commit/42e318de5b239dd4daafc6119f5dc7cf633cd76a))
+* enhance file upload and management features ([2440785](https://github.com/akhileshrangani4/teachanything/commit/24407854c6b2ace5f4358a3d660d4862c7664f7e))
+* enhance file upload and rate limiting features ([#8](https://github.com/akhileshrangani4/teachanything/issues/8)) ([0475c0e](https://github.com/akhileshrangani4/teachanything/commit/0475c0eef9bdfd274f5fb05ef5ad500ddcf94d2e))
+* enhance Support Us section with donations, publicity, and UX improvements ([#18](https://github.com/akhileshrangani4/teachanything/issues/18)) ([35f98b1](https://github.com/akhileshrangani4/teachanything/commit/35f98b1702fea24ffb52615151f80297d7f4dcf7))
+* implement admin email retrieval from database ([364ebc9](https://github.com/akhileshrangani4/teachanything/commit/364ebc9f5c55e74408a47dad5afc7f361bd7700b))
+* improve file association and error handling in chatbot file management ([6248d92](https://github.com/akhileshrangani4/teachanything/commit/6248d924d2d767aaddc3b7716096c11ee6f2c61b))
+* integrate tldts for enhanced domain validation and chat export functionality ([#16](https://github.com/akhileshrangani4/teachanything/issues/16)) ([3d49257](https://github.com/akhileshrangani4/teachanything/commit/3d4925762e214d41af2c4c902f336220a7324813))
+* migration to teach anything name ([#22](https://github.com/akhileshrangani4/teachanything/issues/22)) ([abcec48](https://github.com/akhileshrangani4/teachanything/commit/abcec48fa88f00cf3a2d1a522bcb35074af44719))
+* Password reset flow, allowed domains pagination & embed UX improvements ([#17](https://github.com/akhileshrangani4/teachanything/issues/17)) ([e760b35](https://github.com/akhileshrangani4/teachanything/commit/e760b353270f77c28950d51b9b671d2113312b6e))
+* update architecture diagram ([#5](https://github.com/akhileshrangani4/teachanything/issues/5)) ([9c8ba02](https://github.com/akhileshrangani4/teachanything/commit/9c8ba025e732c3344aa16738183889c5c8a2c475))
+* update landing page ([#6](https://github.com/akhileshrangani4/teachanything/issues/6)) ([3170499](https://github.com/akhileshrangani4/teachanything/commit/3170499c8977ac32044bf0b43b9bc3aa9ebab8c5))
+* update landing page and enhance components ([#10](https://github.com/akhileshrangani4/teachanything/issues/10)) ([b20d63a](https://github.com/akhileshrangani4/teachanything/commit/b20d63abfb4a33abce0547824d80206f0d3cd0a5))
+
+
+### Bug Fixes
+
+* **ci:** add bootstrap-sha to ignore old release PR ([#44](https://github.com/akhileshrangani4/teachanything/issues/44)) ([48ba829](https://github.com/akhileshrangani4/teachanything/commit/48ba829052e1527a41a08b745d347741ee2aadbd))
+* **ci:** change release PR title pattern to avoid matching old PR ([#45](https://github.com/akhileshrangani4/teachanything/issues/45)) ([b4834eb](https://github.com/akhileshrangani4/teachanything/commit/b4834eb48ce135c62173df9ba75a4ee5724548ee))
+* **ci:** correct last-release-sha to PR [#42](https://github.com/akhileshrangani4/teachanything/issues/42) merge commit ([#46](https://github.com/akhileshrangani4/teachanything/issues/46)) ([d75a7c4](https://github.com/akhileshrangani4/teachanything/commit/d75a7c4658bb9dc0b0908d8e9e00fc1d986a3a29))
+* **ci:** fix release-please config to properly track apps/web ([#43](https://github.com/akhileshrangani4/teachanything/issues/43)) ([83a5492](https://github.com/akhileshrangani4/teachanything/commit/83a549268431040904cc3bb209bcf26bcfcd43db))
+* **ci:** reset release-please config to match tambo's working setup ([#52](https://github.com/akhileshrangani4/teachanything/issues/52)) ([160981b](https://github.com/akhileshrangani4/teachanything/commit/160981b31cf508fd79eac0236878afde1336c5ff))
+* **ci:** switch release-please to root-level tracking ([#54](https://github.com/akhileshrangani4/teachanything/issues/54)) ([ac0cb54](https://github.com/akhileshrangani4/teachanything/commit/ac0cb541605cfb77a53230f1049b72bda3bff548))
+* file number on featured chatbots ([#11](https://github.com/akhileshrangani4/teachanything/issues/11)) ([7dd472a](https://github.com/akhileshrangani4/teachanything/commit/7dd472a76dc90e22e5c1f403cd8326b7120786d5))
+* **files:** exclude already-associated files from library when adding to chatbot ([#27](https://github.com/akhileshrangani4/teachanything/issues/27)) ([eabe22f](https://github.com/akhileshrangani4/teachanything/commit/eabe22f271fbad34f9c140b5b0549536688a1923))
+* **files:** increase file upload rate limit from 5 to 20 per minute ([#26](https://github.com/akhileshrangani4/teachanything/issues/26)) ([de36398](https://github.com/akhileshrangani4/teachanything/commit/de363984d327ec6c3eb5387ddfad159ae1f93954))
+* next vulnerability ([#9](https://github.com/akhileshrangani4/teachanything/issues/9)) ([6b2d868](https://github.com/akhileshrangani4/teachanything/commit/6b2d8689dddc5ca554f66bf7b2ba29c06262eca5))
+* update environment variable references in SupportUsSection ([#23](https://github.com/akhileshrangani4/teachanything/issues/23)) ([ce7b9bb](https://github.com/akhileshrangani4/teachanything/commit/ce7b9bb969cc84d7e19fff35b1a7bd5d0435ef2f))
+* update LinkedIn URL handling in DashboardSidebar and InfoSection components ([#19](https://github.com/akhileshrangani4/teachanything/issues/19)) ([f4a8109](https://github.com/akhileshrangani4/teachanything/commit/f4a81098567454a03f93a2950d3e9764ea81d837))
+
+
+### Miscellaneous Chores
+
+* add GitHub Actions workflow for automated build process ([#1](https://github.com/akhileshrangani4/teachanything/issues/1)) ([2a94f65](https://github.com/akhileshrangani4/teachanything/commit/2a94f65b9b458853b0b619164c038206f5b3b9f6))
+* add OpenAI API key requirement to documentation and env example ([857c0d9](https://github.com/akhileshrangani4/teachanything/commit/857c0d9c8dc9a3b3df79e9e224084505dfbd1c80))
+* **ci:** add GitHub automation for dependabot, labels, and CI improvements ([#29](https://github.com/akhileshrangani4/teachanything/issues/29)) ([d2237da](https://github.com/akhileshrangani4/teachanything/commit/d2237da638a01b70be27ca67d0e62f4cac40ff4d))
+* **ci:** add release-please for automated releases and changelog ([#41](https://github.com/akhileshrangani4/teachanything/issues/41)) ([96ea5a5](https://github.com/akhileshrangani4/teachanything/commit/96ea5a5483a981aafdf18a1dfeebb8ee270559df))
+* **deps:** bump @supabase/supabase-js in the supabase group ([#40](https://github.com/akhileshrangani4/teachanything/issues/40)) ([49f4663](https://github.com/akhileshrangani4/teachanything/commit/49f466351b416f0369aa0744e2f748431af9e9d3))
+* **deps:** bump @tanstack/react-query in the tanstack group ([#38](https://github.com/akhileshrangani4/teachanything/issues/38)) ([1808c82](https://github.com/akhileshrangani4/teachanything/commit/1808c824859213e2d56a7b6139cdc5f17b82c440))
+* **deps:** bump langchain from 1.0.1 to 1.2.7 ([#51](https://github.com/akhileshrangani4/teachanything/issues/51)) ([4de0ce2](https://github.com/akhileshrangani4/teachanything/commit/4de0ce23a82a589dc098735544223d9bb02afc4b))
+* **deps:** bump next from 15.5.7 to 15.5.9 ([#49](https://github.com/akhileshrangani4/teachanything/issues/49)) ([bda3693](https://github.com/akhileshrangani4/teachanything/commit/bda3693e21c6cefe134a6576ef9b8639ff893001))
+* **deps:** bump the actions group with 2 updates ([#30](https://github.com/akhileshrangani4/teachanything/issues/30)) ([5c83caf](https://github.com/akhileshrangani4/teachanything/commit/5c83caf62a9d9539af7f46b4061327225608eed6))
+* **deps:** bump the react group with 4 updates ([#37](https://github.com/akhileshrangani4/teachanything/issues/37)) ([b334bd5](https://github.com/akhileshrangani4/teachanything/commit/b334bd5ed2f9c1c95c2ae806bfaa43a337548993))
+* **deps:** bump the trpc group with 4 updates ([#31](https://github.com/akhileshrangani4/teachanything/issues/31)) ([dae2314](https://github.com/akhileshrangani4/teachanything/commit/dae23142403f60de0e321bae1f8a30aa9b54901c))
+* **deps:** bump the upstash group with 2 updates ([#39](https://github.com/akhileshrangani4/teachanything/issues/39)) ([e975589](https://github.com/akhileshrangani4/teachanything/commit/e975589f258bc6e38c99bfff5d77d5da657d36a1))
+* release main ([#42](https://github.com/akhileshrangani4/teachanything/issues/42)) ([5759401](https://github.com/akhileshrangani4/teachanything/commit/57594014a01c567d1a77d315d92b79c65a0e7565))
+* update .env.example and env.ts for development configuration ([729f76b](https://github.com/akhileshrangani4/teachanything/commit/729f76bebedd5cbfa3f4d112cbce4b36b2b9783f))
+* update database setup instructions and enhance package configuration ([30edcb3](https://github.com/akhileshrangani4/teachanything/commit/30edcb35df48b92eec570c1ff5e8ecb39a0137d7))
+
+
+### Documentation
+
+* add AI agent guidance and Claude Code configuration ([#25](https://github.com/akhileshrangani4/teachanything/issues/25)) ([40787b1](https://github.com/akhileshrangani4/teachanything/commit/40787b18c018c7cf216b4b8d5397fb841f45bdbd))
+
+
+### Code Refactoring
+
+* Migrate to Next.js 15 with tRPC and Better Auth, remove old docs, update project name to AIAlexa ([c825cbc](https://github.com/akhileshrangani4/teachanything/commit/c825cbc789933342acb162854c7e8ce7ccb8d381))
