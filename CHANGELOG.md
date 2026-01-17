@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/akhileshrangani4/teachanything/compare/v1.0.2...v1.0.3) (2026-01-17)
+
+
+### Documentation
+
+* update documentation for Next.js 16 and simplify README ([#60](https://github.com/akhileshrangani4/teachanything/issues/60)) ([05a773b](https://github.com/akhileshrangani4/teachanything/commit/05a773bd9e01bbbe4518a67379512093dababd42))
+
 ## [1.0.2](https://github.com/akhileshrangani4/teachanything/compare/v1.0.1...v1.0.2) (2026-01-17)
 
 
