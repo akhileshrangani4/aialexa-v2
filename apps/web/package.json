@@ -24,7 +24,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@tanstack/react-query": "^5.62.13",
+    "@tanstack/react-query": "^5.90.17",
     "@trpc/client": "^11.1.5",
     "@trpc/next": "^11.1.5",
     "@trpc/react-query": "^11.1.5",
