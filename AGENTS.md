@@ -9,7 +9,7 @@ This is a Turborepo monorepo for the Teach Anything AI chatbot platform.
 ```
 teachanything/
 ├── apps/
-│   └── web/                      # Next.js 15 application
+│   └── web/                      # Next.js 16 application
 │       └── src/
 │           ├── app/              # App Router pages & API routes
 │           ├── server/
@@ -31,7 +31,7 @@ teachanything/
 
 ## 2. Tech Stack
 
-- **Framework**: Next.js 15 (App Router), React 19, TypeScript 5.9
+- **Framework**: Next.js 16 (App Router), React 19, TypeScript 5.9
 - **API**: tRPC 11 (end-to-end type-safe)
 - **Database**: PostgreSQL + Drizzle ORM + pgvector
 - **Auth**: Better Auth (email/password with admin approval workflow)
