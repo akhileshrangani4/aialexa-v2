@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.1](https://github.com/akhileshrangani4/teachanything/compare/v1.0.0...v1.0.1) (2026-01-17)
+
+
+### Miscellaneous Chores
+
+* **deps:** bump @langchain/core from 0.3.78 to 0.3.80 ([#47](https://github.com/akhileshrangani4/teachanything/issues/47)) ([2f802d6](https://github.com/akhileshrangani4/teachanything/commit/2f802d6b9c60d5274de1da7b56d35306bd901625))
+* **deps:** bump the drizzle group with 2 updates ([#33](https://github.com/akhileshrangani4/teachanything/issues/33)) ([ebcafaf](https://github.com/akhileshrangani4/teachanything/commit/ebcafaf5116bef199f08e1b4f0cf32457a623017))
+* **deps:** bump the langchain group across 1 directory with 3 updates ([#57](https://github.com/akhileshrangani4/teachanything/issues/57)) ([81ce79b](https://github.com/akhileshrangani4/teachanything/commit/81ce79b61b3aba0b8ea125840d4e745f73af43ce))
+* **deps:** bump the radix-ui group with 3 updates ([#32](https://github.com/akhileshrangani4/teachanything/issues/32)) ([676583c](https://github.com/akhileshrangani4/teachanything/commit/676583cd749b4ad1540f04cc3a16e64d535b2c82))
+
 ## 1.0.0 (2026-01-17)
 
 
