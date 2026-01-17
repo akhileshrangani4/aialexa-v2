@@ -3,8 +3,8 @@
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "separate-pull-requests": false,
-  "pull-request-title-pattern": "chore: release v${version}",
-  "bootstrap-sha": "83a549268431040904cc3bb209bcf26bcfcd43db",
+  "pull-request-title-pattern": "release: v${version}",
+  "last-release-sha": "83a549268431040904cc3bb209bcf26bcfcd43db",
   "packages": {
     "apps/web": {
       "release-type": "node",
