@@ -1,15 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/refs/heads/main/schemas/config.json",
-  "include-component-in-tag": false,
-  "include-v-in-tag": true,
-  "separate-pull-requests": false,
-  "pull-request-title-pattern": "release: v${version}",
-  "last-release-sha": "57594014a01c567d1a77d315d92b79c65a0e7565",
+  "separate-pull-requests": true,
+  "bootstrap-sha": "dae23142403f60de0e321bae1f8a30aa9b54901c",
   "packages": {
-    "apps/web": {
-      "release-type": "node",
-      "changelog-path": "apps/web/CHANGELOG.md"
-    }
+    "apps/web": {}
   },
   "changelog-sections": [
     {
