@@ -1,0 +1,41 @@
+name: Release Please
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release-please-${{ github.ref }}
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs['apps/web--release_created'] }}
+      tag_name: ${{ steps.release.outputs['apps/web--tag_name'] }}
+      version: ${{ steps.release.outputs['apps/web--version'] }}
+    steps:
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          # Use PAT for PRs from your account, or GITHUB_TOKEN for bot
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          manifest-file: .release-please-manifest.json
+          config-file: release-please-config.json
+
+      - name: Summary
+        if: steps.release.outputs['apps/web--release_created'] == 'true'
+        run: |
+          echo "## Release Created! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.release.outputs['apps/web--version'] }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ steps.release.outputs['apps/web--tag_name'] }}" >> $GITHUB_STEP_SUMMARY
