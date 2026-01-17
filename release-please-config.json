@@ -8,7 +8,8 @@
   "packages": {
     "apps/web": {
       "component": "web",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "node"
     }
   },
   "changelog-sections": [
