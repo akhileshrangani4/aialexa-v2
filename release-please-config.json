@@ -4,7 +4,7 @@
   "include-v-in-tag": true,
   "separate-pull-requests": false,
   "pull-request-title-pattern": "release: v${version}",
-  "last-release-sha": "83a549268431040904cc3bb209bcf26bcfcd43db",
+  "last-release-sha": "57594014a01c567d1a77d315d92b79c65a0e7565",
   "packages": {
     "apps/web": {
       "release-type": "node",
