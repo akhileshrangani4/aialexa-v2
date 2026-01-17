@@ -51,24 +51,20 @@ export class OpenRouterClient {
     };
     finishReason?: string;
   }> {
-    const startTime = Date.now();
-
     const result = await generateText({
       model: this.client(params.model),
       messages: params.messages,
       temperature: params.temperature ?? 0.7,
-      maxTokens: params.maxTokens ?? 2000,
+      maxOutputTokens: params.maxTokens ?? 2000,
     });
-
-    const responseTime = Date.now() - startTime;
 
     return {
       text: result.text,
       usage: result.usage
         ? {
-            promptTokens: result.usage.promptTokens,
-            completionTokens: result.usage.completionTokens,
-            totalTokens: result.usage.totalTokens,
+            promptTokens: result.usage.inputTokens ?? 0,
+            completionTokens: result.usage.outputTokens ?? 0,
+            totalTokens: result.usage.totalTokens ?? 0,
           }
         : undefined,
       finishReason: result.finishReason,
@@ -88,7 +84,7 @@ export class OpenRouterClient {
       model: this.client(params.model),
       messages: params.messages,
       temperature: params.temperature ?? 0.7,
-      maxTokens: params.maxTokens ?? 2000,
+      maxOutputTokens: params.maxTokens ?? 2000,
     });
 
     return result;
