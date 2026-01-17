@@ -1,9 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/refs/heads/main/schemas/config.json",
-  "separate-pull-requests": true,
-  "bootstrap-sha": "dae23142403f60de0e321bae1f8a30aa9b54901c",
+  "release-type": "node",
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
   "packages": {
-    "apps/web": {}
+    ".": {
+      "component": "teachanything"
+    }
   },
   "changelog-sections": [
     {
