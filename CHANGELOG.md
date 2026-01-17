@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/akhileshrangani4/teachanything/compare/v1.0.1...v1.0.2) (2026-01-17)
+
+
+### Miscellaneous Chores
+
+* **deps:** bump ai from 4.3.19 to 5.0.52 ([#50](https://github.com/akhileshrangani4/teachanything/issues/50)) ([3c355ed](https://github.com/akhileshrangani4/teachanything/commit/3c355ed93a30cc9616ae83ee23be479302d3ff62))
+* **deps:** bump next from 15.5.9 to 16.0.10 ([#53](https://github.com/akhileshrangani4/teachanything/issues/53)) ([a342abb](https://github.com/akhileshrangani4/teachanything/commit/a342abb329d17890d427a45c948bce024a956362))
+
 ## [1.0.1](https://github.com/akhileshrangani4/teachanything/compare/v1.0.0...v1.0.1) (2026-01-17)
 
 
