@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Clock, Calendar, CheckCircle, XCircle } from "lucide-react";
+import { Clock, Calendar, CheckCircle, XCircle, Eye } from "lucide-react";
 import { PaginationControls } from "../../dashboard/files/PaginationControls";
 import {
   TableToolbar,
@@ -27,6 +27,7 @@ import { formatUserDate } from "../utils/user-helpers";
 import { UserAvatarCell, UserEmailCell } from "../components/UserCells";
 import { StatsHeader } from "../components/StatsHeader";
 import { useUserStats } from "../hooks/useUserStats";
+import { UserDetailsDialog } from "../components/UserDetailsDialog";
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
@@ -61,6 +62,24 @@ export function PendingUsersTab() {
     userId: null,
     userName: null,
     userEmail: null,
+  });
+
+  const [detailsDialog, setDetailsDialog] = useState<{
+    isOpen: boolean;
+    user: {
+      id: string;
+      name: string | null;
+      email: string;
+      title: string | null;
+      institutionalAffiliation: string | null;
+      department: string | null;
+      facultyWebpage: string | null;
+      status: "pending" | "approved" | "rejected";
+      createdAt: Date;
+    } | null;
+  }>({
+    isOpen: false,
+    user: null,
   });
 
   const {
@@ -305,6 +324,31 @@ export function PendingUsersTab() {
                           <div className="flex justify-end gap-2">
                             <Button
                               size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                setDetailsDialog({
+                                  isOpen: true,
+                                  user: {
+                                    id: user.id,
+                                    name: user.name,
+                                    email: user.email,
+                                    title: user.title,
+                                    institutionalAffiliation:
+                                      user.institutionalAffiliation,
+                                    department: user.department,
+                                    facultyWebpage: user.facultyWebpage,
+                                    status: user.status,
+                                    createdAt: user.createdAt,
+                                  },
+                                })
+                              }
+                              className="gap-2"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Details
+                            </Button>
+                            <Button
+                              size="sm"
                               onClick={() =>
                                 handleApprove(
                                   user.id,
@@ -410,6 +454,15 @@ export function PendingUsersTab() {
         confirmText="Reject"
         variant="destructive"
         loading={rejectUser.isPending}
+      />
+
+      {/* User Details Dialog */}
+      <UserDetailsDialog
+        open={detailsDialog.isOpen}
+        onOpenChange={(open) =>
+          !open && setDetailsDialog({ isOpen: false, user: null })
+        }
+        user={detailsDialog.user}
       />
     </>
   );

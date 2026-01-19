@@ -2,6 +2,7 @@
 
 import { ProfileInformationCard } from "@/components/dashboard/settings/ProfileInformationCard";
 import { ChangePasswordCard } from "@/components/dashboard/settings/ChangePasswordCard";
+import { InstitutionalInfoCard } from "@/components/dashboard/settings/InstitutionalInfoCard";
 
 export default function SettingsPage() {
   return (
@@ -17,9 +18,14 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        {/* Cards Grid - Side by side on larger screens */}
+        {/* Cards Grid */}
         <div className="grid lg:grid-cols-2 gap-8">
           <ProfileInformationCard />
+          <InstitutionalInfoCard />
+        </div>
+
+        {/* Password Card - Full width below */}
+        <div className="max-w-xl">
           <ChangePasswordCard />
         </div>
       </div>

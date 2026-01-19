@@ -81,6 +81,23 @@ export const auth = betterAuth({
         required: true,
         defaultValue: "pending",
       },
+      // Verification fields
+      title: {
+        type: "string",
+        required: false, // Optional
+      },
+      institutionalAffiliation: {
+        type: "string",
+        required: true,
+      },
+      department: {
+        type: "string",
+        required: true,
+      },
+      facultyWebpage: {
+        type: "string",
+        required: false, // Optional
+      },
     },
   },
 
