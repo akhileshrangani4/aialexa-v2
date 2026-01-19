@@ -18,20 +18,28 @@ import {
   Trash2,
   ChevronDown,
   Calendar,
+  Eye,
 } from "lucide-react";
 import { formatUserDate } from "../utils/user-helpers";
 import { UserAvatarCell, UserEmailCell } from "../components/UserCells";
 
+interface UserData {
+  id: string;
+  name: string | null;
+  email: string;
+  role: "admin" | "user";
+  status: "approved" | "pending" | "rejected";
+  title: string | null;
+  institutionalAffiliation: string | null;
+  department: string | null;
+  facultyWebpage: string | null;
+  createdAt: Date | string;
+}
+
 interface UserTableRowProps {
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    role: "admin" | "user";
-    status: "approved" | "pending" | "rejected";
-    createdAt: Date | string;
-  };
+  user: UserData;
   isCurrentUser: boolean;
+  onViewDetails: (user: UserData) => void;
   onPromote: (userId: string, userName: string, userEmail: string) => void;
   onDemote: (userId: string, userName: string, userEmail: string) => void;
   onDisable: (userId: string, userName: string, userEmail: string) => void;
@@ -43,6 +51,7 @@ interface UserTableRowProps {
 export function UserTableRow({
   user,
   isCurrentUser,
+  onViewDetails,
   onPromote,
   onDemote,
   onDisable,
@@ -124,6 +133,17 @@ export function UserTableRow({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[180px]">
+                {/* View Details */}
+                <DropdownMenuItem
+                  onClick={() => onViewDetails(user)}
+                  className="cursor-pointer"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
                 {/* Role management */}
                 {!isAdmin ? (
                   <DropdownMenuItem

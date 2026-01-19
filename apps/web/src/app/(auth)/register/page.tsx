@@ -11,6 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
@@ -20,11 +27,17 @@ import { AlertCircle } from "lucide-react";
 import { validatePasswordStrength } from "@/lib/password/password-strength";
 import { PasswordStrengthIndicator } from "@/components/dashboard/settings/PasswordStrengthIndicator";
 import { PasswordRequirementsList } from "@/components/dashboard/settings/PasswordRequirementsList";
+import { TITLE_OPTIONS } from "@/lib/constants/title-options";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { data: session, isPending: sessionLoading } = useSession();
+  const [titleSelection, setTitleSelection] = useState("");
+  const [customTitle, setCustomTitle] = useState("");
   const [name, setName] = useState("");
+  const [institutionalAffiliation, setInstitutionalAffiliation] = useState("");
+  const [department, setDepartment] = useState("");
+  const [facultyWebpage, setFacultyWebpage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -75,7 +88,47 @@ export default function RegisterPage() {
     setError("");
     setSuccess(false);
 
-    // Frontend validation
+    // Validate required fields
+    if (!name.trim()) {
+      setError("Full name is required");
+      toast.error("Full name is required");
+      return;
+    }
+
+    if (!institutionalAffiliation.trim()) {
+      setError("Institutional affiliation is required");
+      toast.error("Institutional affiliation is required");
+      return;
+    }
+
+    if (!department.trim()) {
+      setError("Department is required");
+      toast.error("Department is required");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Email is required");
+      toast.error("Email is required");
+      return;
+    }
+
+    if (!password) {
+      setError("Password is required");
+      toast.error("Password is required");
+      return;
+    }
+
+    // Validate custom title when "Other" is selected
+    if (titleSelection === "other" && !customTitle.trim()) {
+      setError("Please enter your title when selecting 'Other'");
+      toast.error("Title is required", {
+        description: "Please enter your title when selecting 'Other'",
+      });
+      return;
+    }
+
+    // Password strength validation
     if (passwordValidation && !passwordValidation.isValid) {
       const firstError =
         passwordValidation.errors[0] || "Password does not meet requirements";
@@ -88,12 +141,23 @@ export default function RegisterPage() {
 
     setLoading(true);
 
+    // Resolve the title value - use custom title if "other" is selected, null if no selection
+    const resolvedTitle =
+      titleSelection === "other"
+        ? customTitle.trim() || null
+        : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)?.label ||
+          null;
+
     try {
       await authClient.signUp.email(
         {
           name,
           email,
           password,
+          title: resolvedTitle,
+          institutionalAffiliation,
+          department,
+          facultyWebpage,
         },
         {
           onRequest: () => {
@@ -191,10 +255,49 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="title">
+                Title{" "}
+                <span className="text-muted-foreground font-normal">
+                  (Optional)
+                </span>
+              </Label>
+              <Select
+                value={titleSelection}
+                onValueChange={(value) => {
+                  setTitleSelection(value);
+                  if (value !== "other") {
+                    setCustomTitle("");
+                  }
+                }}
+                disabled={loading || success}
+              >
+                <SelectTrigger id="title">
+                  <SelectValue placeholder="Select your title" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TITLE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {titleSelection === "other" && (
+                <Input
+                  id="customTitle"
+                  placeholder="Enter your title"
+                  value={customTitle}
+                  onChange={(e) => setCustomTitle(e.target.value)}
+                  disabled={loading || success}
+                  className="mt-2"
+                />
+              )}
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
-                placeholder="Dr. Jane Smith"
+                placeholder="Jane Smith"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -202,7 +305,47 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="institutionalAffiliation">
+                Institutional Affiliation
+              </Label>
+              <Input
+                id="institutionalAffiliation"
+                placeholder="University of Example"
+                value={institutionalAffiliation}
+                onChange={(e) => setInstitutionalAffiliation(e.target.value)}
+                required
+                disabled={loading || success}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="department">Name of Your Department</Label>
+              <Input
+                id="department"
+                placeholder="Department of Computer Science"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                required
+                disabled={loading || success}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="facultyWebpage">
+                University Faculty Webpage{" "}
+                <span className="text-muted-foreground font-normal">
+                  (Optional)
+                </span>
+              </Label>
+              <Input
+                id="facultyWebpage"
+                type="url"
+                placeholder="https://university.edu/faculty/jsmith"
+                value={facultyWebpage}
+                onChange={(e) => setFacultyWebpage(e.target.value)}
+                disabled={loading || success}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">University Faculty Email</Label>
               <Input
                 id="email"
                 type="email"

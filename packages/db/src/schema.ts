@@ -33,6 +33,10 @@ export const user = pgTable("user", {
   name: text("name"),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  title: text("title"), // e.g., Dr, Professor, etc.
+  institutionalAffiliation: text("institutional_affiliation"),
+  department: text("department"),
+  facultyWebpage: text("faculty_webpage"),
   status: userStatusEnum("status").default("pending").notNull(),
   role: userRoleEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

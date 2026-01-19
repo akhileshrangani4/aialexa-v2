@@ -25,7 +25,10 @@ import { UserTableRow } from "../components/UserTableRow";
 import { StatsHeader } from "../components/StatsHeader";
 import { UserActionDialogs } from "../components/UserActionDialogs";
 import { MutationErrors } from "../components/MutationErrors";
+import { UserDetailsDialog } from "../components/UserDetailsDialog";
+import type { UserDetailsDialogState } from "../types/user-details";
 import { keepPreviousData } from "@tanstack/react-query";
+import { useState } from "react";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -70,6 +73,12 @@ export function AllUsersTab() {
   });
 
   const { dialogs, handlers, closers } = useUserDialogs();
+
+  const [detailsDialog, setDetailsDialog] =
+    useState<UserDetailsDialogState>({
+      isOpen: false,
+      user: null,
+    });
 
   const confirmPromote = async () => {
     if (!dialogs.promote.userId) return;
@@ -226,6 +235,25 @@ export function AllUsersTab() {
                         key={user.id}
                         user={user}
                         isCurrentUser={user.id === currentUserId}
+                        onViewDetails={(u) =>
+                          setDetailsDialog({
+                            isOpen: true,
+                            user: {
+                              id: u.id,
+                              name: u.name,
+                              email: u.email,
+                              title: u.title,
+                              institutionalAffiliation: u.institutionalAffiliation,
+                              department: u.department,
+                              facultyWebpage: u.facultyWebpage,
+                              status: u.status,
+                              createdAt:
+                                typeof u.createdAt === "string"
+                                  ? new Date(u.createdAt)
+                                  : u.createdAt,
+                            },
+                          })
+                        }
                         onPromote={handlers.openPromote}
                         onDemote={handlers.openDemote}
                         onDisable={handlers.openDisable}
@@ -265,6 +293,14 @@ export function AllUsersTab() {
           enable: userActions.enableUser.isPending,
           delete: userActions.deleteUser.isPending,
         }}
+      />
+
+      <UserDetailsDialog
+        open={detailsDialog.isOpen}
+        onOpenChange={(open) =>
+          !open && setDetailsDialog({ isOpen: false, user: null })
+        }
+        user={detailsDialog.user}
       />
     </>
   );
