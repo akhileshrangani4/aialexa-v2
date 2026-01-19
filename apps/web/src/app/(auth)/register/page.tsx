@@ -27,19 +27,7 @@ import { AlertCircle } from "lucide-react";
 import { validatePasswordStrength } from "@/lib/password/password-strength";
 import { PasswordStrengthIndicator } from "@/components/dashboard/settings/PasswordStrengthIndicator";
 import { PasswordRequirementsList } from "@/components/dashboard/settings/PasswordRequirementsList";
-
-const TITLE_OPTIONS = [
-  { value: "dr", label: "Dr" },
-  { value: "professor", label: "Professor" },
-  { value: "associate_professor", label: "Associate Professor" },
-  { value: "assistant_professor", label: "Assistant Professor" },
-  { value: "lecturer", label: "Lecturer" },
-  { value: "researcher", label: "Researcher" },
-  { value: "mr", label: "Mr" },
-  { value: "ms", label: "Ms" },
-  { value: "mrs", label: "Mrs" },
-  { value: "other", label: "Other" },
-];
+import { TITLE_OPTIONS } from "@/lib/constants/title-options";
 
 export default function RegisterPage() {
   const router = useRouter();

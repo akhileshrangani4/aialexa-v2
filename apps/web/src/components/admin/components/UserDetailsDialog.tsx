@@ -19,21 +19,12 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { formatUserDate } from "../utils/user-helpers";
+import type { UserDetailsData } from "../types/user-details";
 
 interface UserDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    title: string | null;
-    institutionalAffiliation: string | null;
-    department: string | null;
-    facultyWebpage: string | null;
-    status: "pending" | "approved" | "rejected";
-    createdAt: Date;
-  } | null;
+  user: UserDetailsData | null;
 }
 
 export function UserDetailsDialog({

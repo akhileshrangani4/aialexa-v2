@@ -26,6 +26,7 @@ import { StatsHeader } from "../components/StatsHeader";
 import { UserActionDialogs } from "../components/UserActionDialogs";
 import { MutationErrors } from "../components/MutationErrors";
 import { UserDetailsDialog } from "../components/UserDetailsDialog";
+import type { UserDetailsDialogState } from "../types/user-details";
 import { keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -73,23 +74,11 @@ export function AllUsersTab() {
 
   const { dialogs, handlers, closers } = useUserDialogs();
 
-  const [detailsDialog, setDetailsDialog] = useState<{
-    isOpen: boolean;
-    user: {
-      id: string;
-      name: string | null;
-      email: string;
-      title: string | null;
-      institutionalAffiliation: string | null;
-      department: string | null;
-      facultyWebpage: string | null;
-      status: "pending" | "approved" | "rejected";
-      createdAt: Date;
-    } | null;
-  }>({
-    isOpen: false,
-    user: null,
-  });
+  const [detailsDialog, setDetailsDialog] =
+    useState<UserDetailsDialogState>({
+      isOpen: false,
+      user: null,
+    });
 
   const confirmPromote = async () => {
     if (!dialogs.promote.userId) return;

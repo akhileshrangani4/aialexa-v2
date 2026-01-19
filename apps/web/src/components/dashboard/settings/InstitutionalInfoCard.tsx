@@ -21,19 +21,7 @@ import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Building2, GraduationCap, Globe, Award, Save } from "lucide-react";
-
-const TITLE_OPTIONS = [
-  { value: "dr", label: "Dr" },
-  { value: "professor", label: "Professor" },
-  { value: "associate_professor", label: "Associate Professor" },
-  { value: "assistant_professor", label: "Assistant Professor" },
-  { value: "lecturer", label: "Lecturer" },
-  { value: "researcher", label: "Researcher" },
-  { value: "mr", label: "Mr" },
-  { value: "ms", label: "Ms" },
-  { value: "mrs", label: "Mrs" },
-  { value: "other", label: "Other" },
-];
+import { TITLE_OPTIONS } from "@/lib/constants/title-options";
 
 export function InstitutionalInfoCard() {
   const [titleSelection, setTitleSelection] = useState("");

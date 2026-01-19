@@ -28,6 +28,7 @@ import { UserAvatarCell, UserEmailCell } from "../components/UserCells";
 import { StatsHeader } from "../components/StatsHeader";
 import { useUserStats } from "../hooks/useUserStats";
 import { UserDetailsDialog } from "../components/UserDetailsDialog";
+import type { UserDetailsDialogState } from "../types/user-details";
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
@@ -64,23 +65,11 @@ export function PendingUsersTab() {
     userEmail: null,
   });
 
-  const [detailsDialog, setDetailsDialog] = useState<{
-    isOpen: boolean;
-    user: {
-      id: string;
-      name: string | null;
-      email: string;
-      title: string | null;
-      institutionalAffiliation: string | null;
-      department: string | null;
-      facultyWebpage: string | null;
-      status: "pending" | "approved" | "rejected";
-      createdAt: Date;
-    } | null;
-  }>({
-    isOpen: false,
-    user: null,
-  });
+  const [detailsDialog, setDetailsDialog] =
+    useState<UserDetailsDialogState>({
+      isOpen: false,
+      user: null,
+    });
 
   const {
     data: pendingUsersData,
