@@ -104,9 +104,13 @@ function InstitutionalForm({
   saved: SavedValues;
 }) {
   const [form, setForm] = useState<FormValues>(initial);
+  const utils = trpc.useUtils();
 
   const updateProfile = trpc.auth.updateProfile.useMutation({
-    onSuccess: () => toast.success("Information updated"),
+    onSuccess: () => {
+      toast.success("Information updated");
+      utils.auth.getProfile.invalidate();
+    },
     onError: (error) =>
       toast.error("Failed to update", { description: error.message }),
   });
