@@ -128,6 +128,17 @@ export default function RegisterPage() {
       return;
     }
 
+    // Validate URL format to match backend z.string().url()
+    try {
+      new URL(facultyWebpage.trim());
+    } catch {
+      setError("Please enter a valid URL for your faculty webpage");
+      toast.error("Invalid URL", {
+        description: "Please enter a valid URL (e.g., https://university.edu/faculty/you)",
+      });
+      return;
+    }
+
     if (!email.trim()) {
       setError("Email is required");
       toast.error("Email is required");

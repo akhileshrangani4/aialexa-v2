@@ -121,6 +121,16 @@ export function InstitutionalInfoCard() {
       return;
     }
 
+    // Validate URL format to match backend z.string().url()
+    try {
+      new URL(facultyWebpage.trim());
+    } catch {
+      toast.error("Invalid URL", {
+        description: "Please enter a valid URL (e.g., https://university.edu/faculty/you)",
+      });
+      return;
+    }
+
     // titleSelection is validated above, so we know it's a valid option
     const resolvedTitle =
       titleSelection === "other"
