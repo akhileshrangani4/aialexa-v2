@@ -26,10 +26,10 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="users" className="space-y-4 md:space-y-6">
-          <TabsList className="bg-muted-foreground/10 border border-border w-full flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="users" className="text-xs md:text-sm flex-1 min-w-fit">Pending Users</TabsTrigger>
+          <TabsList className="bg-muted-foreground/10 border border-border w-full h-auto gap-1 p-1 overflow-x-auto">
+            <TabsTrigger value="users" className="text-xs md:text-sm flex-1 min-w-fit">Pending</TabsTrigger>
             <TabsTrigger value="all-users" className="text-xs md:text-sm flex-1 min-w-fit">All Users</TabsTrigger>
-            <TabsTrigger value="chatbots" className="text-xs md:text-sm flex-1 min-w-fit">All Chatbots</TabsTrigger>
+            <TabsTrigger value="chatbots" className="text-xs md:text-sm flex-1 min-w-fit">Chatbots</TabsTrigger>
             <TabsTrigger value="domains" className="text-xs md:text-sm flex-1 min-w-fit">Domains</TabsTrigger>
           </TabsList>
 

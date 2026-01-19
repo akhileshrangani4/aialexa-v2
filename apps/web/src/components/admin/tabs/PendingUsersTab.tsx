@@ -415,6 +415,7 @@ export function PendingUsersTab() {
                                   disabled={
                                     approveUser.isPending || rejectUser.isPending
                                   }
+                                  aria-label="Open user actions menu"
                                 >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>

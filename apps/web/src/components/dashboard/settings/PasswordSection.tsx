@@ -24,7 +24,9 @@ export function PasswordSection() {
 
   const updatePassword = trpc.auth.updatePassword.useMutation({
     onSuccess: (data) => {
-      toast.success(data.message || "Password updated");
+      toast.success(data.message || "Password updated", {
+        description: "Please sign in again on other devices.",
+      });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
