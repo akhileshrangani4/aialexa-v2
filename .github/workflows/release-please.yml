@@ -29,3 +29,36 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  # Production Deployment - only runs when release-please PR is merged
+  deploy-production:
+    needs: release-please
+    runs-on: ubuntu-latest
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git User
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Merge main into production branch
+        run: |
+          set -e
+          # Fetch remote production branch if it exists
+          git fetch origin production || true
+          # Checkout production: track remote if exists, else create from main
+          if git show-ref --verify --quiet refs/remotes/origin/production; then
+            git checkout --track origin/production || git checkout production
+          else
+            git checkout -b production main
+          fi
+          # Merge main with theirs strategy to handle any conflicts
+          git merge --no-ff -X theirs main -m "chore: deploy release ${{ needs.release-please.outputs.tag_name }} to production"
+          git push origin production
