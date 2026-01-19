@@ -90,6 +90,7 @@ export default function SharedChatPage() {
         </div>
 
         {/* Chat Interface */}
+        {/* Mobile height: 100vh minus header (~80px) + footer (~40px) + padding (~60px) = 180px */}
         <ChatInterface
           messages={messages}
           isStreaming={isStreaming}

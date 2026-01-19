@@ -10,10 +10,10 @@ import {
 import { ProfileSection } from "@/components/dashboard/settings/ProfileSection";
 import { InstitutionalSection } from "@/components/dashboard/settings/InstitutionalSection";
 import { PasswordSection } from "@/components/dashboard/settings/PasswordSection";
+import { getSupportEmail } from "@/lib/constants/support-email";
 
 export default function SettingsPage() {
-  const supportEmail =
-    process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@teachanything.ai";
+  const supportEmail = getSupportEmail();
 
   return (
     <div className="flex-1 p-4 md:p-6 lg:p-8 min-h-0">
