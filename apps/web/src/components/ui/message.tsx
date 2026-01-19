@@ -39,14 +39,14 @@ const MessageAvatar = ({
   return (
     <Avatar
       className={cn(
-        "h-9 w-9 shrink-0 ring-2 ring-background shadow-sm",
+        "h-7 w-7 md:h-9 md:w-9 shrink-0 ring-2 ring-background shadow-sm",
         className,
       )}
     >
       <AvatarImage
         src={src}
         alt={alt}
-        className={cn("object-contain p-1.5", imageClassName)}
+        className={cn("object-contain p-1 md:p-1.5", imageClassName)}
       />
       {fallback && (
         <AvatarFallback delayMs={delayMs}>{fallback}</AvatarFallback>
@@ -72,7 +72,7 @@ const MessageContent = ({
   ...props
 }: MessageContentProps) => {
   const classNames = cn(
-    "rounded-lg px-4 py-3 text-foreground bg-secondary break-words leading-relaxed shadow-sm border border-border/50",
+    "rounded-xl md:rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-foreground bg-secondary break-words leading-relaxed shadow-sm border border-border/50",
     className,
   );
 

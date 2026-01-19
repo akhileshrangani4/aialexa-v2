@@ -9,28 +9,28 @@ import { Shield } from "lucide-react";
 
 export default function AdminPage() {
   return (
-    <div className="flex-1 p-8 bg-gradient-to-b from-background to-muted/20">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="flex-1 p-4 md:p-8 bg-gradient-to-b from-background to-muted/20">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         {/* Header */}
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground tracking-tight">
+          <div className="flex items-center gap-2 md:gap-3 mb-2">
+            <Shield className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground tracking-tight">
               Admin Dashboard
             </h1>
           </div>
-          <p className="text-muted-foreground mt-2 text-lg">
+          <p className="text-muted-foreground mt-2 text-base md:text-lg">
             Manage users, chatbots, and system settings
           </p>
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="bg-muted-foreground/10 border border-border">
-            <TabsTrigger value="users">Pending Users</TabsTrigger>
-            <TabsTrigger value="all-users">All Users</TabsTrigger>
-            <TabsTrigger value="chatbots">All Chatbots</TabsTrigger>
-            <TabsTrigger value="domains">Allowed Domains</TabsTrigger>
+        <Tabs defaultValue="users" className="space-y-4 md:space-y-6">
+          <TabsList className="bg-muted-foreground/10 border border-border w-full h-auto gap-1 p-1 overflow-x-auto">
+            <TabsTrigger value="users" className="text-xs md:text-sm flex-1 min-w-fit">Pending</TabsTrigger>
+            <TabsTrigger value="all-users" className="text-xs md:text-sm flex-1 min-w-fit">All Users</TabsTrigger>
+            <TabsTrigger value="chatbots" className="text-xs md:text-sm flex-1 min-w-fit">Chatbots</TabsTrigger>
+            <TabsTrigger value="domains" className="text-xs md:text-sm flex-1 min-w-fit">Domains</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="mt-6">

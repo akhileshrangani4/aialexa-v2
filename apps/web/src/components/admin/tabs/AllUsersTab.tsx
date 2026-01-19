@@ -180,8 +180,8 @@ export function AllUsersTab() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-md border">
-                <Table>
+              <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[700px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <SortableTableHead
@@ -197,6 +197,7 @@ export function AllUsersTab() {
                         currentSortBy={state.sortBy}
                         currentSortDir={state.sortDir}
                         onSort={actions.toggleSort}
+                        className="hidden sm:table-cell"
                       >
                         Email
                       </SortableTableHead>
@@ -221,6 +222,7 @@ export function AllUsersTab() {
                         currentSortBy={state.sortBy}
                         currentSortDir={state.sortDir}
                         onSort={actions.toggleSort}
+                        className="hidden md:table-cell"
                       >
                         Registered
                       </SortableTableHead>
