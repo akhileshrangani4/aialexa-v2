@@ -77,7 +77,7 @@ export function UserTableRow({
           }
         />
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden sm:table-cell">
         <UserEmailCell email={user.email} />
       </TableCell>
       <TableCell>
@@ -107,13 +107,13 @@ export function UserTableRow({
           {user.status}
         </Badge>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{formatUserDate(user.createdAt)}</span>
         </div>
       </TableCell>
-      <TableCell className="text-right pr-0">
+      <TableCell className="text-right pr-0 sticky right-0 bg-background">
         {isCurrentUser ? (
           <span className="text-sm text-muted-foreground italic">
             Current user
@@ -125,14 +125,15 @@ export function UserTableRow({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-[180px] justify-between font-medium"
+                  className="w-auto min-w-[100px] md:w-[180px] justify-between font-medium"
                   disabled={isAnyActionPending}
                 >
-                  <span>Actions</span>
-                  <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
+                  <span className="hidden md:inline">Actions</span>
+                  <span className="md:hidden">...</span>
+                  <ChevronDown className="h-4 w-4 ml-1 md:ml-2 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuContent align="end" className="w-[180px]" sideOffset={5}>
                 {/* View Details */}
                 <DropdownMenuItem
                   onClick={() => onViewDetails(user)}

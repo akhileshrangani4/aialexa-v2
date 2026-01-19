@@ -67,26 +67,27 @@ export default function ComparisonSection() {
   ];
 
   return (
-    <section id="comparison" className="py-20 px-6 md:px-12 bg-white">
+    <section id="comparison" className="py-12 md:py-20 px-4 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-5xl font-serif font-light text-foreground mb-4">
+          <h2 className="text-3xl md:text-5xl font-serif font-light text-foreground mb-4">
             Why Choose Teach anything?
           </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
             See how we compare to commercial AI solutions. Built with privacy,
             openness, and educators in mind.
           </p>
         </motion.div>
 
+        {/* Desktop Table View */}
         <motion.div
-          className="overflow-x-auto md:overflow-visible"
+          className="hidden md:block"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -131,14 +132,50 @@ export default function ComparisonSection() {
           </table>
         </motion.div>
 
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {comparisonData.map((row, index) => (
+            <motion.div
+              key={row.feature}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.4, delay: index * 0.03 }}
+              className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+            >
+              <h3 className="font-semibold text-foreground text-sm mb-3">
+                {row.feature}
+              </h3>
+              <div className="space-y-3">
+                <div className="bg-white rounded-md p-3 border border-gray-200">
+                  <span className="text-xs font-medium text-primary uppercase tracking-wide">
+                    Teach anything
+                  </span>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                    {row.teachAnything}
+                  </p>
+                </div>
+                <div className="bg-white rounded-md p-3 border border-gray-100">
+                  <span className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide">
+                    Commercial AI
+                  </span>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                    {row.commercial}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
         <motion.div
-          className="mt-12 text-center"
+          className="mt-8 md:mt-12 text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
             Our commitment to open access, privacy, and educator empowerment
             sets us apart from commercial AI solutions that prioritize data
             collection and vendor lock-in.

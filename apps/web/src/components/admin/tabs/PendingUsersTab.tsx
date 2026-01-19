@@ -15,7 +15,21 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Clock, Calendar, CheckCircle, XCircle, Eye } from "lucide-react";
+import {
+  Clock,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  Eye,
+  MoreHorizontal,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PaginationControls } from "../../dashboard/files/PaginationControls";
 import {
   TableToolbar,
@@ -244,8 +258,8 @@ export function PendingUsersTab() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-md border">
-                <Table>
+              <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[600px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <SortableTableHead
@@ -261,6 +275,7 @@ export function PendingUsersTab() {
                         currentSortBy={state.sortBy}
                         currentSortDir={state.sortDir}
                         onSort={actions.toggleSort}
+                        className="hidden sm:table-cell"
                       >
                         Email
                       </SortableTableHead>
@@ -270,10 +285,11 @@ export function PendingUsersTab() {
                         currentSortBy={state.sortBy}
                         currentSortDir={state.sortDir}
                         onSort={actions.toggleSort}
+                        className="hidden md:table-cell"
                       >
                         Registered
                       </SortableTableHead>
-                      <TableHead className="font-semibold text-right">
+                      <TableHead className="font-semibold text-right sticky right-0 bg-muted/50">
                         Actions
                       </TableHead>
                     </TableRow>
@@ -291,7 +307,7 @@ export function PendingUsersTab() {
                             showEmail={!!user.name}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <UserEmailCell email={user.email} />
                         </TableCell>
                         <TableCell>
@@ -303,14 +319,15 @@ export function PendingUsersTab() {
                             <span className="capitalize">{user.status}</span>
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-3.5 w-3.5" />
                             <span>{formatUserDate(user.createdAt)}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                        <TableCell className="text-right sticky right-0 bg-background">
+                          {/* Desktop Actions */}
+                          <div className="hidden md:flex justify-end gap-2">
                             <Button
                               size="sm"
                               variant="outline"
@@ -371,6 +388,74 @@ export function PendingUsersTab() {
                               <XCircle className="h-4 w-4" />
                               Reject
                             </Button>
+                          </div>
+                          {/* Mobile Dropdown Actions */}
+                          <div className="md:hidden flex justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={
+                                    approveUser.isPending || rejectUser.isPending
+                                  }
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-[160px]">
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    setDetailsDialog({
+                                      isOpen: true,
+                                      user: {
+                                        id: user.id,
+                                        name: user.name,
+                                        email: user.email,
+                                        title: user.title,
+                                        institutionalAffiliation:
+                                          user.institutionalAffiliation,
+                                        department: user.department,
+                                        facultyWebpage: user.facultyWebpage,
+                                        status: user.status,
+                                        createdAt: user.createdAt,
+                                      },
+                                    })
+                                  }
+                                  className="cursor-pointer"
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Details
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleApprove(
+                                      user.id,
+                                      user.name || "User",
+                                      user.email,
+                                    )
+                                  }
+                                  className="cursor-pointer text-green-600"
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Approve
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleReject(
+                                      user.id,
+                                      user.name || "User",
+                                      user.email,
+                                    )
+                                  }
+                                  className="cursor-pointer text-destructive"
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Reject
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </TableCell>
                       </TableRow>

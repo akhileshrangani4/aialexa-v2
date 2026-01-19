@@ -76,13 +76,13 @@ export default function SharedChatPage() {
 
   return (
     <div className="min-h-screen bg-secondary">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-4 md:py-8">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground mb-2">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground mb-1 md:mb-2">
             {chatbot.name || "Chatbot"}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground">
             <WrappableText>
               {chatbot.description || "No description available"}
             </WrappableText>
@@ -101,12 +101,12 @@ export default function SharedChatPage() {
           chatbotName={chatbot.name || "Chatbot"}
           resetChat={resetChat}
           stopStreaming={stopStreaming}
-          height="h-[600px] md:h-[700px] lg:h-[800px]"
+          height="h-[calc(100vh-180px)] md:h-[700px] lg:h-[800px]"
           showSources={chatbot.showSources ?? false}
         />
 
         {/* Footer */}
-        <div className="mt-6 text-center text-sm text-muted-foreground">
+        <div className="mt-4 md:mt-6 text-center text-xs md:text-sm text-muted-foreground">
           <p>Powered by Teach anything • AI Teaching Assistant Platform</p>
         </div>
       </div>
