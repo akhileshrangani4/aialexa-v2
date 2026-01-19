@@ -1,33 +1,61 @@
 "use client";
 
-import { ProfileInformationCard } from "@/components/dashboard/settings/ProfileInformationCard";
-import { ChangePasswordCard } from "@/components/dashboard/settings/ChangePasswordCard";
-import { InstitutionalInfoCard } from "@/components/dashboard/settings/InstitutionalInfoCard";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ProfileSection } from "@/components/dashboard/settings/ProfileSection";
+import { InstitutionalSection } from "@/components/dashboard/settings/InstitutionalSection";
+import { PasswordSection } from "@/components/dashboard/settings/PasswordSection";
 
 export default function SettingsPage() {
+  const supportEmail =
+    process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@teachanything.ai";
+
   return (
-    <div className="flex-1 p-4 md:p-8 bg-gradient-to-b from-background to-muted/20 min-h-0">
-      <div className="w-full max-w-7xl mx-auto space-y-6 md:space-y-8">
-        {/* Header */}
-        <div className="space-y-1">
-          <h1 className="text-2xl md:text-4xl font-bold text-foreground tracking-tight">
-            Settings
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-lg">
-            Manage your account settings and preferences
+    <div className="flex-1 p-4 md:p-6 lg:p-8 min-h-0">
+      <div className="w-full max-w-2xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Settings</h1>
+          <p className="text-muted-foreground text-sm">
+            Manage your account settings
           </p>
         </div>
 
-        {/* Cards Grid */}
-        <div className="grid lg:grid-cols-2 gap-4 md:gap-8">
-          <ProfileInformationCard />
-          <InstitutionalInfoCard />
-        </div>
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg">Account</CardTitle>
+            <CardDescription>Your profile and contact details</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <ProfileSection />
 
-        {/* Password Card - Full width below */}
-        <div className="max-w-xl">
-          <ChangePasswordCard />
-        </div>
+            <div className="border-t pt-6">
+              <h3 className="font-semibold mb-4">Institutional Information</h3>
+              <InstitutionalSection />
+            </div>
+
+            <div className="border-t pt-6">
+              <h3 className="font-semibold mb-4">Change Password</h3>
+              <PasswordSection />
+            </div>
+
+            <div className="border-t pt-4">
+              <p className="text-sm text-muted-foreground">
+                Need help?{" "}
+                <a
+                  href={`mailto:${supportEmail}`}
+                  className="text-primary hover:underline"
+                >
+                  {supportEmail}
+                </a>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
