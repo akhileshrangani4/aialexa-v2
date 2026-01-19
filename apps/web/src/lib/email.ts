@@ -14,14 +14,11 @@ import { db } from "@teachanything/db";
 import { user } from "@teachanything/db/schema";
 import { eq } from "drizzle-orm";
 
-// Helper to get support email
-function getSupportEmail(): string {
-  if (env.NEXT_PUBLIC_CONTACT_EMAIL) {
-    return env.NEXT_PUBLIC_CONTACT_EMAIL;
-  }
-  const adminEmails = getAdminEmails();
-  return adminEmails[0] || "no admin email found";
-}
+// Support email - computed once at module load
+const supportEmail =
+  env.NEXT_PUBLIC_CONTACT_EMAIL ||
+  getAdminEmails()[0] ||
+  "no admin email found";
 
 const resend = new Resend(env.RESEND_API_KEY);
 
@@ -81,6 +78,7 @@ export async function sendAdminNotificationEmail(params: {
         userEmail: params.email,
         registrationDate: new Date().toLocaleString(),
         adminUrl,
+        supportEmail,
       }),
     });
 
@@ -115,7 +113,6 @@ export async function sendApprovalEmail(params: {
 }) {
   try {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/login`;
-
     const { data, error } = await resend.emails.send({
       from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
@@ -123,6 +120,7 @@ export async function sendApprovalEmail(params: {
       react: ApprovalConfirmation({
         userName: params.name,
         loginUrl,
+        supportEmail,
       }),
     });
 
@@ -152,8 +150,6 @@ export async function sendRejectionEmail(params: {
   name: string;
 }) {
   try {
-    const supportEmail = getSupportEmail();
-
     const { data, error } = await resend.emails.send({
       from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
@@ -191,7 +187,6 @@ export async function sendPromoteToAdminEmail(params: {
 }) {
   try {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/admin`;
-
     const { data, error } = await resend.emails.send({
       from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
@@ -199,6 +194,7 @@ export async function sendPromoteToAdminEmail(params: {
       react: PromoteToAdmin({
         userName: params.name,
         loginUrl,
+        supportEmail,
       }),
     });
 
@@ -228,9 +224,7 @@ export async function sendDemoteFromAdminEmail(params: {
   name: string;
 }) {
   try {
-    const supportEmail = getSupportEmail();
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/login`;
-
     const { data, error } = await resend.emails.send({
       from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
@@ -268,8 +262,6 @@ export async function sendAccountDisabledEmail(params: {
   name: string;
 }) {
   try {
-    const supportEmail = getSupportEmail();
-
     const { data, error } = await resend.emails.send({
       from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
@@ -307,7 +299,6 @@ export async function sendAccountEnabledEmail(params: {
 }) {
   try {
     const loginUrl = `${env.NEXT_PUBLIC_APP_URL}/login`;
-
     const { data, error } = await resend.emails.send({
       from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
@@ -315,6 +306,7 @@ export async function sendAccountEnabledEmail(params: {
       react: AccountEnabled({
         userName: params.name,
         loginUrl,
+        supportEmail,
       }),
     });
 
@@ -344,8 +336,6 @@ export async function sendAccountDeletedEmail(params: {
   name: string;
 }) {
   try {
-    const supportEmail = getSupportEmail();
-
     const { data, error } = await resend.emails.send({
       from: `Teach anything. <${env.RESEND_FROM_EMAIL}>`,
       to: params.email,
@@ -390,6 +380,7 @@ export async function sendPasswordResetEmail(params: {
       react: PasswordReset({
         userName: params.name,
         resetUrl: params.resetUrl,
+        supportEmail,
       }),
     });
 
