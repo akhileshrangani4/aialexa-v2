@@ -11,8 +11,6 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@teachanything/ai": "*",
-    "@teachanything/db": "*",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -25,6 +23,8 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-query": "^5.90.17",
+    "@teachanything/ai": "*",
+    "@teachanything/db": "*",
     "@trpc/client": "^11.8.1",
     "@trpc/next": "^11.8.1",
     "@trpc/react-query": "^11.1.5",
@@ -33,6 +33,7 @@
     "@upstash/qstash": "^2.8.4",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.1",
+    "@vercel/analytics": "^1.6.1",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.3.27",
