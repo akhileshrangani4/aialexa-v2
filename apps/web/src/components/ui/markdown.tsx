@@ -1,12 +1,35 @@
 import { cn } from "@/lib/utils";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
+import type { Components } from "react-markdown";
 
 export type MarkdownProps = {
   children: string;
   className?: string;
   parseIncompleteMarkdown?: boolean;
   style?: React.CSSProperties;
+};
+
+const markdownComponents: Components = {
+  ul: ({ children, className, ...props }) => (
+    <ul
+      className={cn("ml-6 list-outside list-disc whitespace-normal", className)}
+      {...props}
+    >
+      {children}
+    </ul>
+  ),
+  ol: ({ children, className, ...props }) => (
+    <ol
+      className={cn(
+        "ml-6 list-outside list-decimal whitespace-normal",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </ol>
+  ),
 };
 
 function MarkdownComponent({
@@ -17,7 +40,10 @@ function MarkdownComponent({
 }: MarkdownProps) {
   return (
     <div className={cn("streamdown-content", className)} style={style}>
-      <Streamdown parseIncompleteMarkdown={parseIncompleteMarkdown}>
+      <Streamdown
+        parseIncompleteMarkdown={parseIncompleteMarkdown}
+        components={markdownComponents}
+      >
         {children}
       </Streamdown>
     </div>
