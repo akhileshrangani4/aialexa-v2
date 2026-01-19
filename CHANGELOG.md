@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/akhileshrangani4/teachanything/compare/v1.0.5...v1.1.0) (2026-01-19)
+
+
+### Features
+
+* **email:** add do-not-reply footer to all automated emails ([#69](https://github.com/akhileshrangani4/teachanything/issues/69)) ([1b120e2](https://github.com/akhileshrangani4/teachanything/commit/1b120e2eacc8a7d08798e050189139497ebc628f))
+
 ## [1.0.5](https://github.com/akhileshrangani4/teachanything/compare/v1.0.4...v1.0.5) (2026-01-19)
 
 
