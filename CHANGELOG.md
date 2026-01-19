@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/akhileshrangani4/teachanything/compare/v1.2.0...v1.3.0) (2026-01-19)
+
+
+### Features
+
+* **auth:** make all verification fields required ([#73](https://github.com/akhileshrangani4/teachanything/issues/73)) ([4a9f9cd](https://github.com/akhileshrangani4/teachanything/commit/4a9f9cdfcbf3e32734a71d88aec09ac01261b234))
+
 ## [1.2.0](https://github.com/akhileshrangani4/teachanything/compare/v1.1.0...v1.2.0) (2026-01-19)
 
 
