@@ -81,22 +81,22 @@ export const auth = betterAuth({
         required: true,
         defaultValue: "pending",
       },
-      // Verification fields
+      // Verification fields (optional in auth config, required at registration via client-side validation)
       title: {
         type: "string",
-        required: false, // Optional
+        required: false,
       },
       institutionalAffiliation: {
         type: "string",
-        required: true,
+        required: false, // Nullable in DB for existing users; enforced at registration
       },
       department: {
         type: "string",
-        required: true,
+        required: false, // Nullable in DB for existing users; enforced at registration
       },
       facultyWebpage: {
         type: "string",
-        required: false, // Optional
+        required: false,
       },
     },
   },

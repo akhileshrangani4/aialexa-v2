@@ -131,6 +131,15 @@ export default function RegisterPage() {
       return;
     }
 
+    // Validate custom title when "Other" is selected
+    if (titleSelection === "other" && !customTitle.trim()) {
+      setError("Please enter your title when selecting 'Other'");
+      toast.error("Title is required", {
+        description: "Please enter your title when selecting 'Other'",
+      });
+      return;
+    }
+
     // Password strength validation
     if (passwordValidation && !passwordValidation.isValid) {
       const firstError =
@@ -144,12 +153,12 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    // Resolve the title value - use custom title if "other" is selected
+    // Resolve the title value - use custom title if "other" is selected, null if no selection
     const resolvedTitle =
       titleSelection === "other"
-        ? customTitle
+        ? customTitle.trim() || null
         : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)?.label ||
-          titleSelection;
+          null;
 
     try {
       await authClient.signUp.email(

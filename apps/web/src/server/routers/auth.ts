@@ -115,10 +115,13 @@ export const authRouter = router({
   updateProfile: protectedProcedure
     .input(
       z.object({
-        title: z.string().max(100).optional().nullable(),
-        institutionalAffiliation: z.string().min(1).max(200),
-        department: z.string().min(1).max(200),
-        facultyWebpage: z.string().url().max(500).optional().nullable().or(z.literal("")),
+        title: z.string().trim().max(100).optional().nullable(),
+        institutionalAffiliation: z.string().trim().min(1).max(200),
+        department: z.string().trim().min(1).max(200),
+        facultyWebpage: z.preprocess(
+          (val) => (val === "" ? null : val),
+          z.string().url().max(500).optional().nullable(),
+        ),
       }),
     )
     .mutation(async ({ ctx, input }) => {

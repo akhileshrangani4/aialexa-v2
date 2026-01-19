@@ -106,17 +106,34 @@ export function InstitutionalInfoCard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields
+    if (!institutionalAffiliation.trim()) {
+      toast.error("Institutional affiliation is required");
+      return;
+    }
+
+    if (!department.trim()) {
+      toast.error("Department is required");
+      return;
+    }
+
+    // Validate custom title when "Other" is selected
+    if (titleSelection === "other" && !customTitle.trim()) {
+      toast.error("Please enter your title when selecting 'Other'");
+      return;
+    }
+
     const resolvedTitle =
       titleSelection === "other"
-        ? customTitle || null
+        ? customTitle.trim() || null
         : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)?.label ||
           null;
 
     updateProfile.mutate({
       title: resolvedTitle,
-      institutionalAffiliation,
-      department,
-      facultyWebpage: facultyWebpage || null,
+      institutionalAffiliation: institutionalAffiliation.trim(),
+      department: department.trim(),
+      facultyWebpage: facultyWebpage.trim() || null,
     });
   };
 
