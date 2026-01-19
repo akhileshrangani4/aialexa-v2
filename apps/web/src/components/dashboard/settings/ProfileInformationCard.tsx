@@ -14,7 +14,7 @@ import { trpc } from "@/lib/trpc";
 import { useSession } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { User, Mail, Save, CheckCircle2 } from "lucide-react";
+import { User, Mail, Save, CheckCircle2, HelpCircle } from "lucide-react";
 
 export function ProfileInformationCard() {
   const { data: session } = useSession();
@@ -43,26 +43,26 @@ export function ProfileInformationCard() {
   };
 
   const supportEmail =
-    process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@teachanything.ai";
+    process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@teachanything.ai";
 
   return (
     <Card className="border-2 shadow-sm">
-      <CardHeader className="pb-6">
+      <CardHeader className="pb-4 md:pb-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <User className="h-5 w-5 text-primary" />
+          <div className="h-9 w-9 md:h-10 md:w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <User className="h-4 w-4 md:h-5 md:w-5 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-xl font-semibold">
+            <CardTitle className="text-lg md:text-xl font-semibold">
               Profile Information
             </CardTitle>
-            <CardDescription className="text-base mt-1">
+            <CardDescription className="text-sm md:text-base mt-1">
               Your account information and contact details
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 md:space-y-6">
         <div className="space-y-3">
           <Label
             htmlFor="name"
@@ -71,7 +71,7 @@ export function ProfileInformationCard() {
             <User className="h-4 w-4 text-muted-foreground" />
             Name
           </Label>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Input
               id="name"
               value={name}
@@ -86,7 +86,7 @@ export function ProfileInformationCard() {
                 name === session?.user.name ||
                 !name.trim()
               }
-              className="min-w-[120px] h-11"
+              className="min-w-[100px] sm:min-w-[120px] h-11"
             >
               {updateName.isPending ? (
                 <>
@@ -117,7 +117,7 @@ export function ProfileInformationCard() {
             className="text-sm font-semibold flex items-center gap-2"
           >
             <Mail className="h-4 w-4 text-muted-foreground" />
-            Email
+            Your Email
           </Label>
           <Input
             id="email"
@@ -135,13 +135,25 @@ export function ProfileInformationCard() {
 
         <div className="space-y-3">
           <Label className="text-sm font-semibold flex items-center gap-2">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            Support Email
+            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+            Need Help?
           </Label>
-          <Input value={supportEmail} disabled className="bg-muted/50 h-11" />
-          <p className="text-xs text-muted-foreground">
-            Contact this email for support or assistance
-          </p>
+          <a
+            href={`mailto:${supportEmail}`}
+            className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50 hover:bg-muted/80 hover:border-primary/30 transition-colors group"
+          >
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+              <Mail className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-primary font-medium text-sm block truncate group-hover:underline">
+                {supportEmail}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Contact us for support or assistance
+              </span>
+            </div>
+          </a>
         </div>
       </CardContent>
     </Card>

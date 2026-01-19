@@ -99,23 +99,23 @@ export function ChangePasswordCard() {
 
   return (
     <Card className="border-2 shadow-sm">
-      <CardHeader className="pb-6">
+      <CardHeader className="pb-4 md:pb-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-            <Lock className="h-5 w-5 text-blue-600" />
+          <div className="h-9 w-9 md:h-10 md:w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+            <Lock className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
           </div>
           <div>
-            <CardTitle className="text-xl font-semibold">
+            <CardTitle className="text-lg md:text-xl font-semibold">
               Change Password
             </CardTitle>
-            <CardDescription className="text-base mt-1">
+            <CardDescription className="text-sm md:text-base mt-1">
               Update your password to keep your account secure
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleUpdatePassword} className="space-y-6">
+        <form onSubmit={handleUpdatePassword} className="space-y-4 md:space-y-6">
           {updatePassword.error && (
             <Alert
               variant={

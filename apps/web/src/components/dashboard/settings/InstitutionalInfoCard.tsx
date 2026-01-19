@@ -31,12 +31,22 @@ export function InstitutionalInfoCard() {
   const [facultyWebpage, setFacultyWebpage] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
 
-  const { data: profile, isLoading } = trpc.auth.getProfile.useQuery();
+  const { data: profile, isLoading } = trpc.auth.getProfile.useQuery(
+    undefined,
+    {
+      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const utils = trpc.useUtils();
 
   const updateProfile = trpc.auth.updateProfile.useMutation({
     onSuccess: () => {
       toast.success("Institutional information updated");
       setHasChanges(false);
+      // Invalidate the cache so it refetches with new data
+      utils.auth.getProfile.invalidate();
     },
     onError: (error) => {
       toast.error("Failed to update information", {
@@ -148,16 +158,16 @@ export function InstitutionalInfoCard() {
   if (isLoading) {
     return (
       <Card className="border-2 shadow-sm">
-        <CardHeader className="pb-6">
+        <CardHeader className="pb-4 md:pb-6">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Building2 className="h-5 w-5 text-primary" />
+            <div className="h-9 w-9 md:h-10 md:w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-xl font-semibold">
+              <CardTitle className="text-lg md:text-xl font-semibold">
                 Institutional Information
               </CardTitle>
-              <CardDescription className="text-base mt-1">
+              <CardDescription className="text-sm md:text-base mt-1">
                 Loading...
               </CardDescription>
             </div>
@@ -169,23 +179,23 @@ export function InstitutionalInfoCard() {
 
   return (
     <Card className="border-2 shadow-sm">
-      <CardHeader className="pb-6">
+      <CardHeader className="pb-4 md:pb-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Building2 className="h-5 w-5 text-primary" />
+          <div className="h-9 w-9 md:h-10 md:w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-xl font-semibold">
+            <CardTitle className="text-lg md:text-xl font-semibold">
               Institutional Information
             </CardTitle>
-            <CardDescription className="text-base mt-1">
+            <CardDescription className="text-sm md:text-base mt-1">
               Your academic affiliation and contact details
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
           <div className="space-y-3">
             <Label className="text-sm font-semibold flex items-center gap-2">
               <Award className="h-4 w-4 text-muted-foreground" />
