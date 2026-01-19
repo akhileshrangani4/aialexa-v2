@@ -51,13 +51,14 @@ export function UserDetailsDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Name with Title */}
+          {/* Title & Name */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Full Name
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+              <User className="h-3 w-3" />
+              Title & Full Name
             </label>
             <p className="text-sm font-medium">
-              {titleLabel && <span>{titleLabel} </span>}
+              {titleLabel ? `${titleLabel} ` : ""}
               {user.name || "Not provided"}
             </p>
           </div>

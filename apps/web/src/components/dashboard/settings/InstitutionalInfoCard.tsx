@@ -95,6 +95,17 @@ export function InstitutionalInfoCard() {
     e.preventDefault();
 
     // Validate required fields
+    if (!titleSelection) {
+      toast.error("Title is required");
+      return;
+    }
+
+    // Validate custom title when "Other" is selected
+    if (titleSelection === "other" && !customTitle.trim()) {
+      toast.error("Please enter your title when selecting 'Other'");
+      return;
+    }
+
     if (!institutionalAffiliation.trim()) {
       toast.error("Institutional affiliation is required");
       return;
@@ -105,23 +116,22 @@ export function InstitutionalInfoCard() {
       return;
     }
 
-    // Validate custom title when "Other" is selected
-    if (titleSelection === "other" && !customTitle.trim()) {
-      toast.error("Please enter your title when selecting 'Other'");
+    if (!facultyWebpage.trim()) {
+      toast.error("Faculty webpage is required");
       return;
     }
 
     const resolvedTitle =
       titleSelection === "other"
-        ? customTitle.trim() || null
+        ? customTitle.trim()
         : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)?.label ||
-          null;
+          "";
 
     updateProfile.mutate({
       title: resolvedTitle,
       institutionalAffiliation: institutionalAffiliation.trim(),
       department: department.trim(),
-      facultyWebpage: facultyWebpage.trim() || null,
+      facultyWebpage: facultyWebpage.trim(),
     });
   };
 
@@ -169,10 +179,7 @@ export function InstitutionalInfoCard() {
           <div className="space-y-3">
             <Label className="text-sm font-semibold flex items-center gap-2">
               <Award className="h-4 w-4 text-muted-foreground" />
-              Title{" "}
-              <span className="text-muted-foreground font-normal">
-                (Optional)
-              </span>
+              Title
             </Label>
             <Select
               value={titleSelection}
@@ -243,16 +250,14 @@ export function InstitutionalInfoCard() {
           <div className="space-y-3">
             <Label className="text-sm font-semibold flex items-center gap-2">
               <Globe className="h-4 w-4 text-muted-foreground" />
-              Faculty Webpage{" "}
-              <span className="text-muted-foreground font-normal">
-                (Optional)
-              </span>
+              Faculty Webpage
             </Label>
             <Input
               type="url"
               placeholder="https://university.edu/faculty/you"
               value={facultyWebpage}
               onChange={(e) => setFacultyWebpage(e.target.value)}
+              required
               disabled={updateProfile.isPending}
               className="h-11"
             />

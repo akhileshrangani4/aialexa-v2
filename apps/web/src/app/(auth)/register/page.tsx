@@ -89,6 +89,21 @@ export default function RegisterPage() {
     setSuccess(false);
 
     // Validate required fields
+    if (!titleSelection) {
+      setError("Title is required");
+      toast.error("Title is required");
+      return;
+    }
+
+    // Validate custom title when "Other" is selected
+    if (titleSelection === "other" && !customTitle.trim()) {
+      setError("Please enter your title when selecting 'Other'");
+      toast.error("Title is required", {
+        description: "Please enter your title when selecting 'Other'",
+      });
+      return;
+    }
+
     if (!name.trim()) {
       setError("Full name is required");
       toast.error("Full name is required");
@@ -107,6 +122,12 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!facultyWebpage.trim()) {
+      setError("University faculty webpage is required");
+      toast.error("University faculty webpage is required");
+      return;
+    }
+
     if (!email.trim()) {
       setError("Email is required");
       toast.error("Email is required");
@@ -116,15 +137,6 @@ export default function RegisterPage() {
     if (!password) {
       setError("Password is required");
       toast.error("Password is required");
-      return;
-    }
-
-    // Validate custom title when "Other" is selected
-    if (titleSelection === "other" && !customTitle.trim()) {
-      setError("Please enter your title when selecting 'Other'");
-      toast.error("Title is required", {
-        description: "Please enter your title when selecting 'Other'",
-      });
       return;
     }
 
@@ -141,12 +153,12 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    // Resolve the title value - use custom title if "other" is selected, null if no selection
+    // Resolve the title value - use custom title if "other" is selected
     const resolvedTitle =
       titleSelection === "other"
-        ? customTitle.trim() || null
+        ? customTitle.trim()
         : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)?.label ||
-          null;
+          "";
 
     try {
       await authClient.signUp.email(
@@ -255,12 +267,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">
-                Title{" "}
-                <span className="text-muted-foreground font-normal">
-                  (Optional)
-                </span>
-              </Label>
+              <Label htmlFor="title">Title</Label>
               <Select
                 value={titleSelection}
                 onValueChange={(value) => {
@@ -329,18 +336,14 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="facultyWebpage">
-                University Faculty Webpage{" "}
-                <span className="text-muted-foreground font-normal">
-                  (Optional)
-                </span>
-              </Label>
+              <Label htmlFor="facultyWebpage">University Faculty Webpage</Label>
               <Input
                 id="facultyWebpage"
                 type="url"
                 placeholder="https://university.edu/faculty/jsmith"
                 value={facultyWebpage}
                 onChange={(e) => setFacultyWebpage(e.target.value)}
+                required
                 disabled={loading || success}
               />
             </div>

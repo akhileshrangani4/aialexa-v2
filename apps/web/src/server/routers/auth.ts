@@ -98,9 +98,12 @@ export const authRouter = router({
       });
     }
 
-    // Check if profile is complete (required fields: institutionalAffiliation, department)
+    // Check if profile is complete (all fields required)
     const isProfileComplete = Boolean(
-      userData.institutionalAffiliation && userData.department,
+      userData.title &&
+        userData.institutionalAffiliation &&
+        userData.department &&
+        userData.facultyWebpage,
     );
 
     return {
@@ -115,23 +118,20 @@ export const authRouter = router({
   updateProfile: protectedProcedure
     .input(
       z.object({
-        title: z.string().trim().max(100).optional().nullable(),
+        title: z.string().trim().min(1).max(100),
         institutionalAffiliation: z.string().trim().min(1).max(200),
         department: z.string().trim().min(1).max(200),
-        facultyWebpage: z.preprocess(
-          (val) => (val === "" ? null : val),
-          z.string().url().max(500).optional().nullable(),
-        ),
+        facultyWebpage: z.string().trim().url().min(1).max(500),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(user)
         .set({
-          title: input.title || null,
+          title: input.title,
           institutionalAffiliation: input.institutionalAffiliation,
           department: input.department,
-          facultyWebpage: input.facultyWebpage || null,
+          facultyWebpage: input.facultyWebpage,
           updatedAt: new Date(),
         })
         .where(eq(user.id, ctx.session.user.id));
