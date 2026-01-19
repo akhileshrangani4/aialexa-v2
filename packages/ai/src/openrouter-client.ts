@@ -1,3 +1,4 @@
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, embed, streamText } from "ai";
 
@@ -13,7 +14,7 @@ export type SupportedModel = (typeof SUPPORTED_MODELS)[number];
 
 // OpenRouter client configuration
 export class OpenRouterClient {
-  private client: ReturnType<typeof createOpenAI>;
+  private client: ReturnType<typeof createOpenRouter>;
   private openaiClient: ReturnType<typeof createOpenAI> | null = null;
 
   constructor(apiKey: string, openaiApiKey?: string) {
@@ -21,9 +22,10 @@ export class OpenRouterClient {
       throw new Error("OpenRouter API key is required");
     }
 
-    this.client = createOpenAI({
+    // Use official OpenRouter provider which defaults to 'compatible' mode
+    // This uses the chat completions API format instead of the responses API
+    this.client = createOpenRouter({
       apiKey,
-      baseURL: "https://openrouter.ai/api/v1",
     });
 
     // OpenRouter doesn't support embeddings, so use OpenAI directly if key is provided
