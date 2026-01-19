@@ -121,7 +121,7 @@ export const authRouter = router({
         title: z.string().trim().min(1).max(100),
         institutionalAffiliation: z.string().trim().min(1).max(200),
         department: z.string().trim().min(1).max(200),
-        facultyWebpage: z.string().trim().url().min(1).max(500),
+        facultyWebpage: z.string().trim().url().max(500),
       }),
     )
     .mutation(async ({ ctx, input }) => {

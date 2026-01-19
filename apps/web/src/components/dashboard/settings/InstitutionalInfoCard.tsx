@@ -121,11 +121,11 @@ export function InstitutionalInfoCard() {
       return;
     }
 
+    // titleSelection is validated above, so we know it's a valid option
     const resolvedTitle =
       titleSelection === "other"
         ? customTitle.trim()
-        : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)?.label ||
-          "";
+        : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)!.label;
 
     updateProfile.mutate({
       title: resolvedTitle,

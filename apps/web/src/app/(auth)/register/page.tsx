@@ -154,11 +154,11 @@ export default function RegisterPage() {
     setLoading(true);
 
     // Resolve the title value - use custom title if "other" is selected
+    // titleSelection is validated above, so we know it's a valid option
     const resolvedTitle =
       titleSelection === "other"
         ? customTitle.trim()
-        : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)?.label ||
-          "";
+        : TITLE_OPTIONS.find((opt) => opt.value === titleSelection)!.label;
 
     try {
       await authClient.signUp.email(
