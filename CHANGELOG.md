@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.5](https://github.com/akhileshrangani4/teachanything/compare/v1.0.4...v1.0.5) (2026-01-19)
+
+
+### Bug Fixes
+
+* **ui:** improve markdown list spacing in chat messages ([#66](https://github.com/akhileshrangani4/teachanything/issues/66)) ([38bec83](https://github.com/akhileshrangani4/teachanything/commit/38bec8385a9b6d5e31cb93b63e20328df6282108))
+
+
+### Miscellaneous Chores
+
+* **deps:** bump next from 16.0.10 to 16.1.0 ([#64](https://github.com/akhileshrangani4/teachanything/issues/64)) ([14e9846](https://github.com/akhileshrangani4/teachanything/commit/14e984621a69312663cb73392e7159ae763f420d))
+
+
+### Continuous Integration
+
+* add production deployment to release-please workflow ([#68](https://github.com/akhileshrangani4/teachanything/issues/68)) ([52ad963](https://github.com/akhileshrangani4/teachanything/commit/52ad963acaeece00c466f287aa26404cf18bf118))
+
 ## [1.0.4](https://github.com/akhileshrangani4/teachanything/compare/v1.0.3...v1.0.4) (2026-01-19)
 
 
