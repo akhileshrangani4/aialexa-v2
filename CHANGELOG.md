@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/akhileshrangani4/teachanything/compare/v1.4.0...v1.4.1) (2026-01-19)
+
+
+### Bug Fixes
+
+* **settings:** title dropdown persistence and component refactor ([#77](https://github.com/akhileshrangani4/teachanything/issues/77)) ([41e392d](https://github.com/akhileshrangani4/teachanything/commit/41e392d5dcf3ecb47a1e235f34e4355cd3ba576c))
+
 ## [1.4.0](https://github.com/akhileshrangani4/teachanything/compare/v1.3.0...v1.4.0) (2026-01-19)
 
 
