@@ -24,18 +24,15 @@ export function InstitutionalSection() {
   const [webpage, setWebpage] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
 
-  const { data: profile, isLoading } = trpc.auth.getProfile.useQuery(
-    undefined,
-    { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false },
-  );
+  const { data: profile, isLoading } = trpc.auth.getProfile.useQuery();
 
   const utils = trpc.useUtils();
 
   const updateProfile = trpc.auth.updateProfile.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await utils.auth.getProfile.invalidate();
       toast.success("Information updated");
       setHasChanges(false);
-      utils.auth.getProfile.invalidate();
     },
     onError: (error) => {
       toast.error("Failed to update", { description: error.message });
@@ -44,14 +41,19 @@ export function InstitutionalSection() {
 
   useEffect(() => {
     if (profile) {
+      // Set title selection
       if (profile.title) {
         const match = TITLE_OPTIONS.find((opt) => opt.label === profile.title);
         if (match) {
           setTitleSelection(match.value);
+          setCustomTitle("");
         } else {
           setTitleSelection("other");
           setCustomTitle(profile.title);
         }
+      } else {
+        setTitleSelection("");
+        setCustomTitle("");
       }
       setInstitution(profile.institutionalAffiliation || "");
       setDepartment(profile.department || "");
