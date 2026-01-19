@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/akhileshrangani4/teachanything/compare/v1.0.3...v1.0.4) (2026-01-19)
+
+
+### Bug Fixes
+
+* **ai:** switch to official OpenRouter provider for AI SDK 5 compatibility ([#62](https://github.com/akhileshrangani4/teachanything/issues/62)) ([50453d0](https://github.com/akhileshrangani4/teachanything/commit/50453d032adf7f61b06f83e8e79acdca2ede1ca0))
+
 ## [1.0.3](https://github.com/akhileshrangani4/teachanything/compare/v1.0.2...v1.0.3) (2026-01-17)
 
 
