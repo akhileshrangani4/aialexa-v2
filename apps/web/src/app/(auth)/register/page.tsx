@@ -128,13 +128,13 @@ export default function RegisterPage() {
       return;
     }
 
-    // Validate URL format to match backend z.string().url()
+    // Validate URL format (https:// is auto-prepended on blur if missing)
     try {
       new URL(facultyWebpage.trim());
     } catch {
       setError("Please enter a valid URL for your faculty webpage");
       toast.error("Invalid URL", {
-        description: "Please enter a valid URL (e.g., https://university.edu/faculty/you)",
+        description: "Please enter a valid URL (e.g., university.edu/faculty/you)",
       });
       return;
     }
@@ -180,7 +180,7 @@ export default function RegisterPage() {
           title: resolvedTitle,
           institutionalAffiliation,
           department,
-          facultyWebpage,
+          facultyWebpage: facultyWebpage.trim(),
         },
         {
           onRequest: () => {
@@ -351,9 +351,15 @@ export default function RegisterPage() {
               <Input
                 id="facultyWebpage"
                 type="url"
-                placeholder="https://university.edu/faculty/jsmith"
+                placeholder="university.edu/faculty/jsmith"
                 value={facultyWebpage}
                 onChange={(e) => setFacultyWebpage(e.target.value)}
+                onBlur={(e) => {
+                  const val = e.target.value.trim();
+                  if (val && !/^https?:\/\//i.test(val)) {
+                    setFacultyWebpage(`https://${val}`);
+                  }
+                }}
                 required
                 disabled={loading || success}
               />

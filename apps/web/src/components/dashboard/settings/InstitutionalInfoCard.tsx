@@ -121,12 +121,12 @@ export function InstitutionalInfoCard() {
       return;
     }
 
-    // Validate URL format to match backend z.string().url()
+    // Validate URL format (https:// is auto-prepended on blur if missing)
     try {
       new URL(facultyWebpage.trim());
     } catch {
       toast.error("Invalid URL", {
-        description: "Please enter a valid URL (e.g., https://university.edu/faculty/you)",
+        description: "Please enter a valid URL (e.g., university.edu/faculty/you)",
       });
       return;
     }
@@ -264,9 +264,15 @@ export function InstitutionalInfoCard() {
             </Label>
             <Input
               type="url"
-              placeholder="https://university.edu/faculty/you"
+              placeholder="university.edu/faculty/you"
               value={facultyWebpage}
               onChange={(e) => setFacultyWebpage(e.target.value)}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                if (val && !/^https?:\/\//i.test(val)) {
+                  setFacultyWebpage(`https://${val}`);
+                }
+              }}
               required
               disabled={updateProfile.isPending}
               className="h-11"
