@@ -15,6 +15,13 @@
       "when": 1762909681254,
       "tag": "0001_steep_phantom_reporter",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768798829281,
+      "tag": "0002_square_expediter",
+      "breakpoints": true
     }
   ]
 }

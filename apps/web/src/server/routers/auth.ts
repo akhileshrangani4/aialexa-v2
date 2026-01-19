@@ -72,6 +72,79 @@ export const authRouter = router({
   }),
 
   /**
+   * Get current user's profile including verification fields
+   */
+  getProfile: protectedProcedure.query(async ({ ctx }) => {
+    const [userData] = await ctx.db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        title: user.title,
+        institutionalAffiliation: user.institutionalAffiliation,
+        department: user.department,
+        facultyWebpage: user.facultyWebpage,
+        status: user.status,
+        role: user.role,
+      })
+      .from(user)
+      .where(eq(user.id, ctx.session.user.id))
+      .limit(1);
+
+    if (!userData) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+
+    // Check if profile is complete (required fields: institutionalAffiliation, department)
+    const isProfileComplete = Boolean(
+      userData.institutionalAffiliation && userData.department,
+    );
+
+    return {
+      ...userData,
+      isProfileComplete,
+    };
+  }),
+
+  /**
+   * Update user profile (verification fields)
+   */
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        title: z.string().trim().max(100).optional().nullable(),
+        institutionalAffiliation: z.string().trim().min(1).max(200),
+        department: z.string().trim().min(1).max(200),
+        facultyWebpage: z.preprocess(
+          (val) => (val === "" ? null : val),
+          z.string().url().max(500).optional().nullable(),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(user)
+        .set({
+          title: input.title || null,
+          institutionalAffiliation: input.institutionalAffiliation,
+          department: input.department,
+          facultyWebpage: input.facultyWebpage || null,
+          updatedAt: new Date(),
+        })
+        .where(eq(user.id, ctx.session.user.id));
+
+      logInfo("User profile updated", {
+        userId: ctx.session.user.id,
+        email: ctx.session.user.email,
+      });
+
+      return { success: true };
+    }),
+
+  /**
    * Update user name
    */
   updateName: protectedProcedure

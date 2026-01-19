@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/akhileshrangani4/teachanything/compare/v1.1.0...v1.2.0) (2026-01-19)
+
+
+### Features
+
+* **auth:** add user verification fields for registration and admin review ([#71](https://github.com/akhileshrangani4/teachanything/issues/71)) ([8519cb0](https://github.com/akhileshrangani4/teachanything/commit/8519cb00fa51e1c101330c1e98697ec753d301f2))
+
 ## [1.1.0](https://github.com/akhileshrangani4/teachanything/compare/v1.0.5...v1.1.0) (2026-01-19)
 
 
