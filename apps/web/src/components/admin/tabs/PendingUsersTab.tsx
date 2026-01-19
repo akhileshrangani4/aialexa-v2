@@ -43,10 +43,22 @@ import { StatsHeader } from "../components/StatsHeader";
 import { useUserStats } from "../hooks/useUserStats";
 import { UserDetailsDialog } from "../components/UserDetailsDialog";
 import type { UserDetailsDialogState } from "../types/user-details";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 10;
+
+type PendingUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  title: string | null;
+  institutionalAffiliation: string | null;
+  department: string | null;
+  facultyWebpage: string | null;
+  status: "pending" | "approved" | "rejected";
+  createdAt: Date;
+};
 
 export function PendingUsersTab() {
   const { state, searchInput, actions, queryParams } =
@@ -173,6 +185,26 @@ export function PendingUsersTab() {
       userEmail,
     });
   };
+
+  const openUserDetails = useCallback(
+    (user: PendingUser) => {
+      setDetailsDialog({
+        isOpen: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          title: user.title,
+          institutionalAffiliation: user.institutionalAffiliation,
+          department: user.department,
+          facultyWebpage: user.facultyWebpage,
+          status: user.status,
+          createdAt: user.createdAt,
+        },
+      });
+    },
+    [setDetailsDialog],
+  );
 
   const confirmApprove = async () => {
     if (!approveDialog.userId) return;
@@ -331,23 +363,7 @@ export function PendingUsersTab() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                setDetailsDialog({
-                                  isOpen: true,
-                                  user: {
-                                    id: user.id,
-                                    name: user.name,
-                                    email: user.email,
-                                    title: user.title,
-                                    institutionalAffiliation:
-                                      user.institutionalAffiliation,
-                                    department: user.department,
-                                    facultyWebpage: user.facultyWebpage,
-                                    status: user.status,
-                                    createdAt: user.createdAt,
-                                  },
-                                })
-                              }
+                              onClick={() => openUserDetails(user)}
                               className="gap-2"
                             >
                               <Eye className="h-4 w-4" />
@@ -411,23 +427,7 @@ export function PendingUsersTab() {
                                 collisionPadding={16}
                               >
                                 <DropdownMenuItem
-                                  onClick={() =>
-                                    setDetailsDialog({
-                                      isOpen: true,
-                                      user: {
-                                        id: user.id,
-                                        name: user.name,
-                                        email: user.email,
-                                        title: user.title,
-                                        institutionalAffiliation:
-                                          user.institutionalAffiliation,
-                                        department: user.department,
-                                        facultyWebpage: user.facultyWebpage,
-                                        status: user.status,
-                                        createdAt: user.createdAt,
-                                      },
-                                    })
-                                  }
+                                  onClick={() => openUserDetails(user)}
                                   className="cursor-pointer"
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
