@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/akhileshrangani4/teachanything/compare/v1.3.0...v1.4.0) (2026-01-19)
+
+
+### Features
+
+* **ui:** improve mobile responsiveness and consolidate settings page ([#75](https://github.com/akhileshrangani4/teachanything/issues/75)) ([15b1832](https://github.com/akhileshrangani4/teachanything/commit/15b1832f307917d02c91fbfedc57064e7f18167f))
+
 ## [1.3.0](https://github.com/akhileshrangani4/teachanything/compare/v1.2.0...v1.3.0) (2026-01-19)
 
 

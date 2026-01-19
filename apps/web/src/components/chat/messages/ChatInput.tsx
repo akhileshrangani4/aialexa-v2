@@ -44,7 +44,7 @@ export function ChatInput({
       <div className="flex items-end gap-2 w-full">
         <PromptInputTextarea
           placeholder="Ask me anything..."
-          className="flex-1 text-foreground min-h-[120px] scrollbar-thin"
+          className="flex-1 text-foreground text-sm md:text-base min-h-[80px] md:min-h-[120px] scrollbar-thin"
         />
         <PromptInputActions>
           {isStreaming && onStopStreaming ? (
@@ -53,10 +53,10 @@ export function ChatInput({
               size="icon"
               variant="destructive"
               onClick={handleStop}
-              className="h-9 w-9 rounded-full"
+              className="h-8 w-8 md:h-9 md:w-9 rounded-full"
               title="Stop generating"
             >
-              <Square className="h-4 w-4 fill-current" />
+              <Square className="h-3.5 w-3.5 md:h-4 md:w-4 fill-current" />
             </Button>
           ) : (
             <Button
@@ -64,9 +64,9 @@ export function ChatInput({
               size="icon"
               disabled={isStreaming || !currentMessage.trim()}
               onClick={handleSubmit}
-              className="h-9 w-9 rounded-full bg-foreground text-background hover:bg-foreground/90"
+              className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-foreground text-background hover:bg-foreground/90"
             >
-              <ArrowUp className="h-5 w-5" />
+              <ArrowUp className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
           )}
         </PromptInputActions>

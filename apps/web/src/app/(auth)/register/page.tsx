@@ -246,7 +246,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary">
+    <div className="min-h-screen flex items-center justify-center bg-secondary px-4 py-8">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
@@ -257,6 +257,18 @@ export default function RegisterPage() {
             <AlertDescription>
               All accounts require admin approval before you can log in.
               You&apos;ll receive an email once your account is approved.
+              {process.env.NEXT_PUBLIC_CONTACT_EMAIL && (
+                <>
+                  {" "}
+                  If you have any questions, please contact us at{" "}
+                  <a
+                    href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL}`}
+                    className="text-primary hover:underline"
+                  >
+                    {process.env.NEXT_PUBLIC_CONTACT_EMAIL}
+                  </a>
+                </>
+              )}
             </AlertDescription>
           </Alert>
 

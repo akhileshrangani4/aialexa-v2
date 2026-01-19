@@ -15,7 +15,21 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Clock, Calendar, CheckCircle, XCircle, Eye } from "lucide-react";
+import {
+  Clock,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  Eye,
+  MoreHorizontal,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PaginationControls } from "../../dashboard/files/PaginationControls";
 import {
   TableToolbar,
@@ -29,10 +43,22 @@ import { StatsHeader } from "../components/StatsHeader";
 import { useUserStats } from "../hooks/useUserStats";
 import { UserDetailsDialog } from "../components/UserDetailsDialog";
 import type { UserDetailsDialogState } from "../types/user-details";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
 const ITEMS_PER_PAGE = 10;
+
+type PendingUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  title: string | null;
+  institutionalAffiliation: string | null;
+  department: string | null;
+  facultyWebpage: string | null;
+  status: "pending" | "approved" | "rejected";
+  createdAt: Date;
+};
 
 export function PendingUsersTab() {
   const { state, searchInput, actions, queryParams } =
@@ -160,6 +186,26 @@ export function PendingUsersTab() {
     });
   };
 
+  const openUserDetails = useCallback(
+    (user: PendingUser) => {
+      setDetailsDialog({
+        isOpen: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          title: user.title,
+          institutionalAffiliation: user.institutionalAffiliation,
+          department: user.department,
+          facultyWebpage: user.facultyWebpage,
+          status: user.status,
+          createdAt: user.createdAt,
+        },
+      });
+    },
+    [setDetailsDialog],
+  );
+
   const confirmApprove = async () => {
     if (!approveDialog.userId) return;
     await approveUser.mutateAsync({ userId: approveDialog.userId });
@@ -244,8 +290,8 @@ export function PendingUsersTab() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-md border">
-                <Table>
+              <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[600px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <SortableTableHead
@@ -261,6 +307,7 @@ export function PendingUsersTab() {
                         currentSortBy={state.sortBy}
                         currentSortDir={state.sortDir}
                         onSort={actions.toggleSort}
+                        className="hidden sm:table-cell"
                       >
                         Email
                       </SortableTableHead>
@@ -270,6 +317,7 @@ export function PendingUsersTab() {
                         currentSortBy={state.sortBy}
                         currentSortDir={state.sortDir}
                         onSort={actions.toggleSort}
+                        className="hidden md:table-cell"
                       >
                         Registered
                       </SortableTableHead>
@@ -291,7 +339,7 @@ export function PendingUsersTab() {
                             showEmail={!!user.name}
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <UserEmailCell email={user.email} />
                         </TableCell>
                         <TableCell>
@@ -303,34 +351,19 @@ export function PendingUsersTab() {
                             <span className="capitalize">{user.status}</span>
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-3.5 w-3.5" />
                             <span>{formatUserDate(user.createdAt)}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          {/* Desktop Actions */}
+                          <div className="hidden md:flex justify-end gap-2">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                setDetailsDialog({
-                                  isOpen: true,
-                                  user: {
-                                    id: user.id,
-                                    name: user.name,
-                                    email: user.email,
-                                    title: user.title,
-                                    institutionalAffiliation:
-                                      user.institutionalAffiliation,
-                                    department: user.department,
-                                    facultyWebpage: user.facultyWebpage,
-                                    status: user.status,
-                                    createdAt: user.createdAt,
-                                  },
-                                })
-                              }
+                              onClick={() => openUserDetails(user)}
                               className="gap-2"
                             >
                               <Eye className="h-4 w-4" />
@@ -371,6 +404,65 @@ export function PendingUsersTab() {
                               <XCircle className="h-4 w-4" />
                               Reject
                             </Button>
+                          </div>
+                          {/* Mobile Dropdown Actions */}
+                          <div className="md:hidden flex justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={
+                                    approveUser.isPending || rejectUser.isPending
+                                  }
+                                  aria-label="Open user actions menu"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                side="bottom"
+                                className="w-[160px]"
+                                sideOffset={5}
+                                collisionPadding={16}
+                              >
+                                <DropdownMenuItem
+                                  onClick={() => openUserDetails(user)}
+                                  className="cursor-pointer"
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Details
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleApprove(
+                                      user.id,
+                                      user.name || "User",
+                                      user.email,
+                                    )
+                                  }
+                                  className="cursor-pointer text-green-600"
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Approve
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleReject(
+                                      user.id,
+                                      user.name || "User",
+                                      user.email,
+                                    )
+                                  }
+                                  className="cursor-pointer text-destructive"
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Reject
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </TableCell>
                       </TableRow>
