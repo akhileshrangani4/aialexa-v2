@@ -289,7 +289,7 @@ export function PendingUsersTab() {
                       >
                         Registered
                       </SortableTableHead>
-                      <TableHead className="font-semibold text-right sticky right-0 bg-muted/50">
+                      <TableHead className="font-semibold text-right">
                         Actions
                       </TableHead>
                     </TableRow>
@@ -325,7 +325,7 @@ export function PendingUsersTab() {
                             <span>{formatUserDate(user.createdAt)}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right sticky right-0 bg-background">
+                        <TableCell className="text-right">
                           {/* Desktop Actions */}
                           <div className="hidden md:flex justify-end gap-2">
                             <Button
@@ -403,7 +403,13 @@ export function PendingUsersTab() {
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-[160px]">
+                              <DropdownMenuContent
+                                align="end"
+                                side="bottom"
+                                className="w-[160px]"
+                                sideOffset={5}
+                                collisionPadding={16}
+                              >
                                 <DropdownMenuItem
                                   onClick={() =>
                                     setDetailsDialog({

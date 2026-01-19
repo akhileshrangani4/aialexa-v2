@@ -113,7 +113,7 @@ export function UserTableRow({
           <span>{formatUserDate(user.createdAt)}</span>
         </div>
       </TableCell>
-      <TableCell className="text-right pr-0 sticky right-0 bg-background">
+      <TableCell className="text-right pr-2">
         {isCurrentUser ? (
           <span className="text-sm text-muted-foreground italic">
             Current user
@@ -125,15 +125,20 @@ export function UserTableRow({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-auto min-w-[100px] md:w-[180px] justify-between font-medium"
+                  className="justify-between font-medium"
                   disabled={isAnyActionPending}
                 >
-                  <span className="hidden md:inline">Actions</span>
-                  <span className="md:hidden">...</span>
-                  <ChevronDown className="h-4 w-4 ml-1 md:ml-2 opacity-50" />
+                  <span>Actions</span>
+                  <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]" sideOffset={5}>
+              <DropdownMenuContent
+                align="end"
+                side="bottom"
+                className="w-[180px]"
+                sideOffset={5}
+                collisionPadding={16}
+              >
                 {/* View Details */}
                 <DropdownMenuItem
                   onClick={() => onViewDetails(user)}

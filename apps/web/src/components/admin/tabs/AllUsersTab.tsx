@@ -226,7 +226,7 @@ export function AllUsersTab() {
                       >
                         Registered
                       </SortableTableHead>
-                      <TableHead className="font-semibold text-right sticky right-0 bg-muted/50">
+                      <TableHead className="font-semibold text-right">
                         Actions
                       </TableHead>
                     </TableRow>
