@@ -3,9 +3,10 @@ import * as React from "react";
 interface PromoteToAdminProps {
   userName: string;
   loginUrl: string;
+  supportEmail: string;
 }
 
-export function PromoteToAdmin({ userName, loginUrl }: PromoteToAdminProps) {
+export function PromoteToAdmin({ userName, loginUrl, supportEmail }: PromoteToAdminProps) {
   return (
     <html>
       {/* eslint-disable-next-line @next/next/no-head-element */}
@@ -62,6 +63,15 @@ export function PromoteToAdmin({ userName, loginUrl }: PromoteToAdminProps) {
                 <br />
                 Teach anything Admin Team
               </p>
+
+              <p style={footer}>
+                This is an automated message. Please do not reply to this email.
+                For questions or support, contact us at{" "}
+                <a href={`mailto:${supportEmail}`} style={link}>
+                  {supportEmail}
+                </a>
+                .
+              </p>
             </td>
           </tr>
         </table>
@@ -117,4 +127,13 @@ const signature = {
   color: "#333333",
   fontSize: "16px",
   lineHeight: "1.6",
+};
+
+const footer = {
+  margin: "24px 0 0",
+  padding: "16px 0 0",
+  borderTop: "1px solid #e9ecef",
+  color: "#666666",
+  fontSize: "12px",
+  lineHeight: "1.5",
 };
