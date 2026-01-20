@@ -85,7 +85,8 @@ export default function AdminPage() {
       const fileName = `admin-export-${new Date().toISOString().split("T")[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
       toast.success("Export complete");
-    } catch {
+    } catch (error) {
+      console.error("Failed to export admin data:", error);
       toast.error("Failed to export data");
     } finally {
       setIsExporting(false);
