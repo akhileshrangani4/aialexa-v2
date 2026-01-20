@@ -17,10 +17,8 @@ import {
   CheckCircle,
   Trash2,
   ChevronDown,
-  Calendar,
   Eye,
 } from "lucide-react";
-import { formatUserDate } from "../utils/user-helpers";
 import { UserAvatarCell, UserEmailCell } from "../components/UserCells";
 
 interface UserData {
@@ -108,9 +106,11 @@ export function UserTableRow({
         </Badge>
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" />
-          <span>{formatUserDate(user.createdAt)}</span>
+        <div className="text-sm">
+          <p>{new Date(user.createdAt).toLocaleDateString()}</p>
+          <p className="text-xs text-muted-foreground">
+            {new Date(user.createdAt).toLocaleTimeString()}
+          </p>
         </div>
       </TableCell>
       <TableCell className="text-right pr-2">

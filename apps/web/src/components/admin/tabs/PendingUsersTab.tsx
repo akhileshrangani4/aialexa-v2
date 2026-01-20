@@ -17,7 +17,6 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
   Clock,
-  Calendar,
   CheckCircle,
   XCircle,
   Eye,
@@ -37,7 +36,6 @@ import {
   type PendingUserSortBy,
 } from "@/components/data-table";
 import { useServerTable } from "@/hooks/useServerTable";
-import { formatUserDate } from "../utils/user-helpers";
 import { UserAvatarCell, UserEmailCell } from "../components/UserCells";
 import { StatsHeader } from "../components/StatsHeader";
 import { useUserStats } from "../hooks/useUserStats";
@@ -352,9 +350,11 @@ export function PendingUsersTab() {
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-3.5 w-3.5" />
-                            <span>{formatUserDate(user.createdAt)}</span>
+                          <div className="text-sm">
+                            <p>{new Date(user.createdAt).toLocaleDateString()}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(user.createdAt).toLocaleTimeString()}
+                            </p>
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
