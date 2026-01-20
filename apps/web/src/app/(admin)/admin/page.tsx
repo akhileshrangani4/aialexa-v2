@@ -9,6 +9,7 @@ import { AllowedDomainsTab } from "@/components/admin/tabs/AllowedDomainsTab";
 import { AllUsersTab } from "@/components/admin/tabs/AllUsersTab";
 import { Shield, Download } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 export default function AdminPage() {
@@ -19,6 +20,16 @@ export default function AdminPage() {
     setIsExporting(true);
     try {
       const data = await utils.admin.exportAdminData.fetch();
+
+      // Check if there's any data to export
+      if (
+        data.users.length === 0 &&
+        data.chatbots.length === 0 &&
+        data.domains.length === 0
+      ) {
+        toast.info("No data to export");
+        return;
+      }
 
       // Create workbook
       const workbook = XLSX.utils.book_new();
@@ -71,6 +82,9 @@ export default function AdminPage() {
       // Generate and download file
       const fileName = `admin-export-${new Date().toISOString().split("T")[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
+      toast.success("Export complete");
+    } catch {
+      toast.error("Failed to export data");
     } finally {
       setIsExporting(false);
     }
