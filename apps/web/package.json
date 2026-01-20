@@ -67,6 +67,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tldts": "^7.0.19",
     "use-stick-to-bottom": "^1.1.1",
+    "xlsx": "^0.18.5",
     "yet-another-react-lightbox": "^3.27.0",
     "zod": "^3.25.76"
   },

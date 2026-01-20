@@ -18,7 +18,6 @@ import {
   Calendar,
   ExternalLink,
 } from "lucide-react";
-import { formatUserDate } from "../utils/user-helpers";
 import type { UserDetailsData } from "../types/user-details";
 
 interface UserDetailsDialogProps {
@@ -148,7 +147,7 @@ export function UserDetailsDialog({
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Calendar className="h-3 w-3" />
-              Registered {formatUserDate(user.createdAt)}
+              {new Date(user.createdAt).toLocaleDateString()}
             </div>
           </div>
         </div>
