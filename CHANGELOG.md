@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/akhileshrangani4/teachanything/compare/v1.5.0...v1.5.1) (2026-01-20)
+
+
+### Miscellaneous Chores
+
+* update sign up form brand message ([#92](https://github.com/akhileshrangani4/teachanything/issues/92)) ([42b4d38](https://github.com/akhileshrangani4/teachanything/commit/42b4d3867d41fa2f01703a6137d89cf0a0171c5c))
+
 ## [1.5.0](https://github.com/akhileshrangani4/teachanything/compare/v1.4.1...v1.5.0) (2026-01-20)
 
 
