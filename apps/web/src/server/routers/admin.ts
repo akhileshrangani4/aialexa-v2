@@ -873,6 +873,7 @@ export const adminRouter = router({
         createdAt: user.createdAt,
       })
       .from(user)
+      .where(sql`${user.status} != 'pending'`)
       .orderBy(desc(user.createdAt));
 
     // Get all chatbots with owner info and file counts
