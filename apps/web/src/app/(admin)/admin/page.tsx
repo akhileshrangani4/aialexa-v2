@@ -10,7 +10,6 @@ import { AllUsersTab } from "@/components/admin/tabs/AllUsersTab";
 import { Shield, Download } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
 
 export default function AdminPage() {
   const [isExporting, setIsExporting] = useState(false);
@@ -19,6 +18,9 @@ export default function AdminPage() {
   const handleExportExcel = useCallback(async () => {
     setIsExporting(true);
     try {
+      // Dynamic import to reduce bundle size
+      const XLSX = await import("xlsx");
+
       const data = await utils.admin.exportAdminData.fetch();
 
       // Check if there's any data to export
