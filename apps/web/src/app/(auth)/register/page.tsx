@@ -250,7 +250,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
-          <CardDescription>Register for Teach anything</CardDescription>
+          <CardDescription>Register for Teach Anything AI</CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="mb-4">
