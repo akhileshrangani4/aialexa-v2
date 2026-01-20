@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/akhileshrangani4/teachanything/compare/v1.4.1...v1.5.0) (2026-01-20)
+
+
+### Features
+
+* **admin:** add Excel export for admin dashboard data ([#89](https://github.com/akhileshrangani4/teachanything/issues/89)) ([42ad2f6](https://github.com/akhileshrangani4/teachanything/commit/42ad2f6d008c790ce063eb912b5fff01276c3eb9))
+
 ## [1.4.1](https://github.com/akhileshrangani4/teachanything/compare/v1.4.0...v1.4.1) (2026-01-19)
 
 
