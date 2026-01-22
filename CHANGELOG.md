@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.2](https://github.com/akhileshrangani4/teachanything/compare/v1.5.1...v1.5.2) (2026-01-22)
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump globals from 16.4.0 to 17.0.0 ([#87](https://github.com/akhileshrangani4/teachanything/issues/87)) ([a78f037](https://github.com/akhileshrangani4/teachanything/commit/a78f0379dbffb0ef95ae9119d2dd949f566af79d))
+* **deps:** bump @tanstack/react-query in the tanstack group ([#82](https://github.com/akhileshrangani4/teachanything/issues/82)) ([23e4837](https://github.com/akhileshrangani4/teachanything/commit/23e4837b4761552cb1461cc4c8156479f3266614))
+* **deps:** bump marked from 16.4.1 to 17.0.1 in the markdown group ([#86](https://github.com/akhileshrangani4/teachanything/issues/86)) ([65f10f4](https://github.com/akhileshrangani4/teachanything/commit/65f10f4bfe999933097cfb1d4909bbdf8c2a63a5))
+* **deps:** bump next from 16.1.0 to 16.1.1 ([#91](https://github.com/akhileshrangani4/teachanything/issues/91)) ([554dd92](https://github.com/akhileshrangani4/teachanything/commit/554dd9233c77f046cf4fd9870e42d1a6c138b4d6))
+* **deps:** bump next from 16.1.3 to 16.1.4 ([#95](https://github.com/akhileshrangani4/teachanything/issues/95)) ([129118f](https://github.com/akhileshrangani4/teachanything/commit/129118f9912aa8bbd65bfeb3044b26f0aca6d0fe))
+* **deps:** bump the ai-sdk group with 2 updates ([#79](https://github.com/akhileshrangani4/teachanything/issues/79)) ([24199a9](https://github.com/akhileshrangani4/teachanything/commit/24199a9e07332c0d19721cfd34434f211e75afe0))
+* **deps:** bump the langchain group with 2 updates ([#80](https://github.com/akhileshrangani4/teachanything/issues/80)) ([16c80ce](https://github.com/akhileshrangani4/teachanything/commit/16c80ce5b40e8d08187cc06949d237d9b0dcc153))
+* **deps:** bump the next group with 2 updates ([#81](https://github.com/akhileshrangani4/teachanything/issues/81)) ([3dc9817](https://github.com/akhileshrangani4/teachanything/commit/3dc9817919eed466fc2f487d9b970ff929b1eaf2))
+
 ## [1.5.1](https://github.com/akhileshrangani4/teachanything/compare/v1.5.0...v1.5.1) (2026-01-20)
 
 
